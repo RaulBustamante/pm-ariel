@@ -3,6 +3,8 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Admin\AuditLogController;
+use App\Http\Controllers\Admin\HierarchyController;
+use App\Http\Controllers\Admin\OrgUnitController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordChangeController;
@@ -43,6 +45,17 @@ Route::middleware('auth')->group(function (): void {
         Route::post('users', [UserController::class, 'store'])->name('users.store');
         Route::get('users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
+
+        Route::get('org-units', [OrgUnitController::class, 'index'])->name('org-units.index');
+        Route::get('org-units/create', [OrgUnitController::class, 'create'])->name('org-units.create');
+        Route::post('org-units', [OrgUnitController::class, 'store'])->name('org-units.store');
+        Route::get('org-units/{orgUnit}/edit', [OrgUnitController::class, 'edit'])->name('org-units.edit');
+        Route::put('org-units/{orgUnit}', [OrgUnitController::class, 'update'])->name('org-units.update');
+        Route::delete('org-units/{orgUnit}', [OrgUnitController::class, 'destroy'])->name('org-units.destroy');
+
+        Route::get('hierarchy', [HierarchyController::class, 'index'])->name('hierarchy.index');
+        Route::get('hierarchy/{user}', [HierarchyController::class, 'edit'])->name('hierarchy.edit');
+        Route::put('hierarchy/{user}', [HierarchyController::class, 'update'])->name('hierarchy.update');
 
         Route::get('audit', [AuditLogController::class, 'index'])->name('audit.index');
     });

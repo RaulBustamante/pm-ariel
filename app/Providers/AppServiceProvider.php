@@ -6,8 +6,10 @@ namespace App\Providers;
 
 use App\Contracts\Identity\IdentityProvider;
 use App\Contracts\Identity\ProvisionsUsers;
+use App\Models\OrgUnit;
 use App\Models\Project;
 use App\Models\User;
+use App\Policies\OrgUnitPolicy;
 use App\Policies\ProjectPolicy;
 use App\Policies\UserPolicy;
 use App\Services\Identity\LocalIdentityProvider;
@@ -30,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Gate::policy(OrgUnit::class, OrgUnitPolicy::class);
         Gate::policy(Project::class, ProjectPolicy::class);
         Gate::policy(User::class, UserPolicy::class);
 

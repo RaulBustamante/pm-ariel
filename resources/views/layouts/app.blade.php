@@ -34,6 +34,18 @@
                     @endcan
 
                     @can('viewAny', App\Models\User::class)
+                        <x-nav-link :href="route('admin.hierarchy.index')" :active="request()->routeIs('admin.hierarchy.*')">
+                            {{ __('hierarchy.title') }}
+                        </x-nav-link>
+                    @endcan
+
+                    @can('viewAny', App\Models\OrgUnit::class)
+                        <x-nav-link :href="route('admin.org-units.index')" :active="request()->routeIs('admin.org-units.*')">
+                            {{ __('org_units.title') }}
+                        </x-nav-link>
+                    @endcan
+
+                    @can('viewAny', App\Models\User::class)
                         <x-nav-link :href="route('admin.audit.index')" :active="request()->routeIs('admin.audit.*')">
                             {{ __('common.audit_log') }}
                         </x-nav-link>

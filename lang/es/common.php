@@ -16,6 +16,7 @@ return [
     'cancel' => 'Cancelar',
     'create' => 'Crear',
     'edit' => 'Editar',
+    'delete' => 'Eliminar',
     'deactivate' => 'Desactivar',
     'activate' => 'Activar',
     'search' => 'Buscar',
