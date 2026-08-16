@@ -1,19 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\Feature;
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
-class ExampleTest extends TestCase
+/**
+ * Reemplaza la prueba de ejemplo del esqueleto: la raíz ya no devuelve una
+ * página, redirige al panel, y sin sesión el panel manda al inicio de sesión.
+ */
+final class ExampleTest extends TestCase
 {
-    /**
-     * A basic test example.
-     */
-    public function test_the_application_returns_a_successful_response(): void
+    #[Test]
+    public function the_root_redirects_to_the_dashboard(): void
     {
-        $response = $this->get('/');
+        $this->get('/')->assertRedirect('/dashboard');
+    }
 
-        $response->assertStatus(200);
+    #[Test]
+    public function an_anonymous_visitor_is_sent_to_the_sign_in_screen(): void
+    {
+        $this->get('/dashboard')->assertRedirect(route('login'));
+    }
+
+    #[Test]
+    public function the_health_route_answers(): void
+    {
+        $this->get('/up')->assertOk();
     }
 }

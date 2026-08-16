@@ -1,5 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
+use App\Http\Middleware\EnsurePasswordIsChanged;
+use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,7 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // En el grupo web completo, no en rutas sueltas: así ningún módulo que
+        // se agregue después puede saltarse el cambio de contraseña temporal.
+        $middleware->web(append: [
+            SetLocale::class,
+            EnsurePasswordIsChanged::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

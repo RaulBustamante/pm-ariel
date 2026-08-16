@@ -1,0 +1,55 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+|--------------------------------------------------------------------------
+| Marca
+|--------------------------------------------------------------------------
+|
+| El nombre del producto vive aquí y en ningún otro lado: ni en clases, ni en
+| tablas, ni en rutas, ni en claves de traducción, ni en la interfaz.
+|
+| Cambiar el nombre del producto debe costar editar este archivo. El comando
+| `php artisan branding:verify` falla si la marca se filtró al código.
+|
+*/
+
+return [
+
+    'name' => env('BRANDING_NAME', env('APP_NAME', 'Project Management')),
+
+    'short_name' => env('BRANDING_SHORT_NAME', 'PM'),
+
+    'tagline' => env('BRANDING_TAGLINE', ''),
+
+    'logo' => env('BRANDING_LOGO', ''),
+
+    'colors' => [
+        'primary' => env('BRANDING_COLOR_PRIMARY', '#1d4ed8'),
+        'accent' => env('BRANDING_COLOR_ACCENT', '#0f766e'),
+    ],
+
+    'footer' => env('BRANDING_FOOTER', ''),
+
+    'contact_email' => env('BRANDING_CONTACT_EMAIL', 'no-reply@localhost'),
+
+    /*
+    | Cuenta del primer administrador que crea el seeder.
+    */
+
+    'admin_email' => env('BRANDING_ADMIN_EMAIL', 'admin@localhost'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Términos vigilados
+    |--------------------------------------------------------------------------
+    |
+    | `branding:verify` falla si alguno aparece en el código fuente. Es lo único
+    | que sostiene la regla: sin verificación automática se erosiona en meses.
+    |
+    */
+
+    'forbidden_terms' => ['pm-ariel', 'pmariel', 'PmAriel'],
+
+];
