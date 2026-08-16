@@ -12,15 +12,33 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * Esquema mínimo de la Etapa 1 (CL-008): existe para que las reglas de
- * visibilidad se puedan probar. El CRUD y la lógica llegan en la Etapa 3.
+ * visibilidad se puedan probar. El CRUD completo llega en la Etapa 4.
+ *
+ * @property Carbon|null $planned_start
+ * @property Carbon|null $planned_finish
  */
-#[Fillable(['code', 'name', 'description', 'status', 'owner_id', 'org_unit_id', 'currency'])]
+#[Fillable([
+    'code', 'name', 'description', 'status', 'owner_id', 'org_unit_id', 'currency',
+    'planned_start', 'planned_finish',
+])]
 class Project extends Model
 {
     use RecordsAudit, SoftDeletes;
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'planned_start' => 'datetime',
+            'planned_finish' => 'datetime',
+        ];
+    }
 
     public const ROLE_MANAGER = 'manager';
 
@@ -60,6 +78,46 @@ class Project extends Model
         return $this->hasMany(Risk::class)
             ->orderByRaw('probability * impact DESC')
             ->orderBy('code');
+    }
+
+    /**
+     * @return HasMany<Task, $this>
+     */
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class)->orderBy('sort_order');
+    }
+
+    /**
+     * @return HasMany<TaskDependency, $this>
+     */
+    public function taskDependencies(): HasMany
+    {
+        return $this->hasMany(TaskDependency::class);
+    }
+
+    /**
+     * @return HasMany<Calendar, $this>
+     */
+    public function calendars(): HasMany
+    {
+        return $this->hasMany(Calendar::class);
+    }
+
+    /**
+     * @return HasMany<Baseline, $this>
+     */
+    public function baselines(): HasMany
+    {
+        return $this->hasMany(Baseline::class)->orderByDesc('captured_at');
+    }
+
+    /**
+     * @return HasMany<ScheduleRun, $this>
+     */
+    public function scheduleRuns(): HasMany
+    {
+        return $this->hasMany(ScheduleRun::class)->orderByDesc('id');
     }
 
     /**
