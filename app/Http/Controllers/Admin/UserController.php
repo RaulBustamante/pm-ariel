@@ -14,6 +14,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Support\Visibility\VisibilityScope;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Collection;
 use Illuminate\View\View;
 
 final class UserController extends Controller
@@ -85,7 +86,7 @@ final class UserController extends Controller
     }
 
     /**
-     * @return array{orgUnits: \Illuminate\Support\Collection<int, OrgUnit>, positions: \Illuminate\Support\Collection<int, Position>, roles: \Illuminate\Support\Collection<int, Role>}
+     * @return array{orgUnits: Collection<int, OrgUnit>, positions: Collection<int, Position>, roles: Collection<int, Role>}
      */
     private function formOptions(): array
     {

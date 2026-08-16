@@ -8,6 +8,7 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
+use RuntimeException;
 
 final class DatabaseSeeder extends Seeder
 {
@@ -28,9 +29,19 @@ final class DatabaseSeeder extends Seeder
         $email = (string) config('branding.admin_email');
 
         if (User::query()->where('email', $email)->exists()) {
-            $this->command?->warn("El administrador {$email} ya existe; no se toca.");
+            if (isset($this->command)) {
+                $this->command->warn("El administrador {$email} ya existe; no se toca.");
+            }
 
             return;
+        }
+
+        // Sin consola no hay dónde imprimir la contraseña, y una cuenta cuya
+        // contraseña nadie vio no sirve de nada. Mejor fallar que crearla a ciegas.
+        if (! isset($this->command)) {
+            throw new RuntimeException(
+                'El primer administrador solo puede sembrarse desde consola: la contraseña temporal se imprime una sola vez.',
+            );
         }
 
         $password = Str::password(16);
@@ -46,12 +57,12 @@ final class DatabaseSeeder extends Seeder
 
         $admin->roles()->attach(Role::query()->where('name', Role::ADMIN)->value('id'));
 
-        $this->command?->newLine();
-        $this->command?->info('Administrador creado.');
-        $this->command?->table(
+        $this->command->newLine();
+        $this->command->info('Administrador creado.');
+        $this->command->table(
             ['Correo', 'Contrasena temporal'],
             [[$email, $password]],
         );
-        $this->command?->warn('Anotala ahora: no se vuelve a mostrar y debe cambiarse al primer acceso.');
+        $this->command->warn('Anotala ahora: no se vuelve a mostrar y debe cambiarse al primer acceso.');
     }
 }

@@ -12,6 +12,12 @@ use RuntimeException;
 
 /**
  * Solo se agrega. Sin updated_at, sin borrado, sin edición.
+ *
+ * La columna es JSON en la base, pero el cast la entrega como arreglo; sin
+ * esto el análisis estático la lee como texto.
+ *
+ * @property array<string, mixed>|null $old_values
+ * @property array<string, mixed>|null $new_values
  */
 #[Fillable([
     'user_id', 'auditable_type', 'auditable_id', 'event',
@@ -21,6 +27,9 @@ class AuditLog extends Model
 {
     public const UPDATED_AT = null;
 
+    /**
+     * @return array<string, string>
+     */
     protected function casts(): array
     {
         return [
@@ -41,11 +50,17 @@ class AuditLog extends Model
         });
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function auditable(): MorphTo
     {
         return $this->morphTo();

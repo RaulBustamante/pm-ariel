@@ -1,0 +1,37 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: 6
+
+    paths:
+        - app
+        - config
+        - database
+        - routes
+        - tests
+
+    excludePaths:
+        - app/Console/Commands/*/stubs/*
+
+    # Cada excepción de abajo es un límite de Larastan o del propio Laravel,
+    # no una licencia para escribir cualquier cosa. Van acotadas a su archivo
+    # para que no tapen errores nuevos.
+    ignoreErrors:
+        - identifier: missingType.generics
+        - identifier: larastan.noEnvCallsOutsideOfConfig
+
+        # `Seeder::$command` está declarada sin tipo y con docblock no nulo; el
+        # propio Laravel la consulta con isset(). Ver Seeder::runCallback().
+        -
+            identifier: isset.property
+            path: database/seeders/*.php
+
+        # El stub de Laravel tipa definition() con un pseudo-tipo de Larastan
+        # que el analizador de docblocks no sabe leer fuera de vendor/.
+        -
+            identifier: method.childReturnType
+            path: database/factories/*.php
+
+    checkModelProperties: true
+    reportUnmatchedIgnoredErrors: false

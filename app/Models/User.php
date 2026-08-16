@@ -48,16 +48,25 @@ class User extends Authenticatable
      */
     protected array $auditExclude = ['password', 'remember_token'];
 
+    /**
+     * @return BelongsTo<OrgUnit, $this>
+     */
     public function orgUnit(): BelongsTo
     {
         return $this->belongsTo(OrgUnit::class);
     }
 
+    /**
+     * @return BelongsTo<Position, $this>
+     */
     public function position(): BelongsTo
     {
         return $this->belongsTo(Position::class);
     }
 
+    /**
+     * @return BelongsToMany<Role, $this>
+     */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'user_role')->withTimestamps();
@@ -66,6 +75,8 @@ class User extends Authenticatable
     /**
      * Reportes directos vigentes. La vigencia importa: un cambio de jefe no
      * borra el histórico, solo lo cierra.
+     *
+     * @return BelongsToMany<self, $this>
      */
     public function directReports(): BelongsToMany
     {
@@ -73,12 +84,18 @@ class User extends Authenticatable
             ->wherePivotNull('effective_to');
     }
 
+    /**
+     * @return BelongsToMany<self, $this>
+     */
     public function managers(): BelongsToMany
     {
         return $this->belongsToMany(self::class, 'user_hierarchy', 'subordinate_id', 'manager_id')
             ->wherePivotNull('effective_to');
     }
 
+    /**
+     * @return BelongsToMany<Project, $this>
+     */
     public function projectMemberships(): BelongsToMany
     {
         return $this->belongsToMany(Project::class, 'project_members')
@@ -120,6 +137,12 @@ class User extends Authenticatable
     {
         $membership = $project->members->firstWhere('id', $this->id);
 
-        return $membership?->pivot->project_role;
+        if ($membership === null) {
+            return null;
+        }
+
+        $role = $membership->getAttribute('pivot')?->getAttribute('project_role');
+
+        return is_string($role) ? $role : null;
     }
 }

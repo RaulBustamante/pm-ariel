@@ -29,16 +29,25 @@ class Project extends Model
     /** Roles de proyecto que otorgan escritura. */
     public const WRITING_ROLES = [self::ROLE_MANAGER, self::ROLE_MEMBER];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'owner_id');
     }
 
+    /**
+     * @return BelongsTo<OrgUnit, $this>
+     */
     public function orgUnit(): BelongsTo
     {
         return $this->belongsTo(OrgUnit::class);
     }
 
+    /**
+     * @return BelongsToMany<User, $this>
+     */
     public function members(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'project_members')

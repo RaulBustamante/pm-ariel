@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -21,7 +23,11 @@ final class SetLocale
         /** @var list<string> $supported */
         $supported = config('app.supported_locales', ['es', 'en']);
 
-        $locale = $request->user()?->locale ?? (string) config('app.locale');
+        // Larastan tipa `$request->user()` como no nulo porque conoce el modelo
+        // configurado, pero en una visita anónima es null de verdad.
+        $user = Auth::user();
+
+        $locale = ($user instanceof User ? $user->locale : null) ?? (string) config('app.locale');
 
         if (in_array($locale, $supported, strict: true)) {
             App::setLocale($locale);

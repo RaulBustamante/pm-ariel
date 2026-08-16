@@ -6,6 +6,7 @@ namespace App\Models\Concerns;
 
 use App\Models\AuditLog;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 
@@ -14,16 +15,18 @@ use Illuminate\Support\Facades\Request;
  * el nuevo. Se engancha a los eventos del modelo para que ningún camino de
  * escritura pueda saltárselo: si se dependiera de llamarlo a mano, el día que
  * alguien olvide hacerlo la bitácora mentirá sin avisar.
+ *
+ * @mixin Model
  */
 trait RecordsAudit
 {
     public static function bootRecordsAudit(): void
     {
-        static::created(function (Model $model): void {
+        static::created(function (self $model): void {
             $model->writeAuditLog('created', [], $model->auditableAttributes($model->getAttributes()));
         });
 
-        static::updated(function (Model $model): void {
+        static::updated(function (self $model): void {
             $changes = $model->auditableAttributes($model->getChanges());
 
             // Un update que solo tocó campos excluidos no es un evento de negocio.
@@ -36,16 +39,22 @@ trait RecordsAudit
             $model->writeAuditLog('updated', $model->auditableAttributes($original), $changes);
         });
 
-        static::deleted(function (Model $model): void {
-            $event = method_exists($model, 'isForceDeleting') && $model->isForceDeleting()
+        // `restored` e `isForceDeleting` existen en todo modelo de Eloquent, pero
+        // solo significan algo en los que borran en suave. Preguntar por el trait
+        // es lo que de verdad se quiere saber; preguntar por el método siempre
+        // responde que sí.
+        $softDeletes = in_array(SoftDeletes::class, class_uses_recursive(static::class), strict: true);
+
+        static::deleted(function (self $model) use ($softDeletes): void {
+            $event = $softDeletes && $model->isForceDeleting()
                 ? 'force_deleted'
                 : 'deleted';
 
             $model->writeAuditLog($event, $model->auditableAttributes($model->getAttributes()), []);
         });
 
-        if (method_exists(static::class, 'restored')) {
-            static::restored(function (Model $model): void {
+        if ($softDeletes) {
+            static::restored(function (self $model): void {
                 $model->writeAuditLog('restored', [], $model->auditableAttributes($model->getAttributes()));
             });
         }
