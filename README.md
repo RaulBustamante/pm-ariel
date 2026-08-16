@@ -1,58 +1,170 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# pm-ariel
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema interno de gestión de proyectos y portafolio, grado PMI. Reemplaza el uso de
+MS Project y Excel.
 
-## About Laravel
+> **El nombre del producto no vive en el código.** `pm-ariel` es el nombre del repositorio.
+> El nombre comercial se configura en `config/branding.php` y se consume desde ahí.
+> La planeación completa vive fuera de este repositorio, en
+> `asistente-ejecutivo-trabajo/projects/pm-ariel/`.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Estado
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Etapa 1 — Fundación técnica.** En curso.
 
-## Learning Laravel
+| Bloque | Entregable | Estado |
+|---|---|---|
+| 1.0 | Entorno PHP 8.4 + MySQL 8.4 | ✅ |
+| 1.1 | Repositorio local | ✅ |
+| 1.2 | Laravel 13 instalado | ✅ |
+| 1.3 | Comando de respaldo con restauración probada | ✅ |
+| 1.4 | `config/branding.php` + verificación de marca | ⬜ |
+| 1.5 | Pint, PHPStan y CI local | ⬜ |
+| 1.6+ | Accesos, roles, jerarquía, i18n, auditoría | ⬜ |
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Entorno
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+Verificado, no supuesto:
 
-## Agentic Development
+| Componente | Versión | Notas |
+|---|---|---|
+| PHP | 8.4.24 ZTS (VS17) | Laravel 13 exige 8.3+. XAMPP se detiene en 8.2.12 |
+| Laravel | 13.9.0 (framework v13.25.0) | |
+| MySQL | 8.4.3 | Puerto **3307**, `utf8mb4_unicode_ci`, zona horaria del servidor UTC |
+| Node | 24.11.0 | |
+| Composer | 2.8.12 | Debe correr sobre PHP 8.4, no sobre el de XAMPP |
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+**Por qué el puerto 3307.** La instalación de XAMPP conserva el 3306 y se deja intacta hasta
+que este entorno esté probado. Cuando XAMPP se retire, cambiar `port` en
+`C:\laragon\bin\mysql\mysql-8.4.3-winx64\my.ini` y `DB_PORT` en `.env`.
 
-```bash
-composer require laravel/boost --dev
+**Zona horaria.** Aplicación y base corren en UTC. La conversión a la zona del usuario es
+responsabilidad de la vista, nunca de la base ni del dominio.
 
-php artisan boost:install
+---
+
+## Levantar el proyecto desde cero
+
+1. **PHP 8.4.** Extraer `php-8.4.24-Win32-vs17-x64` en `C:\laragon\bin\php\`. Copiar
+   `php.ini-development` a `php.ini` y habilitar: `curl fileinfo gd intl mbstring openssl
+   pdo_mysql zip opcache sodium sqlite3 pdo_sqlite`.
+   **`intl` no es opcional:** la interfaz es bilingüe.
+
+2. **Arrancar MySQL 8.4**, desde Laragon o a mano:
+
+   ```
+   C:\laragon\bin\mysql\mysql-8.4.3-winx64\bin\mysqld.exe --defaults-file=C:\laragon\bin\mysql\mysql-8.4.3-winx64\my.ini
+   ```
+
+3. **Crear base y usuario de la aplicación:**
+
+   ```sql
+   CREATE DATABASE pm_ariel      CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   CREATE DATABASE pm_ariel_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+   CREATE USER 'pm_ariel'@'127.0.0.1' IDENTIFIED BY '<contraseña>';
+   GRANT ALL PRIVILEGES ON pm_ariel.*      TO 'pm_ariel'@'127.0.0.1';
+   GRANT ALL PRIVILEGES ON pm_ariel_test.* TO 'pm_ariel'@'127.0.0.1';
+   ```
+
+4. **Dependencias y configuración:**
+
+   ```
+   composer install
+   copy .env.example .env      (y completar DB_PASSWORD)
+   php artisan key:generate
+   php artisan migrate
+   ```
+
+5. **Levantar:** `php artisan serve`
+
+La aplicación **nunca** se conecta como `root`. El usuario `pm_ariel` tiene permisos
+únicamente sobre sus dos esquemas.
+
+---
+
+## Respaldo y restauración
+
+Mientras no exista un repositorio remoto, este comando es la única copia del historial.
+
+### Respaldar
+
+```
+php artisan backup:run
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Produce un `.zip` fechado con tres componentes:
 
-## Contributing
+| Componente | Qué contiene |
+|---|---|
+| `database.sql` | Volcado con `--single-transaction`, rutinas y disparadores |
+| `files/` | El contenido de `storage/app` |
+| `repository.bundle` | El historial completo de git, empacado con `git bundle --all` |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Configuración en `config/backup.php` y `.env`:
 
-## Code of Conduct
+| Variable | Para qué |
+|---|---|
+| `BACKUP_DESTINATION` | Ruta absoluta de destino. **Apuntar a un disco distinto al de la aplicación** |
+| `BACKUP_KEEP` | Cuántos archivos conservar. La poda ocurre solo tras un respaldo exitoso |
+| `BACKUP_MYSQLDUMP_PATH` | Ruta a `mysqldump` |
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Programado a las 02:00 en `routes/console.php`, sin traslape.
 
-## Security Vulnerabilities
+### Restaurar — probado, no supuesto
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+1. **Extraer el archivo:**
+   `Expand-Archive backup_AAAA-MM-DD_HHMMSS.zip -DestinationPath restore\`
 
-## License
+2. **Base de datos:**
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+   ```
+   mysql -u root -P 3307 -e "CREATE DATABASE pm_ariel_restore CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+   mysql -u root -P 3307 pm_ariel_restore < restore\database.sql
+   ```
+
+3. **Archivos:** copiar `restore\files\storage_app\` sobre `storage\app\`
+
+4. **Repositorio** — recupera todo el historial, no solo la última versión:
+
+   ```
+   git clone restore\repository.bundle pm-ariel-recuperado
+   git bundle verify restore\repository.bundle
+   ```
+
+**Verificado el 2026-08-16:** restauración completa en un esquema limpio — 9 de 9 tablas,
+migraciones íntegras, y `git bundle verify` confirmando historial completo.
+
+---
+
+## Pruebas
+
+```
+php artisan test
+```
+
+**La suite corre contra MySQL, no contra SQLite en memoria.** El motor de programación y las
+consultas de reporte dependen del comportamiento real de la base; una suite sobre otro motor
+demuestra que el código funciona en otro lado. La base de pruebas es `pm_ariel_test`.
+
+---
+
+## Convenciones
+
+- **PSR-12**, sin prefijo `_` en propiedades ni métodos. Excepción autorizada y acotada a este
+  repositorio frente a `php-dev-standards.md` — ver D-003 en la planeación.
+- Nombres de archivo: clases PHP en PSR-4 · Blade en kebab-case · migraciones en formato
+  Laravel · assets en kebab-case.
+- Controladores delgados. La lógica de negocio vive en Services y Actions; los cálculos de
+  programación, en clases de dominio puras sin dependencia de Laravel.
+- Autorización solo por Policies. Ocultar un botón no es un permiso.
+- **Ninguna función específica de un motor de base de datos.** Todo por el constructor de
+  consultas y las migraciones. El motor de producción aún no está confirmado.
+- Toda fecha en UTC en la base. Ninguna suma directa de días: la aritmética de fechas pasa por
+  el calendario laboral.
+- Cero cadenas de interfaz escritas duro: todo pasa por el sistema de traducción.
+- Commits atómicos con mensaje convencional (`feat:`, `fix:`, `refactor:`, `test:`, `docs:`,
+  `chore:`).
