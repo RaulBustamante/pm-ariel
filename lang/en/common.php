@@ -33,6 +33,12 @@ return [
     'manager' => 'Direct manager',
     'language' => 'Language',
     'timezone' => 'Time zone',
+    'preferences' => 'Preferences',
+
+    // Language names always in their own language: someone who landed on an
+    // interface they cannot read still recognises theirs in the list.
+    'locale_es' => 'Español',
+    'locale_en' => 'English',
 
     'simple_mode' => 'Simple mode',
     'expert_mode' => 'Expert mode',

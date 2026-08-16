@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\PreferencesController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
@@ -32,6 +33,9 @@ Route::middleware('auth')->group(function (): void {
     Route::put('change-password', [PasswordChangeController::class, 'update'])->name('password.change.update');
 
     Route::view('dashboard', 'dashboard')->name('dashboard');
+
+    Route::get('preferences', [PreferencesController::class, 'edit'])->name('preferences.edit');
+    Route::put('preferences', [PreferencesController::class, 'update'])->name('preferences.update');
 
     Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('users', [UserController::class, 'index'])->name('users.index');

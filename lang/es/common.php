@@ -33,6 +33,12 @@ return [
     'manager' => 'Jefe directo',
     'language' => 'Idioma',
     'timezone' => 'Zona horaria',
+    'preferences' => 'Preferencias',
+
+    // El idioma se escribe siempre en su propio idioma: quien entró por error
+    // a una interfaz que no lee, reconoce igual el suyo en la lista.
+    'locale_es' => 'Español',
+    'locale_en' => 'English',
 
     'simple_mode' => 'Modo Simple',
     'expert_mode' => 'Modo Experto',

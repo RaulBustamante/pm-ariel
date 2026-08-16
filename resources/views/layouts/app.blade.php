@@ -42,7 +42,16 @@
             </div>
 
             <div class="flex items-center gap-3">
-                <span class="hidden text-sm text-slate-600 sm:inline">{{ auth()->user()->name }}</span>
+                <a href="{{ route('preferences.edit') }}"
+                   @if (request()->routeIs('preferences.*')) aria-current="page" @endif
+                   class="rounded px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    {{ auth()->user()->name }}
+                    {{-- El modo activo se ve sin entrar a preferencias: si alguien
+                         no encuentra una columna, aquí está la razón. --}}
+                    <span class="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600">
+                        {{ auth()->user()->expert_mode ? __('common.expert_mode') : __('common.simple_mode') }}
+                    </span>
+                </a>
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf

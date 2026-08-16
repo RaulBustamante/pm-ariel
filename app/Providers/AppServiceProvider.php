@@ -13,6 +13,8 @@ use App\Policies\UserPolicy;
 use App\Services\Identity\LocalIdentityProvider;
 use App\Services\Identity\LocalUserProvisioner;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -36,5 +38,29 @@ class AppServiceProvider extends ServiceProvider
         // tumbar una pantalla por un descuido de rendimiento.
         Model::preventLazyLoading(! $this->app->isProduction());
         Model::preventSilentlyDiscardingAttributes(! $this->app->isProduction());
+
+        $this->registerDisplayModeDirectives();
+    }
+
+    /**
+     * `@expert` y `@simple` en las vistas. Existen desde ya para que las
+     * pantallas de las etapas siguientes no inventen cada una su forma de
+     * preguntar lo mismo, ni consulten al usuario a mano en cada Blade.
+     *
+     * Un invitado no tiene preferencia, y lo prudente ahí es lo simple.
+     */
+    private function registerDisplayModeDirectives(): void
+    {
+        Blade::if('expert', function (): bool {
+            $user = Auth::user();
+
+            return $user instanceof User && $user->expert_mode;
+        });
+
+        Blade::if('simple', function (): bool {
+            $user = Auth::user();
+
+            return ! ($user instanceof User && $user->expert_mode);
+        });
     }
 }
