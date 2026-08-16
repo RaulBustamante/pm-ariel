@@ -13,6 +13,7 @@ return [
     'projects' => 'Projects',
 
     'save' => 'Save',
+    'saved' => 'Saved.',
     'cancel' => 'Cancel',
     'create' => 'Create',
     'edit' => 'Edit',

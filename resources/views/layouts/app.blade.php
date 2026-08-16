@@ -27,6 +27,12 @@
                         {{ __('common.dashboard') }}
                     </x-nav-link>
 
+                    @can('viewAny', App\Models\Project::class)
+                        <x-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">
+                            {{ __('common.projects') }}
+                        </x-nav-link>
+                    @endcan
+
                     @can('viewAny', App\Models\User::class)
                         <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
                             {{ __('common.users') }}
@@ -80,6 +86,20 @@
         @if (session('status'))
             <div role="status" class="mb-6 rounded-md bg-emerald-50 px-4 py-3 text-sm text-emerald-900 ring-1 ring-emerald-200">
                 {{ session('status') }}
+            </div>
+        @endif
+
+        {{-- Un aviso no es un error: la acción no se hizo, pero nada se rompió.
+             Distinguirlos evita que el usuario crea que perdió lo que escribió. --}}
+        @if (session('warning'))
+            <div role="alert" class="mb-6 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
+                {{ session('warning') }}
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div role="alert" class="mb-6 rounded-md bg-red-50 px-4 py-3 text-sm text-red-900 ring-1 ring-red-200">
+                {{ session('error') }}
             </div>
         @endif
 

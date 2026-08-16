@@ -15,6 +15,7 @@ final class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call(RolesAndPermissionsSeeder::class);
+        $this->call(ProjectTemplatesSeeder::class);
 
         $this->createFirstAdministrator();
     }

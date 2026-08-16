@@ -13,6 +13,7 @@ return [
     'projects' => 'Proyectos',
 
     'save' => 'Guardar',
+    'saved' => 'Guardado.',
     'cancel' => 'Cancelar',
     'create' => 'Crear',
     'edit' => 'Editar',

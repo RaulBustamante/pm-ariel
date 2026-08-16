@@ -6,14 +6,23 @@ namespace App\Providers;
 
 use App\Contracts\Identity\IdentityProvider;
 use App\Contracts\Identity\ProvisionsUsers;
+use App\Contracts\Initiation\SuggestsContent;
 use App\Models\OrgUnit;
 use App\Models\Project;
+use App\Models\ProjectCharter;
+use App\Models\Risk;
+use App\Models\Stakeholder;
 use App\Models\User;
 use App\Policies\OrgUnitPolicy;
+use App\Policies\ProjectCharterPolicy;
 use App\Policies\ProjectPolicy;
+use App\Policies\RiskPolicy;
+use App\Policies\StakeholderPolicy;
 use App\Policies\UserPolicy;
 use App\Services\Identity\LocalIdentityProvider;
 use App\Services\Identity\LocalUserProvisioner;
+use App\Services\Initiation\OpenAiSuggestionProvider;
+use App\Services\Initiation\TemplateSuggestionProvider;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
@@ -28,12 +37,25 @@ class AppServiceProvider extends ServiceProvider
         // dos ligaduras y nada más en toda la aplicación.
         $this->app->bind(IdentityProvider::class, LocalIdentityProvider::class);
         $this->app->bind(ProvisionsUsers::class, LocalUserProvisioner::class);
+
+        // Mismo patrón: quien pide sugerencias no sabe de dónde salen. Con el
+        // interruptor apagado el recorrido funciona igual, solo con plantillas.
+        $this->app->bind(SuggestsContent::class, function ($app): SuggestsContent {
+            $templates = $app->make(TemplateSuggestionProvider::class);
+
+            return config('initiation.ai.enabled') && filled(config('initiation.ai.key'))
+                ? new OpenAiSuggestionProvider($templates)
+                : $templates;
+        });
     }
 
     public function boot(): void
     {
         Gate::policy(OrgUnit::class, OrgUnitPolicy::class);
         Gate::policy(Project::class, ProjectPolicy::class);
+        Gate::policy(ProjectCharter::class, ProjectCharterPolicy::class);
+        Gate::policy(Risk::class, RiskPolicy::class);
+        Gate::policy(Stakeholder::class, StakeholderPolicy::class);
         Gate::policy(User::class, UserPolicy::class);
 
         // Un acceso perezoso no detectado es una consulta N+1 esperando a

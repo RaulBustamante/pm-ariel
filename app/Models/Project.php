@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -28,6 +30,37 @@ class Project extends Model
 
     /** Roles de proyecto que otorgan escritura. */
     public const WRITING_ROLES = [self::ROLE_MANAGER, self::ROLE_MEMBER];
+
+    /**
+     * @return HasOne<ProjectCharter, $this>
+     */
+    public function charter(): HasOne
+    {
+        return $this->hasOne(ProjectCharter::class);
+    }
+
+    /**
+     * Los de más peso primero. Quien abre la lista quiere ver a los que pueden
+     * hundir el proyecto, no el orden en que se capturaron.
+     *
+     * @return HasMany<Stakeholder, $this>
+     */
+    public function stakeholders(): HasMany
+    {
+        return $this->hasMany(Stakeholder::class)
+            ->orderByRaw('power * interest DESC')
+            ->orderBy('name');
+    }
+
+    /**
+     * @return HasMany<Risk, $this>
+     */
+    public function risks(): HasMany
+    {
+        return $this->hasMany(Risk::class)
+            ->orderByRaw('probability * impact DESC')
+            ->orderBy('code');
+    }
 
     /**
      * @return BelongsTo<User, $this>

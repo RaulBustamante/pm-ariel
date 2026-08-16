@@ -9,7 +9,13 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Initiation\InitiationController;
+use App\Http\Controllers\Initiation\InitiationPackageController;
+use App\Http\Controllers\Initiation\RiskController;
+use App\Http\Controllers\Initiation\StakeholderController;
 use App\Http\Controllers\PreferencesController;
+use App\Http\Controllers\ProjectController;
+use App\Support\Initiation\InitiationStep;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/dashboard');
@@ -38,6 +44,48 @@ Route::middleware('auth')->group(function (): void {
 
     Route::get('preferences', [PreferencesController::class, 'edit'])->name('preferences.edit');
     Route::put('preferences', [PreferencesController::class, 'update'])->name('preferences.update');
+
+    Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
+    Route::get('projects/create', [ProjectController::class, 'create'])->name('projects.create');
+    Route::post('projects', [ProjectController::class, 'store'])->name('projects.store');
+
+    Route::prefix('projects/{project}')->group(function (): void {
+        Route::get('initiation', [InitiationController::class, 'overview'])
+            ->name('projects.initiation.overview');
+        Route::get('initiation/package', [InitiationPackageController::class, 'show'])
+            ->name('projects.initiation.package');
+        Route::post('initiation/approve', [InitiationPackageController::class, 'approve'])
+            ->name('projects.initiation.approve');
+
+        // Un paso por nombre y no por número: si algún día se inserta uno, los
+        // enlaces que la gente guardó siguen llevando a donde decían. Los pasos
+        // salen del enum, así que agregar uno no obliga a tocar este archivo.
+        foreach (InitiationStep::ordered() as $initiationStep) {
+            Route::get("initiation/{$initiationStep->value}", [InitiationController::class, 'step'])
+                ->defaults('step', $initiationStep->value)
+                ->name($initiationStep->route());
+
+            Route::put("initiation/{$initiationStep->value}", [InitiationController::class, 'update'])
+                ->defaults('step', $initiationStep->value)
+                ->name($initiationStep->route().'.update');
+
+            Route::post("initiation/{$initiationStep->value}/suggest/{field}", [InitiationController::class, 'suggest'])
+                ->defaults('step', $initiationStep->value)
+                ->name($initiationStep->route().'.suggest');
+        }
+
+        Route::post('stakeholders', [StakeholderController::class, 'store'])->name('projects.stakeholders.store');
+        Route::post('stakeholders/suggest', [StakeholderController::class, 'suggest'])->name('projects.stakeholders.suggest');
+        Route::put('stakeholders/{stakeholder}', [StakeholderController::class, 'update'])->name('projects.stakeholders.update');
+        Route::delete('stakeholders/{stakeholder}', [StakeholderController::class, 'destroy'])->name('projects.stakeholders.destroy');
+
+        Route::post('risks', [RiskController::class, 'store'])->name('projects.risks.store');
+        Route::post('risks/suggest', [RiskController::class, 'suggest'])->name('projects.risks.suggest');
+        Route::put('risks/{risk}', [RiskController::class, 'update'])->name('projects.risks.update');
+        Route::delete('risks/{risk}', [RiskController::class, 'destroy'])->name('projects.risks.destroy');
+        Route::post('risks/{risk}/responses', [RiskController::class, 'storeResponse'])->name('projects.risks.responses.store');
+        Route::delete('risks/{risk}/responses/{response}', [RiskController::class, 'destroyResponse'])->name('projects.risks.responses.destroy');
+    });
 
     Route::prefix('admin')->name('admin.')->group(function (): void {
         Route::get('users', [UserController::class, 'index'])->name('users.index');
