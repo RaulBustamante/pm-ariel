@@ -161,6 +161,27 @@ final class OrgUnitCrudTest extends TestCase
         $this->assertSoftDeleted($unit);
     }
 
+    /**
+     * Las pantallas de alta y edición se dibujan. Sin esto, un error de plantilla
+     * solo aparecería usándola a mano.
+     */
+    #[Test]
+    public function the_area_forms_render(): void
+    {
+        $root = $this->unit('Dirección');
+        $child = $this->unit('Sistemas', $root);
+
+        $admin = $this->admin();
+
+        $this->actingAs($admin)->get(route('admin.org-units.create'))->assertOk();
+
+        $this->actingAs($admin)
+            ->get(route('admin.org-units.edit', $root))
+            ->assertOk()
+            // Un área no se ofrece como padre de sí misma ni de su ascendencia.
+            ->assertDontSee('value="'.$child->id.'"', escape: false);
+    }
+
     #[Test]
     public function a_viewer_gets_403_on_the_area_screens(): void
     {

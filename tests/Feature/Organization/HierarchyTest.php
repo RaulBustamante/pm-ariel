@@ -177,6 +177,24 @@ final class HierarchyTest extends TestCase
             ->assertSeeInOrder([__('hierarchy.roots_help'), 'Sin Jefe']);
     }
 
+    /**
+     * La pantalla de asignación se dibuja y no ofrece a nadie que cerraría un
+     * ciclo: rechazarlo después de elegirlo es peor experiencia que no ofrecerlo.
+     */
+    #[Test]
+    public function the_assignment_screen_hides_candidates_that_would_close_a_cycle(): void
+    {
+        $top = User::factory()->create(['name' => 'Cabeza']);
+        $middle = User::factory()->create(['name' => 'Medio']);
+
+        $this->manager()->assign($middle, $top);
+
+        $this->actingAs($this->admin())
+            ->get(route('admin.hierarchy.edit', $top))
+            ->assertOk()
+            ->assertDontSee('value="'.$middle->id.'"', escape: false);
+    }
+
     #[Test]
     public function a_viewer_gets_403_on_the_hierarchy_screen(): void
     {
