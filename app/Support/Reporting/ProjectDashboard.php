@@ -134,8 +134,22 @@ final class ProjectDashboard
     /**
      * @return Collection<int, Task>
      */
+    /**
+     * Las tareas que llevan trabajo. Los resúmenes se excluyen: su duración y su
+     * costo son la suma de sus hijas, y contarlos duplicaría todo.
+     *
+     * Si quien llama ya trajo las tareas —el inicio pinta doce proyectos y las
+     * carga de una vez—, se usan esas. Sin esta comprobación, esa pantalla
+     * hacía una consulta por tarjeta.
+     *
+     * @return Collection<int, Task>
+     */
     private function leaves(Project $project): Collection
     {
+        if ($project->relationLoaded('tasks')) {
+            return $project->tasks->reject(fn (Task $task): bool => (bool) $task->is_summary)->values();
+        }
+
         return $project->tasks()->where('is_summary', false)->get();
     }
 

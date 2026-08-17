@@ -8,6 +8,8 @@ use App\Models\Project;
 use App\Models\Role;
 use App\Models\Task;
 use App\Models\User;
+use App\Services\Scheduling\BaselineManager;
+use App\Support\Scheduling\WorkingCalendar;
 use Database\Seeders\ProjectTemplatesSeeder;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -56,10 +58,35 @@ final class OnboardingTest extends TestCase
 
         $demo = Project::query()->where('code', 'DEMO-01')->firstOrFail();
 
-        $this->assertSame(14, Task::query()->where('project_id', $demo->id)->count());
+        // Un plan de tamaño real: con diez tareas todo se ve comodo y las
+        // cosas que hay que poder enseñar —el Gantt paginado, los carriles del
+        // tablero— no aparecen.
+        $this->assertGreaterThanOrEqual(50, Task::query()->where('project_id', $demo->id)->count());
         $this->assertGreaterThan(0, $demo->findings()->count());
         // El aviso de sobreasignación es el que hace demostrable el producto.
         $this->assertContains('resource.overallocated', $demo->findings()->pluck('rule')->all());
+    }
+
+    /**
+     * Una linea base capturada sobre el plan final da varianza cero en todos
+     * los renglones, y la pantalla de comparacion se ve vacia. El ejemplo tiene
+     * que traer desviacion de verdad para que se entienda para que sirve.
+     */
+    #[Test]
+    public function the_demo_baseline_already_shows_a_slip(): void
+    {
+        $this->actingAs($this->admin)->post(route('onboarding.demo.store'));
+
+        $demo = Project::query()->where('code', 'DEMO-01')->firstOrFail();
+        $baseline = $demo->baselines()->firstOrFail();
+
+        $comparison = app(BaselineManager::class)->compare(
+            $demo,
+            $baseline,
+            WorkingCalendar::standard(),
+        );
+
+        $this->assertGreaterThan(0, $comparison['finish_variance_minutes'], 'El ejemplo debe traer atraso.');
     }
 
     /**

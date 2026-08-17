@@ -178,4 +178,97 @@ final class SuggestionProviderTest extends TestCase
         // pasaría igual con un contexto vacío, que no demuestra nada.
         Http::assertSent($carries('Duele el cierre mensual.'));
     }
+
+    /**
+     * Cada sugerencia es una llamada facturada. Sin tope, quien oprime el botón
+     * veinte veces porque no le gustó el borrador gasta veinte veces, y nadie se
+     * entera hasta el estado de cuenta.
+     */
+    #[Test]
+    public function the_spend_cap_stops_calling_the_provider(): void
+    {
+        config()->set('initiation.ai.enabled', true);
+        config()->set('initiation.ai.key', 'sk-lo-que-sea');
+        config()->set('initiation.ai.rate_limit.per_minute', 3);
+
+        Http::fake(['*' => Http::response([
+            'choices' => [['message' => ['content' => '{"risks":[{"description":"Del modelo","probability":3,"impact":3}]}']]],
+        ])]);
+
+        $project = $this->project();
+
+        // Se cuenta desde aquí: crear el proyecto ya gastó sus propias llamadas
+        // precargando el recorrido, y mezclarlas escondería lo que se mide.
+        $before = count(Http::recorded());
+
+        $this->actingAs($project->owner);
+        $provider = app(SuggestsContent::class);
+
+        for ($i = 0; $i < 6; $i++) {
+            $provider->suggestRisks($project);
+        }
+
+        // Seis intentos, tres llamadas: el tope se aplica dentro del proveedor,
+        // así que ninguna ruta nueva puede saltárselo por olvido.
+        $this->assertSame(3, count(Http::recorded()) - $before);
+    }
+
+    /**
+     * Toparse con el límite no puede dejar el formulario vacío. Igual que
+     * cuando no hay internet, contesta la plantilla y el recorrido sigue.
+     */
+    #[Test]
+    public function past_the_cap_the_template_answers_instead_of_failing(): void
+    {
+        config()->set('initiation.ai.enabled', true);
+        config()->set('initiation.ai.key', 'sk-lo-que-sea');
+        config()->set('initiation.ai.rate_limit.per_minute', 1);
+
+        Http::fake(['*' => Http::response([
+            'choices' => [['message' => ['content' => '{"risks":[{"description":"Del modelo","probability":3,"impact":3}]}']]],
+        ])]);
+
+        $project = $this->project();
+        $this->actingAs($project->owner);
+
+        $provider = app(SuggestsContent::class);
+        $provider->suggestRisks($project);
+
+        $afterCap = $provider->suggestRisks($project);
+
+        $this->assertNotEmpty($afterCap);
+        $this->assertNotSame('Del modelo', $afterCap[0]['description']);
+    }
+
+    /**
+     * El tope es por persona. Que alguien agote su cuota no puede dejar sin
+     * asistente a todo el equipo.
+     */
+    #[Test]
+    public function the_cap_belongs_to_each_person_and_not_to_everyone(): void
+    {
+        config()->set('initiation.ai.enabled', true);
+        config()->set('initiation.ai.key', 'sk-lo-que-sea');
+        config()->set('initiation.ai.rate_limit.per_minute', 1);
+
+        Http::fake(['*' => Http::response([
+            'choices' => [['message' => ['content' => '{"risks":[{"description":"Del modelo","probability":3,"impact":3}]}']]],
+        ])]);
+
+        $project = $this->project();
+        $provider = app(SuggestsContent::class);
+
+        $before = count(Http::recorded());
+
+        $this->actingAs($project->owner);
+        $provider->suggestRisks($project);
+        $provider->suggestRisks($project);
+
+        $other = User::factory()->create(['is_active' => true, 'must_change_password' => false]);
+        $this->actingAs($other);
+        $provider->suggestRisks($project);
+
+        // Dos llamadas: la primera de cada quien. La segunda del titular se topó.
+        $this->assertSame(2, count(Http::recorded()) - $before);
+    }
 }

@@ -10,6 +10,7 @@ use App\Models\Stakeholder;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use Throwable;
 
 /**
@@ -123,7 +124,7 @@ final class OpenAiSuggestionProvider implements SuggestsContent
     {
         $empty = $key === 'text' ? null : [];
 
-        if (! $this->configured()) {
+        if (! $this->configured() || ! $this->withinBudget($project)) {
             return $empty;
         }
 
@@ -187,6 +188,55 @@ final class OpenAiSuggestionProvider implements SuggestsContent
 
             return $empty;
         }
+    }
+
+    /**
+     * ¿Le queda cuota a quien oprimió el botón?
+     *
+     * El tope se comprueba aquí y no en las rutas a propósito. Hay tres rutas de
+     * sugerencia hoy y va a haber más; si el límite viviera en el archivo de
+     * rutas, la cuarta nacería sin él y nadie lo notaría hasta el estado de
+     * cuenta. Aquí es imposible llamar al proveedor sin pasar por el tope.
+     *
+     * Al agotarse no se lanza un error: devolver `false` hace que el decorador
+     * responda con la plantilla, igual que cuando no hay internet. El usuario
+     * ve un borrador razonable, no un formulario roto.
+     */
+    private function withinBudget(Project $project): bool
+    {
+        $user = auth()->id();
+
+        // Sin sesión no hay a quién cobrarle la cuota —una orden de consola, una
+        // prueba—, y tampoco hay un botón que alguien pueda mantener oprimido.
+        if ($user === null) {
+            return true;
+        }
+
+        $windows = [
+            "initiation-ai:{$user}:minute" => [(int) config('initiation.ai.rate_limit.per_minute', 5), 60],
+            "initiation-ai:{$user}:day" => [(int) config('initiation.ai.rate_limit.per_day', 100), 86400],
+        ];
+
+        foreach ($windows as $key => [$max, $seconds]) {
+            if (RateLimiter::tooManyAttempts($key, $max)) {
+                Log::info('Sugerencia servida con plantilla: cuota de IA agotada.', [
+                    'user_id' => $user,
+                    'project_id' => $project->id,
+                    'window_seconds' => $seconds,
+                ]);
+
+                return false;
+            }
+        }
+
+        // Se marca sobre las dos ventanas solo cuando ambas dieron paso, para no
+        // consumir la cuota diaria con intentos que la ventana del minuto ya
+        // había rechazado.
+        foreach ($windows as $key => [, $seconds]) {
+            RateLimiter::hit($key, $seconds);
+        }
+
+        return true;
     }
 
     /**

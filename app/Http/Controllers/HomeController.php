@@ -35,7 +35,14 @@ final class HomeController extends Controller
             return view('dashboard', ['projects' => collect()]);
         }
 
-        $query = Project::query()->with(['charter']);
+        // Las tareas se traen de una sola vez y ya filtradas. Los indicadores de
+        // cada tarjeta se calculan sobre ellas; pedirlas por proyecto costaba
+        // una consulta por tarjeta, y los resúmenes solo abultarían la memoria
+        // porque su duración ya está contada en sus hijas.
+        $query = Project::query()->with([
+            'charter',
+            'tasks' => fn ($tasks) => $tasks->where('is_summary', false),
+        ]);
 
         if (! $viewer->hasRole(Role::ADMIN) && ! $viewer->hasRole(Role::AUDITOR)) {
             $visibility->scopeProjects($query, $viewer);

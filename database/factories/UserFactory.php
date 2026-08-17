@@ -30,6 +30,17 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+
+            // Estos dos tienen valor por omisión en la migración, pero un modelo
+            // recién creado por la fábrica no los trae cargados: quedan en null
+            // hasta que alguien lo relea de la base. Cualquier código que decida
+            // algo con ellos —el guardia de cuenta activa, el de contraseña
+            // temporal— ve null y actúa como si fueran falsos.
+            //
+            // Declararlos aquí hace que el usuario de prueba se parezca al que
+            // existe de verdad, en vez de obligar a cada prueba a acordarse.
+            'is_active' => true,
+            'must_change_password' => false,
         ];
     }
 

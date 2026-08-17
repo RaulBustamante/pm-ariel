@@ -27,7 +27,7 @@ return [
     'vocabulary_help' => 'Each term carries a "?" on the screen where it appears. No need to memorize them.',
 
     'demo' => 'Example project',
-    'demo_help' => 'A realistic project with 14 tasks, dependencies and three people, to see the system working without capturing anything. It carries two deliberately planted problems, so you can see how it warns.',
+    'demo_help' => 'A realistic project of more than fifty tasks, with dependencies, three people and a baseline already slipping, to see the system working without capturing anything. It carries two deliberately planted problems, so you can see how it warns.',
     'demo_load' => 'Load the example',
     'demo_open' => 'Open the example',
     'demo_remove' => 'Delete the example',

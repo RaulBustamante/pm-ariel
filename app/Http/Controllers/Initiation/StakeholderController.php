@@ -44,8 +44,11 @@ final class StakeholderController extends Controller
 
     public function destroy(Project $project, Stakeholder $stakeholder): RedirectResponse
     {
-        $this->authorize('delete', $stakeholder);
+        // Pertenencia antes que permisos: si no, un interesado de otro proyecto
+        // responde 403 y uno inexistente 404, y probando identificadores se
+        // averigua cuáles existen.
         $this->authorizeBelongs($project, $stakeholder);
+        $this->authorize('delete', $stakeholder);
 
         $stakeholder->delete();
 

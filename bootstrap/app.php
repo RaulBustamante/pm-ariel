@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsurePasswordIsChanged;
 use App\Http\Middleware\SetLocale;
 use Illuminate\Foundation\Application;
@@ -17,9 +18,15 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // En el grupo web completo, no en rutas sueltas: así ningún módulo que
-        // se agregue después puede saltarse el cambio de contraseña temporal.
+        // se agregue después puede saltarse el cambio de contraseña temporal ni
+        // seguir atendiendo a una cuenta ya desactivada.
+        //
+        // El orden importa: primero se comprueba que la cuenta siga vigente. No
+        // tiene sentido mandar a cambiar su contraseña a alguien que acaba de
+        // dejar la empresa.
         $middleware->web(append: [
             SetLocale::class,
+            EnsureAccountIsActive::class,
             EnsurePasswordIsChanged::class,
         ]);
     })

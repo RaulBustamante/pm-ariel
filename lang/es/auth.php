@@ -10,6 +10,10 @@ return [
     'password' => 'La contraseña no es correcta.',
     'throttle' => 'Demasiados intentos. Vuelve a intentarlo en :seconds segundos.',
 
+    // Aquí sí se puede ser explícito: quien lee esto ya había entrado, así que
+    // el mensaje no le confirma a nadie la existencia de una cuenta ajena.
+    'inactive' => 'Tu cuenta fue desactivada. Habla con el administrador si crees que es un error.',
+
     'sign_in' => 'Entrar',
     'sign_out' => 'Salir',
     'email' => 'Correo electrónico',

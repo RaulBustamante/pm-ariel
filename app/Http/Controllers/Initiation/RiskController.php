@@ -40,8 +40,11 @@ final class RiskController extends Controller
 
     public function destroy(Project $project, Risk $risk): RedirectResponse
     {
-        $this->authorize('delete', $risk);
+        // La pertenencia primero, los permisos después. Al revés, un riesgo de
+        // otro proyecto contesta 403 y uno inexistente 404, y esa diferencia
+        // basta para averiguar qué identificadores existen probando uno por uno.
         $this->authorizeBelongs($project, $risk);
+        $this->authorize('delete', $risk);
 
         $risk->delete();
 
@@ -125,9 +128,9 @@ final class RiskController extends Controller
 
     public function destroyResponse(Project $project, Risk $risk, RiskResponse $response): RedirectResponse
     {
-        $this->authorize('update', $risk);
         $this->authorizeBelongs($project, $risk);
         abort_unless($response->risk_id === $risk->id, 404);
+        $this->authorize('update', $risk);
 
         $response->delete();
 

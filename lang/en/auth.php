@@ -10,6 +10,10 @@ return [
     'password' => 'That password is not correct.',
     'throttle' => 'Too many attempts. Try again in :seconds seconds.',
 
+    // Being explicit is safe here: whoever reads this was already signed in, so
+    // it confirms nothing about anyone else's account.
+    'inactive' => 'Your account was deactivated. Talk to the administrator if you think this is a mistake.',
+
     'sign_in' => 'Sign in',
     'sign_out' => 'Sign out',
     'email' => 'Email address',

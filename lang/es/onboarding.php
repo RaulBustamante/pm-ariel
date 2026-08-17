@@ -27,7 +27,7 @@ return [
     'vocabulary_help' => 'Cada término lleva un «?» en la pantalla donde aparece. No hace falta memorizarlos.',
 
     'demo' => 'Proyecto de ejemplo',
-    'demo_help' => 'Un proyecto realista con 14 tareas, dependencias y tres personas, para ver el sistema funcionando sin capturar nada. Trae dos problemas plantados a propósito, para que veas cómo avisa.',
+    'demo_help' => 'Un proyecto realista de más de cincuenta tareas, con dependencias, tres personas y una línea base ya desviada, para ver el sistema funcionando sin capturar nada. Trae dos problemas plantados a propósito, para que veas cómo avisa.',
     'demo_load' => 'Cargar el ejemplo',
     'demo_open' => 'Abrir el ejemplo',
     'demo_remove' => 'Borrar el ejemplo',

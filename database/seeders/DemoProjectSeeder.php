@@ -14,6 +14,7 @@ use App\Models\TaskAssignment;
 use App\Models\TaskDependency;
 use App\Models\User;
 use App\Services\Advisor\ProjectAdvisor;
+use App\Services\Scheduling\BaselineManager;
 use App\Services\Scheduling\ProjectScheduler;
 use App\Support\Initiation\InitiationStep;
 use Illuminate\Database\Seeder;
@@ -81,6 +82,9 @@ final class DemoProjectSeeder extends Seeder
         $this->resources($project, $tasks);
 
         app(ProjectScheduler::class)->reschedule($project->refresh());
+
+        $this->baselineWithSlip($project, $tasks);
+
         app(ProjectAdvisor::class)->analyze($project->refresh());
 
         if (isset($this->command)) {
@@ -98,6 +102,47 @@ final class DemoProjectSeeder extends Seeder
             $this->command->comment('Trae dos problemas plantados a proposito: una persona sobreasignada');
             $this->command->comment('y una tarea critica sin responsable. Miralos en la pestaña Avisos.');
         }
+    }
+
+    /**
+     * Congela el plan y **después** lo desvía.
+     *
+     * Una línea base capturada sobre el plan final da varianza cero en todos
+     * los renglones, y entonces la pantalla de comparación se ve vacía y nadie
+     * entiende para qué sirve. Aquí se captura primero y luego se alarga una
+     * tarea de la ruta crítica, que es exactamente lo que pasa en un proyecto
+     * real: el compromiso se firmó antes de que las cosas se complicaran.
+     *
+     * @param  array<string, Task>  $tasks
+     */
+    private function baselineWithSlip(Project $project, array $tasks): void
+    {
+        app(BaselineManager::class)->capture(
+            $project,
+            'Línea base aprobada por dirección',
+            'Capturada al aprobarse el proyecto.',
+        );
+
+        // Se alargan tareas **de la ruta crítica**, elegidas del resultado del
+        // motor y no a mano. Alargar una que tiene holgura no mueve la entrega,
+        // la varianza sale en cero y la pantalla de comparación se ve vacía —
+        // que es justo lo contrario de lo que el ejemplo debe enseñar.
+        $critical = Task::query()
+            ->where('project_id', $project->id)
+            ->where('is_critical', true)
+            ->where('is_summary', false)
+            ->where('duration_minutes', '>', 0)
+            ->orderByDesc('duration_minutes')
+            ->limit(2)
+            ->get();
+
+        foreach ($critical as $task) {
+            // Un 60 % más de lo estimado: la desviación típica de una tarea que
+            // resultó más complicada de lo que parecía en el papel.
+            $task->update(['duration_minutes' => (int) round($task->duration_minutes * 1.6)]);
+        }
+
+        app(ProjectScheduler::class)->reschedule($project->refresh());
     }
 
     private function charter(Project $project, User $owner): void
@@ -126,6 +171,13 @@ final class DemoProjectSeeder extends Seeder
     }
 
     /**
+     * El plan del proyecto de ejemplo.
+     *
+     * Cincuenta y tantas tareas y no diez a propósito: con diez todo se ve cómodo, y las
+     * cosas que hay que poder enseñar —el Gantt paginado, el tope de renglones,
+     * un tablero que necesita carriles— solo aparecen con un plan de tamaño
+     * real.
+     *
      * @return array<string, Task>
      */
     private function tasks(Project $project): array
@@ -134,20 +186,65 @@ final class DemoProjectSeeder extends Seeder
             // clave           nombre                                    días  padre
             ['analisis',       'Análisis',                                 0,  null],
             ['entrevistas',    'Entrevistas con almacén',                  3,  'analisis'],
+            ['inventario',     'Levantamiento del inventario actual',      4,  'analisis'],
+            ['procesos',       'Mapeo del proceso de entradas y salidas',  3,  'analisis'],
             ['requerimientos', 'Documento de requerimientos',              4,  'analisis'],
+            ['revision_req',   'Revisión con el área',                     2,  'analisis'],
             ['aprobacion',     'Aprobación de requerimientos',             0,  'analisis'],
+
+            ['infra',          'Infraestructura',                          0,  null],
+            ['servidor',       'Solicitud del servidor a TI',              5,  'infra'],
+            ['ambiente_dev',   'Ambiente de desarrollo',                   2,  'infra'],
+            ['ambiente_qa',    'Ambiente de pruebas',                      2,  'infra'],
+            ['respaldos',      'Respaldos programados y probados',         3,  'infra'],
 
             ['construccion',   'Construcción',                             0,  null],
             ['modelo',         'Modelo de datos',                          3,  'construccion'],
+            ['accesos',        'Accesos y perfiles de usuario',            4,  'construccion'],
             ['catalogo',       'Catálogo de refacciones',                  5,  'construccion'],
+            ['ubicaciones',    'Ubicaciones y almacenes',                  3,  'construccion'],
             ['movimientos',    'Entradas y salidas',                       6,  'construccion'],
+            ['ajustes',        'Ajustes de inventario',                    3,  'construccion'],
             ['alertas',        'Alertas de existencia mínima',             4,  'construccion'],
+            ['reportes',       'Reportes de existencias y consumo',        5,  'construccion'],
+            ['etiquetas',      'Impresión de etiquetas',                   3,  'construccion'],
+            ['lector',         'Lectura de código de barras',              4,  'construccion'],
+            ['cierre_dev',     'Congelamiento de desarrollo',              0,  'construccion'],
+
+            ['calidad',        'Calidad',                                  0,  null],
+            ['pruebas_unit',   'Pruebas del equipo de desarrollo',         4,  'calidad'],
+            ['pruebas_int',    'Pruebas de integración',                   3,  'calidad'],
+            ['carga',          'Prueba de carga con inventario completo',  2,  'calidad'],
+            ['correcciones',   'Corrección de hallazgos',                  5,  'calidad'],
+            ['revalidacion',   'Revalidación',                             2,  'calidad'],
+
+            ['datos',          'Datos',                                    0,  null],
+            ['limpieza',       'Limpieza del catálogo histórico',          6,  'datos'],
+            ['mapeo',          'Mapeo de claves viejas a nuevas',          4,  'datos'],
+            ['migracion',      'Migración de datos históricos',            4,  'datos'],
+            ['conciliacion',   'Conciliación contra el conteo físico',     3,  'datos'],
+            ['visto_bueno',    'Visto bueno de almacén',                   0,  'datos'],
+
+            ['gente',          'Gente',                                    0,  null],
+            ['manual',         'Manual de usuario',                        4,  'gente'],
+            ['material',       'Material de capacitación',                 3,  'gente'],
+            ['capacitacion',   'Capacitación del personal',                2,  'gente'],
+            ['capacitacion_2', 'Capacitación del segundo turno',           2,  'gente'],
+            ['acompanamiento', 'Acompañamiento la primera semana',         5,  'gente'],
 
             ['despliegue',     'Puesta en marcha',                         0,  null],
-            ['migracion',      'Migración de datos históricos',            4,  'despliegue'],
-            ['pruebas',        'Pruebas con usuarios',                     3,  'despliegue'],
-            ['capacitacion',   'Capacitación del personal',                2,  'despliegue'],
+            ['plan_arranque',  'Plan de arranque y marcha atrás',          2,  'despliegue'],
+            ['ventana',        'Ventana de mantenimiento acordada',        1,  'despliegue'],
+            ['pase',           'Pase a producción',                        1,  'despliegue'],
+            ['verificacion',   'Verificación posterior al pase',           1,  'despliegue'],
             ['arranque',       'Arranque en producción',                   0,  'despliegue'],
+
+            ['cierre',         'Cierre',                                   0,  null],
+            ['estabilizacion', 'Estabilización',                          10,  'cierre'],
+            ['medicion',       'Medición contra el criterio de éxito',     3,  'cierre'],
+            ['leccion',        'Lecciones aprendidas',                     2,  'cierre'],
+            ['entrega_ti',     'Entrega formal a TI',                      2,  'cierre'],
+            ['cierre_formal',  'Cierre formal del proyecto',               0,  'cierre'],
         ];
 
         $tasks = [];
@@ -169,8 +266,14 @@ final class DemoProjectSeeder extends Seeder
         }
 
         // Un poco de avance real, para que las barras no se vean todas vacías.
-        $tasks['entrevistas']->update(['percent_complete' => 100]);
-        $tasks['requerimientos']->update(['percent_complete' => 60]);
+        foreach ([
+            'entrevistas' => 100, 'inventario' => 100, 'procesos' => 100,
+            'requerimientos' => 80, 'revision_req' => 40,
+            'servidor' => 100, 'ambiente_dev' => 100, 'ambiente_qa' => 30,
+            'limpieza' => 25,
+        ] as $key => $percent) {
+            $tasks[$key]->update(['percent_complete' => $percent]);
+        }
 
         return $tasks;
     }
@@ -181,18 +284,78 @@ final class DemoProjectSeeder extends Seeder
     private function dependencies(Project $project, array $tasks): void
     {
         $links = [
-            ['entrevistas', 'requerimientos', 'FS', 0],
-            ['requerimientos', 'aprobacion', 'FS', 0],
+            // Análisis
+            ['entrevistas', 'inventario', 'FS', 0],
+            ['entrevistas', 'procesos', 'SS', 0],
+            ['inventario', 'requerimientos', 'FS', 0],
+            ['procesos', 'requerimientos', 'FS', 0],
+            ['requerimientos', 'revision_req', 'FS', 0],
+            ['revision_req', 'aprobacion', 'FS', 0],
+
+            // Infraestructura: arranca en paralelo, no espera al análisis.
+            ['servidor', 'ambiente_dev', 'FS', 0],
+            ['ambiente_dev', 'ambiente_qa', 'FS', 0],
+            ['ambiente_qa', 'respaldos', 'FS', 0],
+
+            // Construcción
             ['aprobacion', 'modelo', 'FS', 0],
+            ['ambiente_dev', 'modelo', 'FS', 0],
+            ['modelo', 'accesos', 'FS', 0],
             ['modelo', 'catalogo', 'FS', 0],
+            ['catalogo', 'ubicaciones', 'FS', 0],
             ['catalogo', 'movimientos', 'FS', 0],
+            ['movimientos', 'ajustes', 'FS', 0],
             // Las alertas pueden empezar cuando los movimientos van a la mitad.
             ['movimientos', 'alertas', 'SS', 2 * self::DAY],
-            ['movimientos', 'migracion', 'FS', 0],
-            ['migracion', 'pruebas', 'FS', 0],
-            ['pruebas', 'capacitacion', 'FS', 0],
-            ['capacitacion', 'arranque', 'FS', 0],
-            ['alertas', 'arranque', 'FS', 0],
+            ['movimientos', 'reportes', 'FS', 0],
+            ['ubicaciones', 'etiquetas', 'FS', 0],
+            ['etiquetas', 'lector', 'FS', 0],
+            ['reportes', 'cierre_dev', 'FS', 0],
+            ['alertas', 'cierre_dev', 'FS', 0],
+            ['lector', 'cierre_dev', 'FS', 0],
+            ['ajustes', 'cierre_dev', 'FS', 0],
+            ['accesos', 'cierre_dev', 'FS', 0],
+
+            // Calidad
+            ['cierre_dev', 'pruebas_unit', 'FS', 0],
+            ['ambiente_qa', 'pruebas_unit', 'FS', 0],
+            ['pruebas_unit', 'pruebas_int', 'FS', 0],
+            ['pruebas_int', 'carga', 'FS', 0],
+            ['carga', 'correcciones', 'FS', 0],
+            ['correcciones', 'revalidacion', 'FS', 0],
+
+            // Datos: la limpieza puede empezar antes de que exista el sistema.
+            ['aprobacion', 'limpieza', 'FS', 0],
+            ['limpieza', 'mapeo', 'FS', 0],
+            ['mapeo', 'migracion', 'FS', 0],
+            ['cierre_dev', 'migracion', 'FS', 0],
+            ['migracion', 'conciliacion', 'FS', 0],
+            ['conciliacion', 'visto_bueno', 'FS', 0],
+
+            // Gente
+            ['cierre_dev', 'manual', 'FS', 0],
+            ['manual', 'material', 'FS', 0],
+            ['revalidacion', 'capacitacion', 'FS', 0],
+            ['material', 'capacitacion', 'FS', 0],
+            ['capacitacion', 'capacitacion_2', 'FS', 0],
+
+            // Puesta en marcha
+            ['revalidacion', 'plan_arranque', 'FS', 0],
+            ['plan_arranque', 'ventana', 'FS', 0],
+            ['visto_bueno', 'pase', 'FS', 0],
+            ['ventana', 'pase', 'FS', 0],
+            ['capacitacion_2', 'pase', 'FS', 0],
+            ['respaldos', 'pase', 'FS', 0],
+            ['pase', 'verificacion', 'FS', 0],
+            ['verificacion', 'arranque', 'FS', 0],
+            ['arranque', 'acompanamiento', 'FS', 0],
+
+            // Cierre
+            ['acompanamiento', 'estabilizacion', 'SS', 0],
+            ['estabilizacion', 'medicion', 'FS', 0],
+            ['medicion', 'leccion', 'FS', 0],
+            ['leccion', 'entrega_ti', 'FS', 0],
+            ['entrega_ti', 'cierre_formal', 'FS', 0],
         ];
 
         foreach ($links as [$from, $to, $type, $lag]) {
@@ -234,15 +397,20 @@ final class DemoProjectSeeder extends Seeder
 
         $assignments = [
             ['ana', 'entrevistas', 100],
+            ['ana', 'inventario', 100],
             ['ana', 'requerimientos', 100],
+            ['ana', 'manual', 100],
             ['luis', 'modelo', 100],
             ['luis', 'catalogo', 100],
             ['luis', 'movimientos', 100],
             // Problema plantado: Luis también lleva las alertas, que se traslapan
             // con los movimientos por la liga SS. Va a salir al 200 %.
             ['luis', 'alertas', 100],
-            ['carmen', 'pruebas', 50],
+            ['luis', 'reportes', 100],
+            ['carmen', 'procesos', 50],
+            ['carmen', 'conciliacion', 50],
             ['carmen', 'capacitacion', 50],
+            ['carmen', 'capacitacion_2', 50],
         ];
 
         foreach ($assignments as [$person, $taskKey, $units]) {

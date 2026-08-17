@@ -92,6 +92,7 @@ final class ResourceController extends Controller
     {
         $this->authorize('update', $project);
         $this->outliner->assertBelongs($project, $task);
+        abort_unless($resource->project_id === $project->id, 404);
 
         TaskAssignment::query()
             ->where('task_id', $task->id)

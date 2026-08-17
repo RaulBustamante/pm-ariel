@@ -31,6 +31,27 @@ return [
         'timeout_seconds' => (int) env('INITIATION_AI_TIMEOUT', 25),
 
         'max_suggestions' => 8,
+
+        /*
+        | Techo de gasto.
+        |
+        | Cada botón de "sugerir" es una llamada facturada a una tarjeta que hoy
+        | es personal (D-018). Sin un tope, alguien que oprime el botón veinte
+        | veces porque no le gustó el borrador, o una pestaña que se recarga
+        | sola, gastan sin que nadie se entere hasta que llegue el estado de
+        | cuenta. El límite es por usuario, no global: que una persona agote su
+        | cuota no debe dejar sin asistente al resto.
+        |
+        | Al toparse responde la plantilla —igual que cuando no hay internet—,
+        | así que el recorrido no se detiene, solo deja de costar.
+        */
+        'rate_limit' => [
+            // Diez y no cinco porque crear un proyecto ya gasta tres —el
+            // recorrido precarga entregables, interesados y riesgos—, y quedaría
+            // muy poco margen para el primer minuto de trabajo real.
+            'per_minute' => (int) env('INITIATION_AI_PER_MINUTE', 10),
+            'per_day' => (int) env('INITIATION_AI_PER_DAY', 100),
+        ],
     ],
 
     /*

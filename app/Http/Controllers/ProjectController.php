@@ -41,7 +41,14 @@ final class ProjectController extends Controller
         /** @var User $viewer */
         $viewer = auth()->user();
 
-        $query = Project::query()->with(['charter', 'owner', 'orgUnit']);
+        // `stakeholders` y `risks.responses` no se pintan en esta tabla, pero el
+        // semáforo de la última columna sale de `InitiationHealth`, que los
+        // recorre. Sin traerlos aquí, cada renglón dispara tres consultas más
+        // —setenta y cinco en una página de veinticinco— y el guardia de carga
+        // perezosa no lo detecta porque `loadMissing` es una carga explícita.
+        $query = Project::query()->with([
+            'charter', 'owner', 'orgUnit', 'stakeholders', 'risks.responses',
+        ]);
 
         if (! $viewer->hasRole(Role::ADMIN) && ! $viewer->hasRole(Role::AUDITOR)) {
             $visibility->scopeProjects($query, $viewer);
