@@ -7,7 +7,7 @@
     <p class="mb-4 max-w-2xl text-sm text-slate-600">{{ __('org_units.intro') }}</p>
 
     @if (session('error'))
-        <div role="alert" class="mb-6 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
+        <div role="alert" class="mb-6 rounded-md bg-[var(--color-badge-warn-bg)] px-4 py-3 text-sm text-[var(--color-badge-warn-fg)] ring-1 ring-[var(--color-badge-warn-line)]">
             {{ session('error') }}
         </div>
     @endif
@@ -15,7 +15,7 @@
     @can('create', App\Models\OrgUnit::class)
         <div class="mb-4">
             <a href="{{ route('admin.org-units.create') }}"
-               class="inline-block rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+               class="inline-block btn btn-primary">
                 {{ __('org_units.new') }}
             </a>
         </div>
@@ -58,7 +58,7 @@
                                 <div class="flex items-center justify-end gap-3">
                                     @can('update', $unit)
                                         <a href="{{ route('admin.org-units.edit', $unit) }}"
-                                           class="rounded text-blue-700 underline hover:text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                           class="rounded text-brand-700 underline hover:text-brand-800 focus:outline-none focus:ring-2 focus:ring-hud-500">
                                             {{ __('common.edit') }}<span class="sr-only"> — {{ $unit->name }}</span>
                                         </a>
                                     @endcan
@@ -69,7 +69,7 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
-                                                    class="rounded text-red-700 underline hover:text-red-900 focus:outline-none focus:ring-2 focus:ring-red-600">
+                                                    class="rounded text-[var(--color-badge-danger-fg)] underline hover:text-[var(--color-badge-danger-fg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-badge-danger-fg)]">
                                                 {{ __('common.delete') }}<span class="sr-only"> — {{ $unit->name }}</span>
                                             </button>
                                         </form>

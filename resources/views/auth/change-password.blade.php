@@ -15,7 +15,7 @@
         <x-form-field name="password_confirmation" :label="__('auth.confirm_password')" type="password" required autocomplete="new-password" />
 
         <button type="submit"
-                class="w-full rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+                class="w-full btn btn-primary">
             {{ __('common.save') }}
         </button>
     </form>

@@ -20,7 +20,7 @@
             </label>
             <select id="manager-field" name="manager_id"
                     @if ($errors->has('manager_id')) aria-invalid="true" aria-describedby="manager-field-error" @endif
-                    class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-600 sm:text-sm">
+                    class="field">
                 <option value="">{{ __('hierarchy.no_manager') }}</option>
                 @foreach ($candidates as $candidate)
                     <option value="{{ $candidate->id }}"
@@ -30,7 +30,7 @@
                 @endforeach
             </select>
             @error('manager_id')
-                <p id="manager-field-error" role="alert" class="text-sm text-red-700">{{ $message }}</p>
+                <p id="manager-field-error" role="alert" class="text-sm text-[var(--color-badge-danger-fg)]">{{ $message }}</p>
             @enderror
         </div>
 
@@ -40,11 +40,11 @@
 
         <div class="flex gap-3">
             <button type="submit"
-                    class="rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+                    class="btn btn-primary">
                 {{ __('common.save') }}
             </button>
             <a href="{{ route('admin.hierarchy.index') }}"
-               class="rounded-md px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-600">
+               class="rounded-md px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-hud-500">
                 {{ __('common.cancel') }}
             </a>
         </div>

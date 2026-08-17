@@ -36,7 +36,7 @@
                             <td class="px-4 py-3">
                                 @if ($log->new_values)
                                     <details>
-                                        <summary class="cursor-pointer text-blue-700 underline focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                        <summary class="cursor-pointer text-brand-700 underline focus:outline-none focus:ring-2 focus:ring-hud-500">
                                             {{ __('audit.see_detail') }}
                                         </summary>
                                         <dl class="mt-2 space-y-1 text-xs">

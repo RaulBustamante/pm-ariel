@@ -17,14 +17,14 @@
                 <div>
                     <label for="name-field" class="field-label">{{ __('initiation.project_name') }}</label>
                     <input id="name-field" type="text" name="name" value="{{ old('name', $project->name) }}" class="field" required>
-                    @error('name') <p role="alert" class="mt-1 text-xs text-red-700">{{ $message }}</p> @enderror
+                    @error('name') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="grid gap-3 sm:grid-cols-3">
                     <div>
                         <label for="code-field" class="field-label">{{ __('initiation.project_code') }}</label>
                         <input id="code-field" type="text" name="code" value="{{ old('code', $project->code) }}" class="field" required>
-                        @error('code') <p role="alert" class="mt-1 text-xs text-red-700">{{ $message }}</p> @enderror
+                        @error('code') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
@@ -181,8 +181,8 @@
         {{-- Zona de peligro, al final y separada.
              No va junto a «guardar»: la mano que viene de guardar cambios no
              debe encontrarse el borrado a dos centímetros. --}}
-        <section class="card mt-6 border-red-800/50 p-5">
-            <h2 class="text-sm font-semibold text-red-400">{{ __('projects.danger_zone') }}</h2>
+        <section class="card mt-6 border-[var(--color-badge-danger-line)]/50 p-5">
+            <h2 class="text-sm font-semibold text-[var(--color-badge-danger-fg)]">{{ __('projects.danger_zone') }}</h2>
             <p class="mt-1 max-w-2xl text-xs leading-relaxed text-slate-600">
                 {{ __('projects.delete_help', ['code' => $project->code]) }}
             </p>

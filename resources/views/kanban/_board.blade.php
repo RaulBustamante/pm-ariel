@@ -2,7 +2,7 @@
     $meta = [
         'todo' => ['label' => __('kanban.todo'), 'accent' => 'bg-slate-400'],
         'doing' => ['label' => __('kanban.doing'), 'accent' => 'bg-brand-600'],
-        'done' => ['label' => __('kanban.done'), 'accent' => 'bg-emerald-600'],
+        'done' => ['label' => __('kanban.done'), 'accent' => 'bar-ok'],
     ];
 
     // Límite de trabajo en curso. No se impide pasarse —el sistema no manda—
@@ -32,7 +32,7 @@
             </div>
 
             @if ($overWip)
-                <p class="border-b border-amber-200 bg-amber-50 px-3 py-1.5 text-[11px] leading-snug text-amber-900">
+                <p class="border-b border-[var(--color-badge-warn-line)] bg-[var(--color-badge-warn-bg)] px-3 py-1.5 text-[11px] leading-snug text-[var(--color-badge-warn-fg)]">
                     {{ __('kanban.wip_exceeded', ['limit' => $wipLimit]) }}
                 </p>
             @endif

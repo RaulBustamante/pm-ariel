@@ -7,7 +7,7 @@
     <p class="mb-6 text-sm text-slate-600">{{ __('auth.reset_intro') }}</p>
 
     @if (session('status'))
-        <div role="status" class="mb-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-900 ring-1 ring-emerald-200">
+        <div role="status" class="mb-4 rounded-md bg-[var(--color-badge-ok-bg)] px-3 py-2 text-sm text-[var(--color-badge-ok-fg)] ring-1 ring-[var(--color-badge-ok-line)]">
             {{ session('status') }}
         </div>
     @endif
@@ -18,13 +18,13 @@
         <x-form-field name="email" :label="__('auth.email')" type="email" required autocomplete="username" autofocus />
 
         <button type="submit"
-                class="w-full rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+                class="w-full btn btn-primary">
             {{ __('auth.reset_send_link') }}
         </button>
     </form>
 
     <p class="mt-4 text-center text-sm">
-        <a href="{{ route('login') }}" class="text-blue-700 underline hover:text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+        <a href="{{ route('login') }}" class="text-brand-700 underline hover:text-brand-800 focus:outline-none focus:ring-2 focus:ring-hud-500">
             {{ __('auth.back_to_login') }}
         </a>
     </p>

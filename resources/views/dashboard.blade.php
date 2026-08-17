@@ -139,7 +139,7 @@
                         @if ($row['overdue'] > 0)
                             <div>
                                 <dt class="inline">{{ __('dashboard.overdue') }}:</dt>
-                                <dd class="inline font-semibold text-red-700">{{ $row['overdue'] }}</dd>
+                                <dd class="inline font-semibold text-[var(--color-badge-danger-fg)]">{{ $row['overdue'] }}</dd>
                             </div>
                         @endif
                     </dl>

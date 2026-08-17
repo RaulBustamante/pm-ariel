@@ -24,7 +24,7 @@
                 </label>
                 <select id="locale-field" name="locale"
                         @if ($errors->has('locale')) aria-invalid="true" aria-describedby="locale-field-error" @endif
-                        class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-600 sm:text-sm">
+                        class="field">
                     @foreach (config('app.supported_locales') as $locale)
                         <option value="{{ $locale }}" @selected(old('locale', $me->locale) === $locale)>
                             {{ __('common.locale_'.$locale) }}
@@ -32,7 +32,7 @@
                     @endforeach
                 </select>
                 @error('locale')
-                    <p id="locale-field-error" role="alert" class="text-sm text-red-700">{{ $message }}</p>
+                    <p id="locale-field-error" role="alert" class="text-sm text-[var(--color-badge-danger-fg)]">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -77,7 +77,7 @@
                 <p class="field-help">{{ __('preferences.theme_help') }}</p>
 
                 @error('theme')
-                    <p role="alert" class="text-sm text-red-700">{{ $message }}</p>
+                    <p role="alert" class="text-sm text-[var(--color-badge-danger-fg)]">{{ $message }}</p>
                 @enderror
             </fieldset>
 
@@ -119,7 +119,7 @@
                 <p class="field-help">{{ __('preferences.timezone_help') }}</p>
 
                 @error('timezone')
-                    <p id="timezone-field-error" role="alert" class="text-sm text-red-700">{{ $message }}</p>
+                    <p id="timezone-field-error" role="alert" class="text-sm text-[var(--color-badge-danger-fg)]">{{ $message }}</p>
                 @enderror
             </div>
         </fieldset>
@@ -135,7 +135,7 @@
                 <label class="flex items-start gap-3 text-sm">
                     <input type="checkbox" name="expert_mode" value="1"
                            @checked(old('expert_mode', $me->expert_mode))
-                           class="mt-0.5 rounded border-slate-300 text-blue-700 focus:ring-2 focus:ring-blue-600">
+                           class="mt-0.5 rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-hud-500">
                     <span>
                         <span class="font-medium text-slate-900">{{ __('common.expert_mode') }}</span>
                         <span class="mt-1 block text-slate-600">{{ __('preferences.expert_mode_help') }}</span>
@@ -153,12 +153,12 @@
 
         <div class="flex items-center gap-3">
             <button type="submit"
-                    class="rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+                    class="btn btn-primary">
                 {{ __('common.save') }}
             </button>
 
             <a href="{{ route('dashboard') }}"
-               class="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-600">
+               class="rounded-md px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-hud-500">
                 {{ __('common.cancel') }}
             </a>
         </div>

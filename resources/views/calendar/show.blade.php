@@ -69,7 +69,7 @@
                                             <a href="{{ route('projects.tasks.show', [$project, $task]) }}"
                                                title="{{ $task->name }}"
                                                class="block truncate px-1 py-0.5 text-[10px] font-medium leading-tight text-white
-                                                      {{ $task->is_critical ? 'bg-red-600 hover:bg-red-700' : 'bg-brand-600 hover:bg-brand-700' }}
+                                                      {{ $task->is_critical ? 'fill-danger' : 'fill-brand' }}
                                                       {{ $entry['starts'] ? 'rounded-l' : '' }} {{ $entry['ends'] ? 'rounded-r' : '' }}">
                                                 {{ $entry['starts'] ? $task->name : '' }}
                                                 @unless ($entry['starts'])
@@ -92,7 +92,7 @@
                 {{ __('gantt.legend_task') }}
             </span>
             <span class="inline-flex items-center gap-1.5">
-                <span class="inline-block h-2.5 w-6 rounded-sm bg-red-600" aria-hidden="true"></span>
+                <span class="inline-block h-2.5 w-6 rounded-sm bar-danger" aria-hidden="true"></span>
                 {{ __('tasks.critical') }}
             </span>
             <span class="inline-flex items-center gap-1.5">

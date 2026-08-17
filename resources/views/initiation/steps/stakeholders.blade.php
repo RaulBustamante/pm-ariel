@@ -39,7 +39,7 @@
 
                 <div class="flex flex-wrap items-center gap-3">
                     <button type="submit"
-                            class="rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+                            class="btn btn-primary">
                         {{ __('common.create') }}
                     </button>
                     <p class="text-xs text-slate-500">{{ __('initiation.stakeholder_strategy_help') }}</p>
@@ -70,9 +70,9 @@
                                     </span>
                                     <span class="rounded-full px-2 py-0.5 font-medium
                                         @class([
-                                            'bg-red-100 text-red-900' => $person->quadrant() === \App\Models\Stakeholder::QUADRANT_MANAGE_CLOSELY,
-                                            'bg-amber-100 text-amber-900' => $person->quadrant() === \App\Models\Stakeholder::QUADRANT_KEEP_SATISFIED,
-                                            'bg-sky-100 text-sky-900' => $person->quadrant() === \App\Models\Stakeholder::QUADRANT_KEEP_INFORMED,
+                                            'bg-[var(--color-badge-danger-bg)] text-[var(--color-badge-danger-fg)]' => $person->quadrant() === \App\Models\Stakeholder::QUADRANT_MANAGE_CLOSELY,
+                                            'bg-[var(--color-badge-warn-bg)] text-[var(--color-badge-warn-fg)]' => $person->quadrant() === \App\Models\Stakeholder::QUADRANT_KEEP_SATISFIED,
+                                            'bg-brand-100 text-brand-800' => $person->quadrant() === \App\Models\Stakeholder::QUADRANT_KEEP_INFORMED,
                                             'bg-slate-100 text-slate-700' => $person->quadrant() === \App\Models\Stakeholder::QUADRANT_MONITOR,
                                         ])">
                                         {{ __("initiation.quadrant_{$person->quadrant()}") }}
@@ -83,7 +83,7 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
-                                                class="rounded text-red-700 underline hover:text-red-900 focus:outline-none focus:ring-2 focus:ring-red-600">
+                                                class="rounded text-[var(--color-badge-danger-fg)] underline hover:text-[var(--color-badge-danger-fg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-badge-danger-fg)]">
                                             {{ __('common.delete') }}<span class="sr-only"> — {{ $person->name }}</span>
                                         </button>
                                     </form>
@@ -116,7 +116,7 @@
                 <form method="POST" action="{{ route('projects.stakeholders.suggest', $project) }}">
                     @csrf
                     <button type="submit"
-                            class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:border-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:border-hud-500 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-hud-500">
                         {{ __('initiation.suggest_stakeholders') }}
                     </button>
                 </form>

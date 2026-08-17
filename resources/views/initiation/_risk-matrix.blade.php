@@ -8,10 +8,10 @@
     // Mismos cortes que Risk::level(). Si aquí dijeran otra cosa, la matriz y la
     // etiqueta de cada riesgo se contradirían en la misma pantalla.
     $shade = fn (int $probability, int $impact): string => match (true) {
-        $probability * $impact >= 15 => 'bg-red-100 border-red-200',
-        $probability * $impact >= 9 => 'bg-orange-100 border-orange-200',
-        $probability * $impact >= 4 => 'bg-amber-50 border-amber-200',
-        default => 'bg-emerald-50 border-emerald-200',
+        $probability * $impact >= 15 => 'bg-[var(--color-badge-danger-bg)] border-[var(--color-badge-danger-line)]',
+        $probability * $impact >= 9 => 'bg-[var(--color-badge-warn-bg)] border-[var(--color-badge-warn-line)]',
+        $probability * $impact >= 4 => 'bg-[var(--color-badge-warn-bg)] border-[var(--color-badge-warn-line)]',
+        default => 'bg-[var(--color-badge-ok-bg)] border-[var(--color-badge-ok-line)]',
     };
 @endphp
 
@@ -51,10 +51,10 @@
 
     <dl class="mt-4 grid grid-cols-2 gap-1.5 text-[11px]">
         @foreach ([
-            'critical' => 'bg-red-100 ring-red-200',
-            'high' => 'bg-orange-100 ring-orange-200',
-            'medium' => 'bg-amber-50 ring-amber-200',
-            'low' => 'bg-emerald-50 ring-emerald-200',
+            'critical' => 'bg-[var(--color-badge-danger-bg)] ring-[var(--color-badge-danger-line)]',
+            'high' => 'bg-[var(--color-badge-warn-bg)] ring-[var(--color-badge-warn-line)]',
+            'medium' => 'bg-[var(--color-badge-warn-bg)] ring-[var(--color-badge-warn-line)]',
+            'low' => 'bg-[var(--color-badge-ok-bg)] ring-[var(--color-badge-ok-line)]',
         ] as $level => $classes)
             <div class="rounded px-2 py-1 ring-1 {{ $classes }}">
                 <dt class="inline font-semibold text-slate-900">{{ __("initiation.level_{$level}") }}</dt>

@@ -8,9 +8,9 @@
 
     @php
         $lightClasses = match ($light) {
-            'green' => 'bg-emerald-50 text-emerald-900 ring-emerald-200',
-            'amber' => 'bg-amber-50 text-amber-900 ring-amber-200',
-            default => 'bg-red-50 text-red-900 ring-red-200',
+            'green' => 'badge-ok',
+            'amber' => 'badge-warn',
+            default => 'badge-danger',
         };
         $lightMark = match ($light) { 'green' => '✓', 'amber' => '·', default => '!' };
     @endphp
@@ -39,8 +39,8 @@
             @foreach ($findings as $finding)
                 @php
                     $badge = match ($finding->severity) {
-                        \App\Models\ProjectFinding::SEVERITY_CRITICAL => ['bg-red-100 text-red-900', '!'],
-                        \App\Models\ProjectFinding::SEVERITY_WARNING => ['bg-amber-100 text-amber-900', '·'],
+                        \App\Models\ProjectFinding::SEVERITY_CRITICAL => ['bg-[var(--color-badge-danger-bg)] text-[var(--color-badge-danger-fg)]', '!'],
+                        \App\Models\ProjectFinding::SEVERITY_WARNING => ['bg-[var(--color-badge-warn-bg)] text-[var(--color-badge-warn-fg)]', '·'],
                         default => ['bg-slate-100 text-slate-700', 'i'],
                     };
                 @endphp
@@ -68,7 +68,7 @@
 
                             @if ($finding->task_id)
                                 <a href="{{ route('projects.tasks.index', $project) }}"
-                                   class="mt-2 inline-block rounded text-xs text-blue-700 underline hover:text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                   class="mt-2 inline-block rounded text-xs text-brand-700 underline hover:text-brand-800 focus:outline-none focus:ring-2 focus:ring-hud-500">
                                     {{ $finding->task?->name ?? __('tasks.title') }} →
                                 </a>
                             @endif
@@ -88,7 +88,7 @@
             <form method="POST" action="{{ route('projects.advisor.analyze', $project) }}">
                 @csrf
                 <button type="submit"
-                        class="w-full rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+                        class="w-full btn btn-primary">
                     {{ __('advisor.analyze') }}
                 </button>
             </form>
@@ -110,7 +110,7 @@
                             <li>
                                 <div class="flex items-baseline justify-between gap-2 text-xs">
                                     <span class="truncate font-medium text-slate-800">{{ $row['resource']->name }}</span>
-                                    <span class="shrink-0 {{ $over ? 'font-semibold text-red-700' : 'text-slate-600' }}">
+                                    <span class="shrink-0 {{ $over ? 'font-semibold text-[var(--color-badge-danger-fg)]' : 'text-slate-600' }}">
                                         {{ $peak }} %
                                     </span>
                                 </div>
@@ -118,7 +118,7 @@
                                 {{-- La barra puede pasar del 100 %: recortarla ahí
                                      escondería exactamente el problema. --}}
                                 <div class="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
-                                    <div class="h-full {{ $over ? 'bg-red-600' : 'bg-blue-600' }}"
+                                    <div class="h-full {{ $over ? 'bar-danger' : 'bar-brand' }}"
                                          style="width: {{ min(100, $peak) }}%"></div>
                                 </div>
 
@@ -146,7 +146,7 @@
                                   value="100" :help="__('resources.capacity_help')" required />
 
                     <button type="submit"
-                            class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:border-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:border-hud-500 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-hud-500">
                         {{ __('resources.add') }}
                     </button>
                 </form>

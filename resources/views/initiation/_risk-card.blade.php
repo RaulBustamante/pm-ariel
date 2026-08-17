@@ -2,10 +2,10 @@
     use App\Models\Risk;
     /** @var Risk $risk */
     $levelClasses = match ($risk->level()) {
-        Risk::LEVEL_CRITICAL => 'bg-red-100 text-red-900',
-        Risk::LEVEL_HIGH => 'bg-orange-100 text-orange-900',
-        Risk::LEVEL_MEDIUM => 'bg-amber-100 text-amber-900',
-        default => 'bg-emerald-100 text-emerald-900',
+        Risk::LEVEL_CRITICAL => 'bg-[var(--color-badge-danger-bg)] text-[var(--color-badge-danger-fg)]',
+        Risk::LEVEL_HIGH => 'bg-[var(--color-badge-warn-bg)] text-[var(--color-badge-warn-fg)]',
+        Risk::LEVEL_MEDIUM => 'bg-[var(--color-badge-warn-bg)] text-[var(--color-badge-warn-fg)]',
+        default => 'bg-[var(--color-badge-ok-bg)] text-[var(--color-badge-ok-fg)]',
     };
 @endphp
 
@@ -26,7 +26,7 @@
 
         <div class="flex shrink-0 items-center gap-2 text-xs">
             @if ($risk->kind === Risk::KIND_OPPORTUNITY)
-                <span class="rounded-full bg-sky-100 px-2 py-0.5 font-medium text-sky-900">
+                <span class="rounded-full bg-brand-100 px-2 py-0.5 font-medium text-brand-800">
                     {{ __('initiation.risk_kind_opportunity') }}
                 </span>
             @endif
@@ -41,7 +41,7 @@
                 @csrf
                 @method('DELETE')
                 <button type="submit"
-                        class="rounded text-red-700 underline hover:text-red-900 focus:outline-none focus:ring-2 focus:ring-red-600">
+                        class="rounded text-[var(--color-badge-danger-fg)] underline hover:text-[var(--color-badge-danger-fg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-badge-danger-fg)]">
                     {{ __('common.delete') }}<span class="sr-only"> — {{ $risk->code }}</span>
                 </button>
             </form>
@@ -65,20 +65,20 @@
                 <form method="POST" action="{{ route('projects.risks.responses.destroy', [$project, $risk, $response]) }}">
                     @csrf
                     @method('DELETE')
-                    <button type="submit" class="shrink-0 rounded text-slate-500 underline hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-600">
+                    <button type="submit" class="shrink-0 rounded text-slate-500 underline hover:text-[var(--color-badge-danger-fg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-badge-danger-fg)]">
                         {{ __('common.delete') }}
                     </button>
                 </form>
             </div>
         @empty
-            <p class="mb-2 text-xs {{ $risk->needsResponse() ? 'font-medium text-red-800' : 'text-slate-500' }}">
+            <p class="mb-2 text-xs {{ $risk->needsResponse() ? 'font-medium text-[var(--color-badge-danger-fg)]' : 'text-slate-500' }}">
                 {{ __('initiation.no_responses') }}
                 <x-help-term term="risk_response" />
             </p>
         @endforelse
 
         <details class="text-xs">
-            <summary class="cursor-pointer rounded font-medium text-blue-700 underline focus:outline-none focus:ring-2 focus:ring-blue-600">
+            <summary class="cursor-pointer rounded font-medium text-brand-700 underline focus:outline-none focus:ring-2 focus:ring-hud-500">
                 {{ __('initiation.add_response') }}
             </summary>
 
@@ -90,7 +90,7 @@
                     <label class="block">
                         <span class="mb-1 block font-medium text-slate-700">{{ __('initiation.response_strategy') }}</span>
                         <select name="strategy" required
-                                class="block w-full rounded-md border-slate-300 text-xs shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+                                class="block w-full rounded-md border-slate-300 text-xs shadow-sm focus:border-hud-500 focus:ring-2 focus:ring-hud-500">
                             @foreach (\App\Models\RiskResponse::STRATEGIES as $strategy)
                                 <option value="{{ $strategy }}">{{ __("initiation.strategy_{$strategy}") }}</option>
                             @endforeach
@@ -100,7 +100,7 @@
                     <label class="block">
                         <span class="mb-1 block font-medium text-slate-700">{{ __('initiation.response_owner') }}</span>
                         <select name="owner_id"
-                                class="block w-full rounded-md border-slate-300 text-xs shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+                                class="block w-full rounded-md border-slate-300 text-xs shadow-sm focus:border-hud-500 focus:ring-2 focus:ring-hud-500">
                             <option value="">—</option>
                             @foreach ($members as $member)
                                 <option value="{{ $member->id }}">{{ $member->name }}</option>
@@ -112,17 +112,17 @@
                 <label class="block">
                     <span class="mb-1 block font-medium text-slate-700">{{ __('initiation.response_description') }}</span>
                     <textarea name="description" rows="2" required
-                              class="block w-full rounded-md border-slate-300 text-xs shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-600"></textarea>
+                              class="block w-full rounded-md border-slate-300 text-xs shadow-sm focus:border-hud-500 focus:ring-2 focus:ring-hud-500"></textarea>
                 </label>
 
                 <label class="block">
                     <span class="mb-1 block font-medium text-slate-700">{{ __('initiation.response_due') }}</span>
                     <input type="date" name="due_date"
-                           class="block rounded-md border-slate-300 text-xs shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+                           class="block rounded-md border-slate-300 text-xs shadow-sm focus:border-hud-500 focus:ring-2 focus:ring-hud-500">
                 </label>
 
                 <button type="submit"
-                        class="rounded-md bg-blue-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-1">
+                        class="rounded-md bg-brand-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-hud-500 focus:ring-offset-1">
                     {{ __('common.save') }}
                 </button>
             </form>

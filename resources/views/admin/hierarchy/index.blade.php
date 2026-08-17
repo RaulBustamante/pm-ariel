@@ -34,13 +34,13 @@
                     <tr>
                         <td class="px-4 py-3 font-medium">{{ $person->name }}</td>
                         <td class="px-4 py-3 text-slate-600">{{ $person->orgUnit?->name ?? '—' }}</td>
-                        <td class="px-4 py-3 {{ $managers->has($person->id) ? 'text-slate-600' : 'text-amber-800' }}">
+                        <td class="px-4 py-3 {{ $managers->has($person->id) ? 'text-slate-600' : 'text-[var(--color-badge-warn-fg)]' }}">
                             {{ $managers->get($person->id)?->name ?? __('hierarchy.no_manager') }}
                         </td>
                         <td class="px-4 py-3 text-right">
                             @can('update', $person)
                                 <a href="{{ route('admin.hierarchy.edit', $person) }}"
-                                   class="rounded text-blue-700 underline hover:text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                   class="rounded text-brand-700 underline hover:text-brand-800 focus:outline-none focus:ring-2 focus:ring-hud-500">
                                     {{ __('hierarchy.change') }}<span class="sr-only"> — {{ $person->name }}</span>
                                 </a>
                             @endcan

@@ -36,7 +36,7 @@
                 </label>
                 <p class="text-xs leading-relaxed text-slate-600">{{ __('initiation.help_sponsor') }}</p>
                 <select id="sponsor-field" name="sponsor_id"
-                        class="block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+                        class="block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-hud-500 focus:ring-2 focus:ring-hud-500">
                     <option value="">—</option>
                     @foreach ($members as $member)
                         <option value="{{ $member->id }}" @selected((int) old('sponsor_id', $charter->sponsor_id ?? 0) === $member->id)>

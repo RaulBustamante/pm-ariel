@@ -20,7 +20,7 @@
             <div class="space-y-1">
                 <label for="org-unit-field" class="block text-sm font-medium text-slate-700">{{ __('common.org_unit') }}</label>
                 <select id="org-unit-field" name="org_unit_id"
-                        class="block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+                        class="block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-hud-500 focus:ring-2 focus:ring-hud-500">
                     <option value="">—</option>
                     @foreach ($orgUnits as $unit)
                         <option value="{{ $unit->id }}" @selected((int) old('org_unit_id') === $unit->id)>
@@ -36,7 +36,7 @@
                 {{ __('initiation.project_description') }}
             </label>
             <textarea id="description-field" name="description" rows="2"
-                      class="block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-600">{{ old('description') }}</textarea>
+                      class="block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-hud-500 focus:ring-2 focus:ring-hud-500">{{ old('description') }}</textarea>
         </div>
 
         <fieldset class="space-y-2">
@@ -45,10 +45,10 @@
 
             <div class="space-y-2">
                 @foreach ($templates as $template)
-                    <label class="flex cursor-pointer items-start gap-3 rounded-md border border-slate-200 p-3 text-sm hover:border-blue-400 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50">
+                    <label class="flex cursor-pointer items-start gap-3 rounded-md border border-slate-200 p-3 text-sm hover:border-brand-400 has-[:checked]:border-hud-500 has-[:checked]:bg-brand-50">
                         <input type="radio" name="template_id" value="{{ $template->id }}"
                                @checked((int) old('template_id') === $template->id)
-                               class="mt-0.5 border-slate-300 text-blue-700 focus:ring-2 focus:ring-blue-600">
+                               class="mt-0.5 border-slate-300 text-brand-700 focus:ring-2 focus:ring-hud-500">
                         <span>
                             <span class="block font-medium text-slate-900">{{ $template->name }}</span>
                             <span class="block text-xs text-slate-600">{{ $template->description }}</span>
@@ -56,10 +56,10 @@
                     </label>
                 @endforeach
 
-                <label class="flex cursor-pointer items-start gap-3 rounded-md border border-slate-200 p-3 text-sm hover:border-blue-400 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50">
+                <label class="flex cursor-pointer items-start gap-3 rounded-md border border-slate-200 p-3 text-sm hover:border-brand-400 has-[:checked]:border-hud-500 has-[:checked]:bg-brand-50">
                     <input type="radio" name="template_id" value=""
                            @checked(old('template_id') === '' || old('template_id') === null)
-                           class="mt-0.5 border-slate-300 text-blue-700 focus:ring-2 focus:ring-blue-600">
+                           class="mt-0.5 border-slate-300 text-brand-700 focus:ring-2 focus:ring-hud-500">
                     <span class="font-medium text-slate-900">{{ __('initiation.no_template') }}</span>
                 </label>
             </div>

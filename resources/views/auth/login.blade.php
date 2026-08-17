@@ -6,7 +6,7 @@
     <h2 class="mb-6 text-lg font-semibold">{{ __('auth.sign_in') }}</h2>
 
     @if (session('status'))
-        <div role="status" class="mb-4 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-900 ring-1 ring-emerald-200">
+        <div role="status" class="mb-4 rounded-md bg-[var(--color-badge-ok-bg)] px-3 py-2 text-sm text-[var(--color-badge-ok-fg)] ring-1 ring-[var(--color-badge-ok-line)]">
             {{ session('status') }}
         </div>
     @endif
@@ -19,18 +19,18 @@
 
         <div class="flex items-center gap-2">
             <input type="checkbox" id="remember" name="remember" value="1"
-                   class="rounded border-slate-300 text-blue-700 focus:ring-2 focus:ring-blue-600">
+                   class="rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-hud-500">
             <label for="remember" class="text-sm text-slate-700">{{ __('auth.remember_me') }}</label>
         </div>
 
         <button type="submit"
-                class="w-full rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+                class="w-full btn btn-primary">
             {{ __('auth.sign_in') }}
         </button>
     </form>
 
     <p class="mt-4 text-center text-sm">
-        <a href="{{ route('password.request') }}" class="text-blue-700 underline hover:text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+        <a href="{{ route('password.request') }}" class="text-brand-700 underline hover:text-brand-800 focus:outline-none focus:ring-2 focus:ring-hud-500">
             {{ __('auth.forgot_password') }}
         </a>
     </p>

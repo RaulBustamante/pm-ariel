@@ -7,7 +7,7 @@
     @can('create', App\Models\Project::class)
         <div class="mb-4">
             <a href="{{ route('projects.create') }}"
-               class="inline-block rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+               class="inline-block btn btn-primary">
                 {{ __('initiation.new_project') }}
             </a>
         </div>
@@ -37,9 +37,9 @@
                             $light = $health->light($project);
                             $completion = $health->completion($project);
                             $badge = match ($light) {
-                                'green' => ['bg-emerald-50 text-emerald-900', '✓'],
-                                'amber' => ['bg-amber-50 text-amber-900', '·'],
-                                default => ['bg-red-50 text-red-900', '!'],
+                                'green' => ['bg-[var(--color-badge-ok-bg)] text-[var(--color-badge-ok-fg)]', '✓'],
+                                'amber' => ['bg-[var(--color-badge-warn-bg)] text-[var(--color-badge-warn-fg)]', '·'],
+                                default => ['bg-[var(--color-badge-danger-bg)] text-[var(--color-badge-danger-fg)]', '!'],
                             };
                         @endphp
                         <tr>
@@ -56,11 +56,11 @@
                             <td class="px-4 py-3 text-right">
                                 <div class="flex items-center justify-end gap-3">
                                     <a href="{{ route('projects.tasks.index', $project) }}"
-                                       class="rounded font-medium text-blue-700 underline hover:text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                       class="rounded font-medium text-brand-700 underline hover:text-brand-800 focus:outline-none focus:ring-2 focus:ring-hud-500">
                                         {{ __('tasks.title') }}<span class="sr-only"> — {{ $project->name }}</span>
                                     </a>
                                     <a href="{{ route('projects.initiation.overview', $project) }}"
-                                       class="rounded text-slate-600 underline hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                       class="rounded text-slate-600 underline hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-hud-500">
                                         {{ $completion === 100 ? __('initiation.title') : __('initiation.continue') }}<span class="sr-only"> — {{ $project->name }}</span>
                                     </a>
                                 </div>

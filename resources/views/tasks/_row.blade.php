@@ -24,17 +24,17 @@
             @if ($task->is_summary)
                 <span aria-hidden="true" class="text-slate-400">▸</span>
             @elseif ($task->isMilestone())
-                <span aria-hidden="true" class="text-blue-700" title="{{ __('tasks.milestone') }}">◆</span>
+                <span aria-hidden="true" class="text-brand-700" title="{{ __('tasks.milestone') }}">◆</span>
             @endif
 
             <input type="text" name="name" form="task-{{ $task->id }}" value="{{ $task->name }}"
                    aria-label="{{ __('tasks.name') }} — {{ __('tasks.row') }} {{ $row }}"
-                   class="w-full min-w-[10rem] rounded border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 focus:border-blue-600 focus:bg-surface focus:ring-1 focus:ring-blue-600">
+                   class="w-full min-w-[10rem] rounded border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 focus:border-hud-500 focus:bg-surface focus:ring-1 focus:ring-hud-500">
 
             @if ($isCritical && ! $task->is_summary)
                 {{-- Texto además del color: la ruta crítica no puede depender de
                      distinguir rojo, que es justo la deficiencia más común. --}}
-                <span class="shrink-0 rounded bg-red-100 px-1 text-[10px] font-semibold uppercase text-red-800">
+                <span class="shrink-0 rounded bg-[var(--color-badge-danger-bg)] px-1 text-[10px] font-semibold uppercase text-[var(--color-badge-danger-fg)]">
                     {{ __('tasks.critical') }}
                 </span>
             @endif
@@ -46,7 +46,7 @@
             <input type="text" name="duration" form="task-{{ $task->id }}"
                    value="{{ $durations->toHuman((int) $task->duration_minutes) }}"
                    aria-label="{{ __('tasks.duration') }} — {{ $task->name }}"
-                   class="w-16 rounded border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 focus:border-blue-600 focus:bg-surface focus:ring-1 focus:ring-blue-600">
+                   class="w-16 rounded border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 focus:border-hud-500 focus:bg-surface focus:ring-1 focus:ring-hud-500">
         @else
             <span class="text-xs text-slate-400">—</span>
         @endunless
@@ -57,7 +57,7 @@
             <input type="text" name="predecessors" form="task-{{ $task->id }}" value="{{ $predecessors }}"
                    placeholder="12FS+2d"
                    aria-label="{{ __('tasks.predecessors') }} — {{ $task->name }}"
-                   class="w-24 rounded border-transparent bg-transparent px-1 py-0.5 font-mono text-xs hover:border-slate-300 focus:border-blue-600 focus:bg-surface focus:ring-1 focus:ring-blue-600">
+                   class="w-24 rounded border-transparent bg-transparent px-1 py-0.5 font-mono text-xs hover:border-slate-300 focus:border-hud-500 focus:bg-surface focus:ring-1 focus:ring-hud-500">
         @endunless
     </td>
 
@@ -70,7 +70,7 @@
             @if ($float === null)
                 <span class="text-slate-400">—</span>
             @elseif ($float < 0)
-                <span class="font-semibold text-red-700" title="{{ __('tasks.negative_float_explained') }}">
+                <span class="font-semibold text-[var(--color-badge-danger-fg)]" title="{{ __('tasks.negative_float_explained') }}">
                     {{ $durations->toHuman($float) }}
                 </span>
             @else
@@ -83,7 +83,7 @@
         @unless ($task->is_summary)
             <select name="owner_id" form="task-{{ $task->id }}"
                     aria-label="{{ __('tasks.owner') }} — {{ $task->name }}"
-                    class="w-full min-w-[7rem] rounded border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 focus:border-blue-600 focus:bg-surface focus:ring-1 focus:ring-blue-600">
+                    class="w-full min-w-[7rem] rounded border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 focus:border-hud-500 focus:bg-surface focus:ring-1 focus:ring-hud-500">
                 <option value="">—</option>
                 @foreach ($members as $member)
                     <option value="{{ $member->id }}" @selected((int) $task->owner_id === $member->id)>{{ $member->name }}</option>
@@ -95,7 +95,7 @@
     <td class="whitespace-nowrap px-2 py-1.5 text-right">
         <div class="flex items-center justify-end gap-0.5">
             <button type="submit" form="task-{{ $task->id }}"
-                    class="rounded px-1.5 py-0.5 text-xs font-medium text-blue-700 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    class="rounded px-1.5 py-0.5 text-xs font-medium text-brand-700 hover:bg-brand-50 focus:outline-none focus:ring-2 focus:ring-hud-500">
                 {{ __('common.save') }}<span class="sr-only"> — {{ $task->name }}</span>
             </button>
 
@@ -115,7 +115,7 @@
                 <form method="POST" action="{{ route('projects.tasks.outline', [$project, $task, $action]) }}" class="inline">
                     @csrf
                     <button type="submit" title="{{ $label }}"
-                            class="rounded px-1 py-0.5 text-xs text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            class="rounded px-1 py-0.5 text-xs text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-hud-500">
                         <span aria-hidden="true">{{ $glyph }}</span>
                         <span class="sr-only">{{ $label }} — {{ $task->name }}</span>
                     </button>
@@ -127,7 +127,7 @@
                 @csrf
                 @method('DELETE')
                 <button type="submit"
-                        class="rounded px-1 py-0.5 text-xs text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-600">
+                        class="rounded px-1 py-0.5 text-xs text-[var(--color-badge-danger-fg)] hover:bg-[var(--color-badge-danger-bg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-badge-danger-fg)]">
                     <span aria-hidden="true">✕</span>
                     <span class="sr-only">{{ __('common.delete') }} — {{ $task->name }}</span>
                 </button>

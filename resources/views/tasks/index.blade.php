@@ -84,7 +84,7 @@
                     <div class="space-y-1">
                         <label for="owner-field" class="block text-sm font-medium text-slate-700">{{ __('tasks.owner') }}</label>
                         <select id="owner-field" name="owner_id"
-                                class="block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+                                class="block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-hud-500 focus:ring-2 focus:ring-hud-500">
                             <option value="">—</option>
                             @foreach ($members as $member)
                                 <option value="{{ $member->id }}" @selected((int) old('owner_id') === $member->id)>{{ $member->name }}</option>
@@ -97,7 +97,7 @@
             <p class="text-xs text-slate-500">{{ __('tasks.duration_help') }}</p>
 
             <button type="submit"
-                    class="rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+                    class="btn btn-primary">
                 {{ __('tasks.add') }}
             </button>
         </form>
@@ -139,7 +139,7 @@
             <form method="POST" action="{{ route('projects.tasks.recalculate', $project) }}">
                 @csrf
                 <button type="submit"
-                        class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:border-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:border-hud-500 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-hud-500">
                     {{ __('tasks.recalculate') }}
                 </button>
             </form>

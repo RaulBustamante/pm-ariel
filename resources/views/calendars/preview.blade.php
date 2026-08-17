@@ -28,14 +28,14 @@
                 </p>
 
                 @if ($movedTasks === 0)
-                    <p class="rounded-md bg-emerald-50 px-4 py-3 text-sm text-emerald-900 ring-1 ring-emerald-200">
+                    <p class="rounded-md bg-[var(--color-badge-ok-bg)] px-4 py-3 text-sm text-[var(--color-badge-ok-fg)] ring-1 ring-[var(--color-badge-ok-line)]">
                         {{ __('calendars.impact_no_change') }}
                     </p>
                 @else
                     {{-- El número que importa va primero y con peso: cuánto se
                          recorre la entrega. Lo demás es contexto. --}}
                     <div class="rounded-md px-4 py-3 text-sm ring-1
-                                {{ $slip > 0 ? 'bg-amber-50 text-amber-900 ring-amber-200' : 'bg-emerald-50 text-emerald-900 ring-emerald-200' }}">
+                                {{ $slip > 0 ? 'badge-warn' : 'badge-ok' }}">
                         <p class="text-base font-semibold">
                             {{ $slip > 0
                                 ? __('calendars.impact_warning', ['amount' => $durations->toHuman($slip)])

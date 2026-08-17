@@ -23,12 +23,12 @@
 
                 <div class="space-y-1.5">
                     <label for="description-field" class="block text-sm font-medium text-slate-800">
-                        {{ __('initiation.risk_description') }} <span class="text-red-600" aria-hidden="true">*</span>
+                        {{ __('initiation.risk_description') }} <span class="text-[var(--color-badge-danger-fg)]" aria-hidden="true">*</span>
                     </label>
                     <p class="text-xs text-slate-600">{{ __('initiation.risk_description_help') }}</p>
                     <textarea id="description-field" name="description" rows="2" required
-                              class="block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-600">{{ old('description') }}</textarea>
-                    @error('description') <p role="alert" class="text-sm text-red-700">{{ $message }}</p> @enderror
+                              class="block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-hud-500 focus:ring-2 focus:ring-hud-500">{{ old('description') }}</textarea>
+                    @error('description') <p role="alert" class="text-sm text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="grid gap-4 sm:grid-cols-2">
@@ -50,7 +50,7 @@
                             <x-help-term term="opportunity" />
                         </label>
                         <select id="kind-field" name="kind"
-                                class="block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+                                class="block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-hud-500 focus:ring-2 focus:ring-hud-500">
                             <option value="threat" @selected(old('kind', 'threat') === 'threat')>{{ __('initiation.risk_kind_threat') }}</option>
                             <option value="opportunity" @selected(old('kind') === 'opportunity')>{{ __('initiation.risk_kind_opportunity') }}</option>
                         </select>
@@ -62,7 +62,7 @@
                             <x-help-term term="risk_owner" />
                         </label>
                         <select id="owner-field" name="owner_id"
-                                class="block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-600">
+                                class="block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-hud-500 focus:ring-2 focus:ring-hud-500">
                             <option value="">—</option>
                             @foreach ($members as $member)
                                 <option value="{{ $member->id }}" @selected((int) old('owner_id') === $member->id)>{{ $member->name }}</option>
@@ -72,7 +72,7 @@
                 </div>
 
                 <button type="submit"
-                        class="rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+                        class="btn btn-primary">
                     {{ __('common.create') }}
                 </button>
             </form>
@@ -104,7 +104,7 @@
                 <form method="POST" action="{{ route('projects.risks.suggest', $project) }}">
                     @csrf
                     <button type="submit"
-                            class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:border-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            class="w-full rounded-md border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:border-hud-500 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-hud-500">
                         {{ __('initiation.suggest_risks') }}
                     </button>
                 </form>

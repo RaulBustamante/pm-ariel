@@ -12,9 +12,9 @@
         $high = Stakeholder::HIGH_THRESHOLD;
 
         return match (true) {
-            $power >= $high && $interest >= $high => 'bg-red-50',
-            $power >= $high => 'bg-amber-50',
-            $interest >= $high => 'bg-sky-50',
+            $power >= $high && $interest >= $high => 'bg-[var(--color-badge-danger-bg)]',
+            $power >= $high => 'bg-[var(--color-badge-warn-bg)]',
+            $interest >= $high => 'bg-brand-50',
             default => 'bg-slate-50',
         };
     };
@@ -62,9 +62,9 @@
          nada, y la matriz se vuelve un adorno. --}}
     <dl class="mt-4 grid gap-2 text-xs sm:grid-cols-2">
         @foreach ([
-            'manage_closely' => 'bg-red-50 ring-red-200',
-            'keep_satisfied' => 'bg-amber-50 ring-amber-200',
-            'keep_informed' => 'bg-sky-50 ring-sky-200',
+            'manage_closely' => 'bg-[var(--color-badge-danger-bg)] ring-[var(--color-badge-danger-line)]',
+            'keep_satisfied' => 'bg-[var(--color-badge-warn-bg)] ring-[var(--color-badge-warn-line)]',
+            'keep_informed' => 'bg-brand-50 ring-brand-200',
             'monitor' => 'bg-slate-50 ring-slate-200',
         ] as $quadrant => $classes)
             <div class="rounded px-2 py-1.5 ring-1 {{ $classes }}">

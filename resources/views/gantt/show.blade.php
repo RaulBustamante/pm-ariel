@@ -17,8 +17,8 @@
         ] as $value => $label)
             <a href="{{ route('projects.gantt', ['project' => $project, 'zoom' => $value]) }}"
                @if ($zoom === $value) aria-current="true" @endif
-               class="rounded-md px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-600
-                      {{ $zoom === $value ? 'bg-blue-700 text-white' : 'bg-surface text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50' }}">
+               class="rounded-md px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-hud-500
+                      {{ $zoom === $value ? 'bg-brand-700 text-white' : 'bg-surface text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50' }}">
                 {{ $label }}
             </a>
         @endforeach
@@ -49,7 +49,7 @@
                            style="padding-left: {{ 0.75 + ($task->outline_depth ?? 0) * 0.75 }}rem"
                            title="{{ $task->name }} · {{ $task->early_start?->format('d/m/y') }} → {{ $task->early_finish?->format('d/m/y') }}">
                             @if ($task->is_critical && ! $task->is_summary)
-                                <span aria-hidden="true" class="text-red-600">●</span>
+                                <span aria-hidden="true" class="text-[var(--color-badge-danger-fg)]">●</span>
                             @endif
                             <span class="truncate">{{ $task->name }}</span>
                             {{-- Lo que el dibujo no puede decir, se dice aquí. --}}
@@ -72,11 +72,11 @@
 
         <div class="mt-4 flex flex-wrap gap-4 text-xs text-slate-600">
             <span class="inline-flex items-center gap-1.5">
-                <span class="inline-block h-2.5 w-6 rounded-sm bg-blue-600" aria-hidden="true"></span>
+                <span class="inline-block h-2.5 w-6 rounded-sm bar-brand" aria-hidden="true"></span>
                 {{ __('gantt.legend_task') }}
             </span>
             <span class="inline-flex items-center gap-1.5">
-                <span class="inline-block h-2.5 w-6 rounded-sm bg-red-600" aria-hidden="true"></span>
+                <span class="inline-block h-2.5 w-6 rounded-sm bar-danger" aria-hidden="true"></span>
                 {{ __('tasks.critical') }}
             </span>
             <span class="inline-flex items-center gap-1.5">
@@ -84,7 +84,7 @@
                 {{ __('tasks.summary') }}
             </span>
             <span class="inline-flex items-center gap-1.5">
-                <span aria-hidden="true" class="text-blue-700">◆</span>
+                <span aria-hidden="true" class="text-brand-700">◆</span>
                 {{ __('tasks.milestone') }}
             </span>
 

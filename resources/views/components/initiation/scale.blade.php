@@ -26,8 +26,8 @@
                        @checked($selected === $level)
                        class="peer sr-only">
                 <span class="block rounded-md border border-slate-300 py-1.5 text-center text-sm text-slate-700
-                             peer-checked:border-blue-700 peer-checked:bg-blue-700 peer-checked:font-semibold peer-checked:text-white
-                             peer-focus-visible:ring-2 peer-focus-visible:ring-blue-600 peer-focus-visible:ring-offset-1">
+                             peer-checked:border-brand-700 peer-checked:bg-brand-700 peer-checked:font-semibold peer-checked:text-white
+                             peer-focus-visible:ring-2 peer-focus-visible:ring-hud-500 peer-focus-visible:ring-offset-1">
                     {{ $level }}
                 </span>
             </label>
@@ -35,6 +35,6 @@
     </div>
 
     @error($name)
-        <p role="alert" class="text-sm text-red-700">{{ $message }}</p>
+        <p role="alert" class="text-sm text-[var(--color-badge-danger-fg)]">{{ $message }}</p>
     @enderror
 </fieldset>

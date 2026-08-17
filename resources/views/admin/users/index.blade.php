@@ -7,7 +7,7 @@
     @can('create', App\Models\User::class)
         <div class="mb-4">
             <a href="{{ route('admin.users.create') }}"
-               class="inline-block rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+               class="inline-block btn btn-primary">
                 {{ __('users.create_action') }}
             </a>
         </div>
@@ -47,7 +47,7 @@
                             <td class="px-4 py-3">
                                 {{-- Estado con texto además del color: nada se comunica solo con color. --}}
                                 <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium
-                                    {{ $user->is_active ? 'bg-emerald-50 text-emerald-800' : 'bg-slate-100 text-slate-700' }}">
+                                    {{ $user->is_active ? 'bg-[var(--color-badge-ok-bg)] text-[var(--color-badge-ok-fg)]' : 'bg-slate-100 text-slate-700' }}">
                                     <span aria-hidden="true">{{ $user->is_active ? '●' : '○' }}</span>
                                     {{ $user->is_active ? __('common.active') : __('common.inactive') }}
                                 </span>
@@ -55,7 +55,7 @@
                             <td class="px-4 py-3 text-right">
                                 @can('update', $user)
                                     <a href="{{ route('admin.users.edit', $user) }}"
-                                       class="rounded text-blue-700 underline hover:text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                       class="rounded text-brand-700 underline hover:text-brand-800 focus:outline-none focus:ring-2 focus:ring-hud-500">
                                         {{ __('common.edit') }}<span class="sr-only"> — {{ $user->name }}</span>
                                     </a>
                                 @endcan

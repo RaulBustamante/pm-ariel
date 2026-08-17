@@ -43,7 +43,7 @@
         {{-- Un recurso sin tarifa aporta cero, y un cero no se distingue de «es
              gratis». Quien lea un total tiene derecho a saber que hay huecos. --}}
         @if ($costs['missing_rates'] !== [])
-            <p class="mt-3 rounded-md bg-[#2c1f05] px-3 py-2 text-xs text-amber-200 ring-1 ring-amber-800/60">
+            <p class="badge-warn mt-3 block rounded-md border px-3 py-2 text-xs">
                 {{ __('resources.missing_rates', ['names' => implode(', ', array_slice($costs['missing_rates'], 0, 6))]) }}
             </p>
         @endif

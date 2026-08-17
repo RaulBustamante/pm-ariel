@@ -27,7 +27,7 @@
     <div class="mb-4 grid gap-3 sm:grid-cols-3">
         <div class="card p-4">
             <p class="text-xs text-slate-600">{{ __('projects.finish_variance') }}</p>
-            <p class="mt-1 text-2xl font-bold {{ $slip > 0 ? 'text-red-700' : ($slip < 0 ? 'text-emerald-700' : 'text-slate-900') }}">
+            <p class="mt-1 text-2xl font-bold {{ $slip > 0 ? 'text-[var(--color-badge-danger-fg)]' : ($slip < 0 ? 'text-[var(--color-badge-ok-fg)]' : 'text-slate-900') }}">
                 {{ $slip === 0 ? __('projects.on_time') : ($slip > 0 ? '+' : '−').$durations->toHuman(abs($slip)) }}
             </p>
             <p class="mt-0.5 text-[11px] text-slate-500">{{ __('projects.variance_help') }}</p>
@@ -35,7 +35,7 @@
 
         <div class="card p-4">
             <p class="text-xs text-slate-600">{{ __('projects.cost_variance') }}</p>
-            <p class="mt-1 text-2xl font-bold {{ $comparison['cost_variance'] > 0 ? 'text-red-700' : 'text-slate-900' }}">
+            <p class="mt-1 text-2xl font-bold {{ $comparison['cost_variance'] > 0 ? 'text-[var(--color-badge-danger-fg)]' : 'text-slate-900' }}">
                 {{ number_format($comparison['cost_variance'], 2) }}
             </p>
             <p class="mt-0.5 text-[11px] text-slate-500">{{ $project->currency }}</p>
@@ -43,7 +43,7 @@
 
         <div class="card p-4">
             <p class="text-xs text-slate-600">{{ __('projects.removed_tasks') }}</p>
-            <p class="mt-1 text-2xl font-bold {{ $comparison['removed'] !== [] ? 'text-amber-700' : 'text-slate-900' }}">
+            <p class="mt-1 text-2xl font-bold {{ $comparison['removed'] !== [] ? 'text-[var(--color-badge-warn-fg)]' : 'text-slate-900' }}">
                 {{ count($comparison['removed']) }}
             </p>
             <p class="mt-0.5 text-[11px] text-slate-500">{{ __('projects.removed_help') }}</p>
@@ -51,7 +51,7 @@
     </div>
 
     @if ($comparison['removed'] !== [])
-        <div role="alert" class="mb-4 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
+        <div role="alert" class="mb-4 rounded-md bg-[var(--color-badge-warn-bg)] px-4 py-3 text-sm text-[var(--color-badge-warn-fg)] ring-1 ring-[var(--color-badge-warn-line)]">
             <p class="font-medium">{{ __('projects.removed_warning') }}</p>
             <p class="mt-1">{{ collect($comparison['removed'])->pluck('name')->implode(', ') }}</p>
         </div>
@@ -80,11 +80,11 @@
                             </td>
                             @foreach (['start_variance_minutes', 'finish_variance_minutes'] as $field)
                                 @php $value = $row[$field]; @endphp
-                                <td class="{{ $value > 0 ? 'font-semibold text-red-700' : ($value < 0 ? 'text-emerald-700' : 'text-slate-500') }}">
+                                <td class="{{ $value > 0 ? 'font-semibold text-[var(--color-badge-danger-fg)]' : ($value < 0 ? 'text-[var(--color-badge-ok-fg)]' : 'text-slate-500') }}">
                                     {{ $value === 0 ? '—' : ($value > 0 ? '+' : '−').$durations->toHuman(abs($value)) }}
                                 </td>
                             @endforeach
-                            <td class="{{ $row['cost_variance'] > 0 ? 'text-red-700' : 'text-slate-500' }}">
+                            <td class="{{ $row['cost_variance'] > 0 ? 'text-[var(--color-badge-danger-fg)]' : 'text-slate-500' }}">
                                 {{ $row['cost_variance'] == 0.0 ? '—' : number_format($row['cost_variance'], 2) }}
                             </td>
                         </tr>

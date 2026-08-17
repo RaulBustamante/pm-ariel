@@ -20,7 +20,7 @@
                          necesita saber igual qué es obligatorio y qué es consejo. --}}
                     <span aria-hidden="true"
                           class="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-bold
-                                 {{ $finding->isBlocking() ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-900' }}">
+                                 {{ $finding->isBlocking() ? 'bg-[var(--color-badge-danger-bg)] text-[var(--color-badge-danger-fg)]' : 'bg-[var(--color-badge-warn-bg)] text-[var(--color-badge-warn-fg)]' }}">
                         {{ $finding->isBlocking() ? '!' : '·' }}
                     </span>
 

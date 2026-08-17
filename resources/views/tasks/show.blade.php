@@ -42,7 +42,7 @@
                             <label for="duration-field" class="field-label">{{ __('tasks.duration') }}</label>
                             <input id="duration-field" type="text" name="duration"
                                    value="{{ old('duration', $durations->toHuman((int) $task->duration_minutes)) }}" class="field">
-                            @error('duration') <p role="alert" class="mt-1 text-xs text-red-700">{{ $message }}</p> @enderror
+                            @error('duration') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
                         </div>
 
                         <div>
@@ -87,7 +87,7 @@
                         <label for="constraint-date-field" class="field-label">{{ __('tasks.constraint_date') }}</label>
                         <input id="constraint-date-field" type="date" name="constraint_date"
                                value="{{ old('constraint_date', $task->constraint_date?->format('Y-m-d')) }}" class="field sm:max-w-[12rem]">
-                        @error('constraint_date') <p role="alert" class="mt-1 text-xs text-red-700">{{ $message }}</p> @enderror
+                        @error('constraint_date') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
                     </div>
 
                     @can('update', $project)
@@ -220,7 +220,7 @@
                             <label for="attachment-field" class="field-label">{{ __('attachments.add') }}</label>
                             <input id="attachment-field" type="file" name="file" class="field" required>
                             <p class="field-help">{{ __('attachments.help') }}</p>
-                            @error('file') <p role="alert" class="text-xs text-red-700">{{ $message }}</p> @enderror
+                            @error('file') <p role="alert" class="text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
                             <button type="submit" class="btn btn-secondary">{{ __('attachments.add') }}</button>
                         </form>
                     @endcan
@@ -275,7 +275,7 @@
                     @expert
                         <div class="flex justify-between gap-3 border-t border-slate-100 pt-2">
                             <dt class="text-slate-600">{{ __('tasks.total_float') }}</dt>
-                            <dd class="font-medium {{ ($task->total_float_minutes ?? 0) < 0 ? 'text-red-700' : '' }}">
+                            <dd class="font-medium {{ ($task->total_float_minutes ?? 0) < 0 ? 'text-[var(--color-badge-danger-fg)]' : '' }}">
                                 {{ $task->total_float_minutes === null ? '—' : $durations->toHuman((int) $task->total_float_minutes) }}
                             </dd>
                         </div>

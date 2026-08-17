@@ -14,7 +14,7 @@
     {{-- Un `details` y no una ventana emergente con JavaScript: funciona con
          teclado, con lector de pantalla y al imprimir, sin código propio. --}}
     <details class="inline">
-        <summary class="inline cursor-help list-none rounded-full border border-slate-300 px-1.5 text-xs font-medium text-slate-600 hover:border-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
+        <summary class="inline cursor-help list-none rounded-full border border-slate-300 px-1.5 text-xs font-medium text-slate-600 hover:border-hud-500 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-hud-500"
                  aria-describedby="{{ $id }}">
             <span aria-hidden="true">?</span>
             <span class="sr-only">{{ __('glossary.what_is', ['term' => __("glossary.{$term}_label")]) }}</span>

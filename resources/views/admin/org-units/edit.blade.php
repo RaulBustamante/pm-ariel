@@ -12,11 +12,11 @@
 
         <div class="mt-6 flex gap-3">
             <button type="submit"
-                    class="rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+                    class="btn btn-primary">
                 {{ __('common.save') }}
             </button>
             <a href="{{ route('admin.org-units.index') }}"
-               class="rounded-md px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-600">
+               class="rounded-md px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-hud-500">
                 {{ __('common.cancel') }}
             </a>
         </div>

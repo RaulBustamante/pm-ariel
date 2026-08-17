@@ -20,7 +20,7 @@
         </label>
         <select id="parent-field" name="parent_id"
                 @if ($errors->has('parent_id')) aria-invalid="true" aria-describedby="parent-field-error" @endif
-                class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-600 sm:text-sm">
+                class="field">
             <option value="">{{ __('org_units.no_parent') }}</option>
             @foreach ($parents as $candidate)
                 <option value="{{ $candidate->id }}"
@@ -30,7 +30,7 @@
             @endforeach
         </select>
         @error('parent_id')
-            <p id="parent-field-error" role="alert" class="text-sm text-red-700">{{ $message }}</p>
+            <p id="parent-field-error" role="alert" class="text-sm text-[var(--color-badge-danger-fg)]">{{ $message }}</p>
         @enderror
     </div>
 </div>

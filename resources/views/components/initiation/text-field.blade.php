@@ -34,7 +34,7 @@
                  guardar lo que el usuario lleva escrito en los demás campos. --}}
             <button type="submit"
                     form="suggest-{{ $name }}"
-                    class="shrink-0 rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:border-blue-600 hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    class="shrink-0 rounded border border-slate-300 px-2 py-1 text-xs font-medium text-slate-700 hover:border-hud-500 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-hud-500">
                 {{ __('initiation.suggest') }}
             </button>
         @endif
@@ -46,11 +46,11 @@
               name="{{ $name }}"
               rows="{{ $rows }}"
               @if ($errors->has($name)) aria-invalid="true" aria-describedby="{{ $id }}-error" @endif
-              class="block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-blue-600 focus:ring-2 focus:ring-blue-600
-                     {{ $justSuggested ? 'border-blue-400 bg-blue-50/40' : '' }}">{{ $value }}</textarea>
+              class="block w-full rounded-md border-slate-300 text-sm shadow-sm focus:border-hud-500 focus:ring-2 focus:ring-hud-500
+                     {{ $justSuggested ? 'border-brand-400 bg-brand-50/40' : '' }}">{{ $value }}</textarea>
 
     @if ($justSuggested)
-        <p role="status" class="text-xs font-medium text-blue-800">{{ __('initiation.suggest_help') }}</p>
+        <p role="status" class="text-xs font-medium text-brand-800">{{ __('initiation.suggest_help') }}</p>
     @endif
 
     @if ($example && blank($value))
@@ -58,7 +58,7 @@
     @endif
 
     @error($name)
-        <p id="{{ $id }}-error" role="alert" class="text-sm text-red-700">{{ $message }}</p>
+        <p id="{{ $id }}-error" role="alert" class="text-sm text-[var(--color-badge-danger-fg)]">{{ $message }}</p>
     @enderror
 </div>
 

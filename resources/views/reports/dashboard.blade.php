@@ -8,9 +8,9 @@
 
     @php
         $lightClasses = match ($light) {
-            'green' => ['bg-emerald-50 ring-emerald-200 text-emerald-900', '✓'],
-            'amber' => ['bg-amber-50 ring-amber-200 text-amber-900', '·'],
-            default => ['bg-red-50 ring-red-200 text-red-900', '!'],
+            'green' => ['bg-[var(--color-badge-ok-bg)] ring-[var(--color-badge-ok-line)] text-[var(--color-badge-ok-fg)]', '✓'],
+            'amber' => ['bg-[var(--color-badge-warn-bg)] ring-[var(--color-badge-warn-line)] text-[var(--color-badge-warn-fg)]', '·'],
+            default => ['bg-[var(--color-badge-danger-bg)] ring-[var(--color-badge-danger-line)] text-[var(--color-badge-danger-fg)]', '!'],
         };
         $behind = $kpis['elapsed_percent'] - $kpis['progress'];
     @endphp
@@ -19,7 +19,7 @@
          alguien, y ese alguien es el que ya sabía la respuesta. --}}
     <section class="mb-4 rounded-lg p-4 ring-1 {{ $lightClasses[0] }}">
         <div class="flex items-start gap-3">
-            <span aria-hidden="true" class="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/70 text-base font-bold">
+            <span aria-hidden="true" class="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-surface/80 text-base font-bold">
                 {{ $lightClasses[1] }}
             </span>
             <div class="min-w-0">
@@ -47,10 +47,10 @@
 
         <div class="card p-4">
             <p class="text-xs text-slate-600">{{ __('dashboard.elapsed') }}</p>
-            <p class="mt-1 text-2xl font-bold {{ $behind > 10 ? 'text-red-700' : 'text-slate-900' }}">
+            <p class="mt-1 text-2xl font-bold {{ $behind > 10 ? 'text-[var(--color-badge-danger-fg)]' : 'text-slate-900' }}">
                 {{ $kpis['elapsed_percent'] }} %
             </p>
-            <p class="mt-2 text-[11px] {{ $behind > 10 ? 'font-medium text-red-700' : 'text-slate-500' }}">
+            <p class="mt-2 text-[11px] {{ $behind > 10 ? 'font-medium text-[var(--color-badge-danger-fg)]' : 'text-slate-500' }}">
                 {{ $behind > 10
                     ? __('dashboard.behind_by', ['points' => round($behind, 1)])
                     : __('dashboard.elapsed_help') }}
@@ -59,7 +59,7 @@
 
         <div class="card p-4">
             <p class="text-xs text-slate-600">{{ __('dashboard.overdue') }}</p>
-            <p class="mt-1 text-2xl font-bold {{ $kpis['overdue'] > 0 ? 'text-red-700' : 'text-slate-900' }}">
+            <p class="mt-1 text-2xl font-bold {{ $kpis['overdue'] > 0 ? 'text-[var(--color-badge-danger-fg)]' : 'text-slate-900' }}">
                 {{ $kpis['overdue'] }}
             </p>
             <p class="mt-2 text-[11px] text-slate-500">{{ __('dashboard.overdue_help') }}</p>
@@ -108,34 +108,34 @@
                         @foreach ([0, 25, 50, 75, 100] as $percent)
                             @php $y = $scaleY($curve['max'] * $percent / 100); @endphp
                             <line x1="{{ $padLeft }}" y1="{{ $y }}" x2="{{ $width - 10 }}" y2="{{ $y }}"
-                                  stroke="#e2e8f0" stroke-width="1" />
+                                  class="c-grid" stroke-width="1" />
                             <text x="{{ $padLeft - 6 }}" y="{{ $y + 3 }}" text-anchor="end"
-                                  font-size="9" fill="#94a3b8" font-family="sans-serif">{{ $percent }}%</text>
+                                  font-size="9" class="c-axis" font-family="sans-serif">{{ $percent }}%</text>
                         @endforeach
 
                         <polyline points="{{ $pointsFor($curve['planned']) }}"
-                                  fill="none" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 3" />
+                                  fill="none" class="c-planned" stroke-width="2" stroke-dasharray="4 3" />
 
                         @if ($curve['actual'] !== [])
                             <polyline points="{{ $pointsFor($curve['actual']) }}"
-                                      fill="none" stroke="#1e40af" stroke-width="2.5" />
+                                      fill="none" class="c-actual" stroke-width="2.5" />
                         @endif
 
                         @foreach ($curve['labels'] as $i => $label)
                             @if ($i % max(1, (int) ceil(count($curve['labels']) / 8)) === 0)
                                 <text x="{{ round($padLeft + $i * $stepX, 1) }}" y="{{ $height - 8 }}"
-                                      text-anchor="middle" font-size="9" fill="#94a3b8" font-family="sans-serif">{{ $label }}</text>
+                                      text-anchor="middle" font-size="9" class="c-axis" font-family="sans-serif">{{ $label }}</text>
                             @endif
                         @endforeach
                     </svg>
 
                     <div class="mt-2 flex flex-wrap gap-4 text-xs text-slate-600">
                         <span class="inline-flex items-center gap-1.5">
-                            <svg width="24" height="6" aria-hidden="true"><line x1="0" y1="3" x2="24" y2="3" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 3"/></svg>
+                            <svg width="24" height="6" aria-hidden="true"><line x1="0" y1="3" x2="24" y2="3" class="c-planned" stroke-width="2" stroke-dasharray="4 3"/></svg>
                             {{ __('dashboard.planned') }}
                         </span>
                         <span class="inline-flex items-center gap-1.5">
-                            <svg width="24" height="6" aria-hidden="true"><line x1="0" y1="3" x2="24" y2="3" stroke="#1e40af" stroke-width="2.5"/></svg>
+                            <svg width="24" height="6" aria-hidden="true"><line x1="0" y1="3" x2="24" y2="3" class="c-actual" stroke-width="2.5"/></svg>
                             {{ __('dashboard.actual') }}
                         </span>
                     </div>
@@ -150,7 +150,7 @@
                 <div class="card-header"><h2 class="card-title">{{ __('dashboard.distribution') }}</h2></div>
                 <div class="space-y-3 p-4">
                     @foreach ([
-                        ['label' => __('kanban.done'), 'value' => $kpis['done'], 'class' => 'bg-emerald-600'],
+                        ['label' => __('kanban.done'), 'value' => $kpis['done'], 'class' => 'bar-ok'],
                         ['label' => __('kanban.doing'), 'value' => $kpis['doing'], 'class' => 'bg-brand-600'],
                         ['label' => __('kanban.todo'), 'value' => $kpis['todo'], 'class' => 'bg-slate-400'],
                     ] as $slice)

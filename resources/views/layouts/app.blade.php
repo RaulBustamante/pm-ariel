@@ -148,12 +148,12 @@
                          El filo encendido a la izquierda hace el trabajo que
                          hacía el fondo de color cuando el lienzo era blanco. --}}
                     @foreach ([
-                        'status' => ['bg-[#06281f] text-emerald-200 ring-emerald-800/60 shadow-[inset_3px_0_0_0_#34d399]', 'status'],
-                        'warning' => ['bg-[#2c1f05] text-amber-200 ring-amber-800/60 shadow-[inset_3px_0_0_0_#fbbf24]', 'alert'],
-                        'error' => ['bg-[#2e0f18] text-rose-200 ring-rose-800/60 shadow-[inset_3px_0_0_0_#fb7185]', 'alert'],
+                        'status' => ['badge-ok shadow-[inset_3px_0_0_0_var(--color-fill-ok)]', 'status'],
+                        'warning' => ['badge-warn shadow-[inset_3px_0_0_0_var(--color-fill-warn)]', 'alert'],
+                        'error' => ['badge-danger shadow-[inset_3px_0_0_0_var(--color-fill-danger)]', 'alert'],
                     ] as $key => [$classes, $role])
                         @if (session($key))
-                            <div role="{{ $role }}" class="hud-in rounded-md px-4 py-2.5 text-sm ring-1 {{ $classes }}">
+                            <div role="{{ $role }}" class="hud-in block rounded-md border px-4 py-2.5 text-sm {{ $classes }}">
                                 {{ session($key) }}
                             </div>
                         @endif

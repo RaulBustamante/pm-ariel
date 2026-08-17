@@ -90,11 +90,18 @@
     --color-brand-800: #1e3a8a;
     --color-brand-900: #1e336e;
 
-    /* --- Cian: el acento del sistema ---------------------------------- */
+    /*
+    | Cian: el acento del sistema.
+    |
+    | En el tema claro va **mas oscuro** que en el oscuro, y no es un capricho:
+    | el boton primario lleva texto blanco encima. Con `#0891b2` daba 3.68:1,
+    | por debajo del minimo de AA, y la prueba de contraste lo detecto en cuanto
+    | empezo a revisar los dos temas y no solo el activo.
+    */
     --color-hud-300: #67e8f9;
-    --color-hud-400: #22d3ee;
-    --color-hud-500: #0891b2;
-    --color-hud-600: #0e7490;
+    --color-hud-400: #0891b2;
+    --color-hud-500: #0e7490;
+    --color-hud-600: #155e75;
     --color-hud-ink: #ffffff;
     --color-hud-soft: #ecfeff;
 
@@ -136,6 +143,26 @@
     --color-viz-6: #2563eb;
     --color-viz-7: #c026d3;
     --color-viz-8: #64748b;
+
+    /*
+    | Rellenos solidos: el fondo **y su tinta**.
+    |
+    | Una barra o un chip con texto encima necesita las dos cosas juntas, y ahi
+    | estaba el defecto: la vista de calendario pintaba `text-white` sobre
+    | `bg-brand-600`, que en el tema oscuro es azul claro. Blanco sobre azul
+    | claro no se lee, y nada fallaba --el color existia, solo era el equivocado.
+    |
+    | Por eso el fondo y la tinta viajan en pareja: al cambiar de tema cambian
+    | los dos, y es imposible dejar uno sin el otro.
+    */
+    --color-fill-brand: #2563eb;
+    --color-fill-brand-ink: #ffffff;
+    --color-fill-danger: #dc2626;
+    --color-fill-danger-ink: #ffffff;
+    --color-fill-ok: #047857;
+    --color-fill-ok-ink: #ffffff;
+    --color-fill-warn: #b45309;
+    --color-fill-warn-ink: #ffffff;
 
     /* --- El Gantt ----------------------------------------------------- */
     --color-g-weekend: #f1f5f9;
@@ -251,6 +278,15 @@
         --color-viz-7: #f0abfc;
         --color-viz-8: #94a3b8;
 
+        --color-fill-brand: #38bdf8;
+        --color-fill-brand-ink: #04141a;
+        --color-fill-danger: #fb7185;
+        --color-fill-danger-ink: #2e0f18;
+        --color-fill-ok: #34d399;
+        --color-fill-ok-ink: #04231a;
+        --color-fill-warn: #fbbf24;
+        --color-fill-warn-ink: #2c1f05;
+
         --color-g-weekend: #0b1220;
         --color-g-header: #101a2e;
         --color-g-rule: #253451;
@@ -350,6 +386,15 @@
             --color-viz-6: #60a5fa;
             --color-viz-7: #f0abfc;
             --color-viz-8: #94a3b8;
+
+            --color-fill-brand: #38bdf8;
+            --color-fill-brand-ink: #04141a;
+            --color-fill-danger: #fb7185;
+            --color-fill-danger-ink: #2e0f18;
+            --color-fill-ok: #34d399;
+            --color-fill-ok-ink: #04231a;
+            --color-fill-warn: #fbbf24;
+            --color-fill-warn-ink: #2c1f05;
 
             --color-g-weekend: #0b1220;
             --color-g-header: #101a2e;
@@ -844,6 +889,32 @@
         color: #7c8ba6;
     }
 
+
+    /* --- Rellenos solidos ------------------------------------------------- */
+
+    /*
+    | Fondo y tinta juntos. Se usan en las barras y los chips que llevan texto
+    | encima: un chip de tarea en el calendario, una barra de carga con su
+    | porcentaje dentro.
+    |
+    | Escribir `bg-algo text-white` a mano es lo que produjo el defecto que estas
+    | clases eliminan: en un tema el fondo es oscuro y el blanco se lee; en el
+    | otro el mismo token es claro y el blanco desaparece.
+    */
+    .fill-brand  { background-color: var(--color-fill-brand);  color: var(--color-fill-brand-ink); }
+    .fill-danger { background-color: var(--color-fill-danger); color: var(--color-fill-danger-ink); }
+    .fill-ok     { background-color: var(--color-fill-ok);     color: var(--color-fill-ok-ink); }
+    .fill-warn   { background-color: var(--color-fill-warn);   color: var(--color-fill-warn-ink); }
+
+    .fill-brand:hover  { filter: brightness(1.1); }
+    .fill-danger:hover { filter: brightness(1.1); }
+
+    /* Sin texto encima: solo el color. Para barras de progreso y leyendas. */
+    .bar-brand  { background-color: var(--color-fill-brand); }
+    .bar-danger { background-color: var(--color-fill-danger); }
+    .bar-ok     { background-color: var(--color-fill-ok); }
+    .bar-warn   { background-color: var(--color-fill-warn); }
+
     /* --- Barras y medidores ----------------------------------------------- */
 
     .meter {
@@ -896,6 +967,18 @@
     .hud-in-2 { animation-delay: 80ms; }
     .hud-in-3 { animation-delay: 120ms; }
     .hud-in-4 { animation-delay: 160ms; }
+
+    /* --- Curva S ----------------------------------------------------------- */
+
+    /*
+    | Mismo problema que el Gantt: es un SVG y los colores estaban escritos como
+    | atributos, así que no cambiaban de tema. La línea real venía en `#1e40af`,
+    | azul oscuro, y sobre el lienzo oscuro prácticamente desaparecía.
+    */
+    .c-grid    { stroke: var(--color-line); }
+    .c-axis    { fill: var(--color-dim); }
+    .c-planned { stroke: var(--color-slate-400); }
+    .c-actual  { stroke: var(--color-fill-brand); }
 
     /* --- Gantt ------------------------------------------------------------ */
 

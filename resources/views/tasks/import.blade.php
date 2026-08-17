@@ -9,14 +9,14 @@
     <div class="grid gap-4 lg:grid-cols-3">
         <div class="space-y-4 lg:col-span-2">
             @if ($errors_list !== [])
-                <div role="alert" class="card border-amber-200 bg-amber-50 p-4">
-                    <p class="text-sm font-semibold text-amber-900">{{ __('import.problems_found') }}</p>
-                    <ul class="mt-2 list-inside list-disc space-y-0.5 text-sm text-amber-900">
+                <div role="alert" class="card border-[var(--color-badge-warn-line)] bg-[var(--color-badge-warn-bg)] p-4">
+                    <p class="text-sm font-semibold text-[var(--color-badge-warn-fg)]">{{ __('import.problems_found') }}</p>
+                    <ul class="mt-2 list-inside list-disc space-y-0.5 text-sm text-[var(--color-badge-warn-fg)]">
                         @foreach ($errors_list as $problem)
                             <li>{{ $problem }}</li>
                         @endforeach
                     </ul>
-                    <p class="mt-2 text-xs text-amber-800">{{ __('import.problems_help') }}</p>
+                    <p class="mt-2 text-xs text-[var(--color-badge-warn-fg)]">{{ __('import.problems_help') }}</p>
                 </div>
             @endif
 
@@ -33,7 +33,7 @@
                         <div>
                             <label for="file-field" class="field-label">{{ __('import.file') }}</label>
                             <input id="file-field" type="file" name="file" accept=".csv,text/csv" class="field" required>
-                            @error('file') <p role="alert" class="mt-1 text-xs text-red-700">{{ $message }}</p> @enderror
+                            @error('file') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
                         </div>
 
                         <label class="flex items-start gap-2 text-sm">

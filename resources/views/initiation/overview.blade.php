@@ -6,9 +6,9 @@
 @section('content')
     @php
         $lightClasses = match ($light) {
-            'green' => 'bg-emerald-50 text-emerald-900 ring-emerald-200',
-            'amber' => 'bg-amber-50 text-amber-900 ring-amber-200',
-            default => 'bg-red-50 text-red-900 ring-red-200',
+            'green' => 'badge-ok',
+            'amber' => 'badge-warn',
+            default => 'badge-danger',
         };
         $lightMark = match ($light) { 'green' => '✓', 'amber' => '·', default => '!' };
     @endphp
@@ -41,7 +41,7 @@
             @include('initiation._findings')
 
             @if ($findings === [])
-                <div class="rounded-lg border border-dashed border-emerald-300 bg-surface p-6 text-center text-sm text-slate-700">
+                <div class="rounded-lg border border-dashed border-[var(--color-badge-ok-line)] bg-surface p-6 text-center text-sm text-slate-700">
                     {{ __('initiation.health_green') }}
                 </div>
             @endif
@@ -77,7 +77,7 @@
             </div>
 
             <a href="{{ route('projects.initiation.package', $project) }}"
-               class="block rounded-md bg-blue-700 px-4 py-2 text-center text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
+               class="block rounded-md bg-brand-700 px-4 py-2 text-center text-sm font-medium text-white hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-hud-500 focus:ring-offset-2">
                 {{ __('initiation.download_package') }}
             </a>
 
@@ -86,7 +86,7 @@
                     <form method="POST" action="{{ route('projects.initiation.approve', $project) }}">
                         @csrf
                         <button type="submit"
-                                class="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:border-emerald-600 hover:text-emerald-800 focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                                class="w-full rounded-md border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:border-[var(--color-fill-ok)] hover:text-[var(--color-badge-ok-fg)] focus:outline-none focus:ring-2 focus:ring-[var(--color-fill-ok)]">
                             {{ __('initiation.approve') }}
                         </button>
                     </form>
