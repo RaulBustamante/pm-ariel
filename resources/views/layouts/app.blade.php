@@ -164,5 +164,10 @@
             </main>
         </div>
     </div>
+
+    {{-- Scripts que empujan las vistas. Va al final del cuerpo para que el DOM
+         ya exista cuando corran: sin esto, un `@push('scripts')` no se pinta en
+         ningun lado y el script desaparece sin avisar. --}}
+    @stack('scripts')
 </body>
 </html>

@@ -117,6 +117,16 @@ class Task extends Model
     }
 
     /**
+     * Lo que se asignó a esta tarea: quién trabaja y qué se consume.
+     *
+     * @return HasMany<TaskAssignment, $this>
+     */
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(TaskAssignment::class);
+    }
+
+    /**
      * @return BelongsTo<Project, $this>
      */
     public function project(): BelongsTo

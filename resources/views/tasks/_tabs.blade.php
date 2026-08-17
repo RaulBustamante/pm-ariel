@@ -10,6 +10,7 @@
         'gantt' => ['route' => 'projects.gantt', 'label' => __('tasks.gantt_view')],
         'kanban' => ['route' => 'projects.kanban', 'label' => __('kanban.title')],
         'calendar' => ['route' => 'projects.calendar', 'label' => __('calendar.title')],
+        'resources' => ['route' => 'projects.resources.index', 'label' => __('resources.title')],
         'advisor' => ['route' => 'projects.advisor', 'label' => __('advisor.title')],
         'documents' => ['route' => 'projects.documents', 'label' => __('documents.title')],
     ];

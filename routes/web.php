@@ -160,7 +160,10 @@ Route::middleware('auth')->group(function (): void {
         Route::get('advisor', [AdvisorController::class, 'show'])->name('projects.advisor');
         Route::post('advisor', [AdvisorController::class, 'analyze'])->name('projects.advisor.analyze');
 
+        Route::get('resources', [ResourceController::class, 'index'])->name('projects.resources.index');
         Route::post('resources', [ResourceController::class, 'store'])->name('projects.resources.store');
+        Route::get('resources/{resource}/edit', [ResourceController::class, 'edit'])->name('projects.resources.edit');
+        Route::put('resources/{resource}', [ResourceController::class, 'update'])->name('projects.resources.update');
         Route::delete('resources/{resource}', [ResourceController::class, 'destroy'])->name('projects.resources.destroy');
         Route::post('tasks/{task}/attachments', [AttachmentController::class, 'store'])->name('projects.attachments.store');
         Route::get('attachments/{attachment}', [AttachmentController::class, 'download'])->name('projects.attachments.download');

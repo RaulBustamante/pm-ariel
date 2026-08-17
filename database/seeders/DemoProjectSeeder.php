@@ -471,5 +471,43 @@ final class DemoProjectSeeder extends Seeder
         // Segundo problema plantado: la migración es crítica y nadie la lleva.
         $tasks['entrevistas']->update(['owner_id' => $project->owner_id]);
         $tasks['requerimientos']->update(['owner_id' => $project->owner_id]);
+
+        /*
+        | Tarifas y un material, para que el reporte de costos tenga que enseñar.
+        |
+        | Sin tarifas el ejemplo muestra un costo de cero, que es exactamente el
+        | caso que no permite juzgar si la pantalla sirve. Y sin material, la
+        | mitad del motor de costo —cantidad × costo unitario— queda sin
+        | demostrar.
+        */
+        foreach ([
+            'Luis Ortega' => 480.0,
+            'Ana Barrera' => 620.0,
+            'Miguel Fuentes' => 390.0,
+        ] as $who => $rate) {
+            Resource::query()
+                ->where('project_id', $project->id)
+                ->where('name', $who)
+                ->update(['cost_per_hour' => $rate]);
+        }
+
+        $licencias = Resource::query()->create([
+            'project_id' => $project->id,
+            'name' => 'Licencias de servidor',
+            'type' => Resource::TYPE_MATERIAL,
+            'unit_of_measure' => 'licencia',
+            'cost_per_unit' => 8400.00,
+            'supplier' => 'Distribuidor autorizado',
+            'is_external' => true,
+        ]);
+
+        if (isset($tasks['servidor'])) {
+            TaskAssignment::query()->create([
+                'task_id' => $tasks['servidor']->id,
+                'resource_id' => $licencias->id,
+                'units_percent' => 0,
+                'quantity' => 4,
+            ]);
+        }
     }
 }

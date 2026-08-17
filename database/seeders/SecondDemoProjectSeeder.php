@@ -229,6 +229,31 @@ final class SecondDemoProjectSeeder extends Seeder
                 'units_percent' => 100,
             ]);
         }
+
+        // Tarifas y material: sin ellos el reporte de costos sale en cero, que es
+        // justo el caso con el que no se puede juzgar si la pantalla sirve.
+        $rates = ['Marta Reyes' => 520.0, 'Jorge Salinas' => 610.0, 'Cuadrilla de mudanza' => 340.0];
+
+        foreach ($rates as $name => $rate) {
+            $people[$name]->update(['cost_per_hour' => $rate, 'is_external' => $name === 'Cuadrilla de mudanza']);
+        }
+
+        $racks = Resource::query()->create([
+            'project_id' => $project->id,
+            'name' => 'Rack de carga pesada',
+            'type' => Resource::TYPE_MATERIAL,
+            'unit_of_measure' => 'modulo',
+            'cost_per_unit' => 12500.00,
+            'supplier' => 'Almacenaje Industrial',
+            'is_external' => true,
+        ]);
+
+        TaskAssignment::query()->create([
+            'task_id' => $tasks['racks']->id,
+            'resource_id' => $racks->id,
+            'units_percent' => 0,
+            'quantity' => 18,
+        ]);
     }
 
     /** Igual que el primer ejemplo: se cierran en su fecha, una dentro de esta semana. */

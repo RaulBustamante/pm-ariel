@@ -107,9 +107,29 @@
                 <div class="p-4">
                     @forelse ($assignments as $assignment)
                         <div class="flex items-center justify-between gap-3 border-b border-slate-100 py-1.5 text-sm last:border-0">
-                            <span class="text-slate-800">{{ $assignment->resource?->name ?? '—' }}</span>
+                            <span class="min-w-0 truncate text-slate-800">
+                                {{ $assignment->resource?->name ?? '—' }}
+                                @if ($assignment->resource?->is_external)
+                                    <span class="badge badge-warn ml-1">{{ __('resources.external') }}</span>
+                                @endif
+                            </span>
                             <div class="flex items-center gap-3">
-                                <span class="badge badge-neutral">{{ $assignment->units_percent }} %</span>
+                                {{-- Cada tipo en su unidad. Un material con
+                                     <<100 %>> seria un dato falso: no tiene
+                                     jornada que repartir. --}}
+                                @if ($assignment->resource?->isMaterial())
+                                    <span class="badge badge-neutral tabular">
+                                        {{ rtrim(rtrim(number_format((float) $assignment->quantity, 3), '0'), '.') }}
+                                        {{ $assignment->resource->unit_of_measure }}
+                                    </span>
+                                @else
+                                    <span class="badge badge-neutral tabular">{{ $assignment->units_percent }} %</span>
+                                @endif
+
+                                @php $line = \App\Support\Costing\TaskCost::ofAssignment($assignment, $task); @endphp
+                                @if ($line['cost'] > 0)
+                                    <span class="text-xs tabular text-slate-500">{{ number_format($line['cost'], 2) }}</span>
+                                @endif
                                 @can('update', $project)
                                     <form method="POST" action="{{ route('projects.assignments.destroy', [$project, $task, $assignment->resource_id]) }}">
                                         @csrf
@@ -130,16 +150,33 @@
                                 @csrf
                                 <div class="min-w-[10rem] flex-1">
                                     <label for="assign-resource" class="field-label">{{ __('resources.title') }}</label>
-                                    <select id="assign-resource" name="resource_id" class="field" required>
+                                    {{-- El tipo viaja en el propio <option> para que el
+                                         formulario pueda cambiar el campo de medida sin
+                                         preguntarle al servidor. La regla de verdad la
+                                         aplica el controlador. --}}
+                                    <select id="assign-resource" name="resource_id" class="field" required data-assign-resource>
                                         @foreach ($resources as $resource)
-                                            <option value="{{ $resource->id }}">{{ $resource->name }}</option>
+                                            <option value="{{ $resource->id }}"
+                                                    data-material="{{ $resource->isMaterial() ? '1' : '0' }}"
+                                                    data-unit="{{ $resource->unit_of_measure }}">
+                                                {{ $resource->name }} · {{ __("resources.type_{$resource->type}") }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="w-24">
+
+                                <div class="w-24" data-assign-units>
                                     <label for="assign-units" class="field-label">{{ __('resources.units') }}</label>
-                                    <input id="assign-units" type="number" name="units_percent" value="100" min="1" max="500" class="field" required>
+                                    <input id="assign-units" type="number" name="units_percent" value="100" min="1" max="500" class="field">
                                 </div>
+
+                                <div class="w-28" data-assign-quantity hidden>
+                                    <label for="assign-quantity" class="field-label">
+                                        {{ __('resources.quantity') }} <span data-assign-unit-label class="text-slate-500"></span>
+                                    </label>
+                                    <input id="assign-quantity" type="number" step="0.001" min="0.001" name="quantity" class="field">
+                                </div>
+
                                 <button type="submit" class="btn btn-secondary">{{ __('resources.assign') }}</button>
                             </form>
                         @endif
@@ -282,3 +319,31 @@
         </aside>
     </div>
 @endsection
+
+@push('scripts')
+    {{-- Cambia el campo de medida segun el recurso elegido: porcentaje de
+         jornada para quien trabaja, cantidad para lo que se consume.
+         Es **solo comodidad**. El controlador vuelve a decidir cual de los dos
+         guarda, asi que sin JavaScript se ven los dos campos y el que no aplica
+         se ignora --nunca se guarda un dato sin sentido. --}}
+    <script>
+        document.querySelectorAll('[data-assign-resource]').forEach((select) => {
+            const form = select.closest('form');
+            const units = form.querySelector('[data-assign-units]');
+            const quantity = form.querySelector('[data-assign-quantity]');
+            const unitLabel = form.querySelector('[data-assign-unit-label]');
+
+            const apply = () => {
+                const option = select.selectedOptions[0];
+                const isMaterial = option?.dataset.material === '1';
+
+                units.hidden = isMaterial;
+                quantity.hidden = !isMaterial;
+                unitLabel.textContent = isMaterial && option.dataset.unit ? '(' + option.dataset.unit + ')' : '';
+            };
+
+            select.addEventListener('change', apply);
+            apply();
+        });
+    </script>
+@endpush

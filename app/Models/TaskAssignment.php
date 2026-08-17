@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-#[Fillable(['task_id', 'resource_id', 'units_percent'])]
+#[Fillable(['task_id', 'resource_id', 'units_percent', 'quantity'])]
 class TaskAssignment extends Model
 {
     use RecordsAudit, SoftDeletes;
@@ -20,7 +20,9 @@ class TaskAssignment extends Model
      */
     protected function casts(): array
     {
-        return ['units_percent' => 'integer'];
+        // `quantity` con tres decimales: hay materiales que se piden en
+        // fracciones —1.5 litros, 0.75 metros— y redondear ahí falsea el costo.
+        return ['units_percent' => 'integer', 'quantity' => 'decimal:3'];
     }
 
     /**
