@@ -6,6 +6,10 @@
         'calendar' => ['route' => 'projects.calendar', 'label' => __('calendar.title')],
         'advisor' => ['route' => 'projects.advisor', 'label' => __('advisor.title')],
     ];
+
+    if (auth()->user()?->can('update', $project)) {
+        $tabs['settings'] = ['route' => 'projects.edit', 'label' => __('projects.settings')];
+    }
 @endphp
 
 <div class="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200">

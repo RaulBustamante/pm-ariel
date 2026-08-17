@@ -89,7 +89,23 @@
             $y = $layout->y($index) + ($rowHeight - $barHeight) / 2;
             $label = $task->name.' · '.($task->early_start?->format('d/m/y') ?? '')
                 .' → '.($task->early_finish?->format('d/m/y') ?? '');
+            $frozen = $baselineByTask[$task->id] ?? null;
         @endphp
+
+        @if ($frozen && $frozen->start && $frozen->finish && ! $task->is_summary)
+            {{-- La línea base va debajo y más delgada, en gris: es referencia, no
+                 el plan. Si tuviera el mismo peso, competirían por la atención y
+                 la barra real dejaría de leerse de un vistazo. --}}
+            <rect x="{{ $layout->x($frozen->start) }}"
+                  y="{{ $y + $barHeight - 1 }}"
+                  width="{{ $layout->barWidth($frozen->start, $frozen->finish) }}"
+                  height="3" rx="1" fill="#94a3b8">
+                <title>{{ __('gantt.baseline_bar', [
+                    'from' => $frozen->start->format('d/m/y'),
+                    'to' => $frozen->finish->format('d/m/y'),
+                ]) }}</title>
+            </rect>
+        @endif
 
         @if ($task->is_summary)
             {{-- Un resumen no es una barra: es un corchete. La forma distinta

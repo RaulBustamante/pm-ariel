@@ -72,6 +72,16 @@
                 <span aria-hidden="true" class="text-blue-700">◆</span>
                 {{ __('tasks.milestone') }}
             </span>
+
+            @if ($baseline)
+                <span class="inline-flex items-center gap-1.5">
+                    <span class="inline-block h-1 w-6 rounded-sm bg-slate-400" aria-hidden="true"></span>
+                    <a href="{{ route('projects.baselines.compare', [$project, $baseline]) }}"
+                       class="rounded text-brand-700 underline hover:text-brand-800">
+                        {{ $baseline->name }}
+                    </a>
+                </span>
+            @endif
         </div>
 
         <p class="mt-2 max-w-3xl text-xs text-slate-500">{{ __('gantt.reading_help') }}</p>

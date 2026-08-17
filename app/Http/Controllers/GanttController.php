@@ -38,12 +38,21 @@ final class GanttController extends Controller
 
         $layout = new GanttLayout($tasks, $zoom);
 
+        // La línea base vigente, indexada por tarea. Dibujarla debajo de la barra
+        // real es lo que convierte el Gantt en un reporte de avance: sin ella
+        // muestra el plan de hoy y nadie recuerda cuál era el de hace un mes.
+        $baseline = $project->baselines()->where('is_active', true)->first();
+
         return view('gantt.show', [
             'project' => $project,
             'tasks' => $tasks,
             'layout' => $layout,
             'zoom' => $layout->zoom,
             'dependencies' => $project->taskDependencies()->get(),
+            'baseline' => $baseline,
+            'baselineByTask' => $baseline === null
+                ? []
+                : $baseline->tasks()->get()->keyBy('task_id')->all(),
         ]);
     }
 }

@@ -20,4 +20,6 @@ return [
 
     'reading_help' => 'Grey bands are non-working days: that is why a bar can look like it skips two days. Hover a bar to see its dates.',
 
+    'baseline_bar' => 'Baseline: :from to :to',
+
 ];

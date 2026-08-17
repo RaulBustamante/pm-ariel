@@ -5,16 +5,20 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProjectRequest;
+use App\Http\Requests\UpdateProjectRequest;
 use App\Models\OrgUnit;
 use App\Models\Project;
 use App\Models\ProjectTemplate;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\Scheduling\ProjectScheduler;
 use App\Support\Initiation\InitiationHealth;
 use App\Support\Initiation\InitiationStarter;
 use App\Support\Visibility\VisibilityScope;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -81,6 +85,76 @@ final class ProjectController extends Controller
         return redirect()
             ->route('projects.initiation.justification', $project)
             ->with('status', __('initiation.created'));
+    }
+
+    /**
+     * Los ajustes del proyecto: datos, arranque, miembros y calendario.
+     *
+     * Cambiar la fecha de arranque o el calendario **recalcula el plan entero**.
+     * Sin eso, el proyecto diría que empieza en marzo mientras sus tareas siguen
+     * con las fechas de enero, y nadie notaría la contradicción hasta imprimirlo.
+     */
+    public function edit(Project $project): View
+    {
+        $this->authorize('update', $project);
+
+        return view('projects.edit', [
+            ...$this->formOptions(),
+            'project' => $project->load(['members', 'calendars']),
+            'candidates' => User::query()->where('is_active', true)->orderBy('name')->get(),
+            'baselines' => $project->baselines()->with('capturedBy')->get(),
+        ]);
+    }
+
+    public function update(UpdateProjectRequest $request, Project $project, ProjectScheduler $scheduler): RedirectResponse
+    {
+        $before = [
+            'start' => $project->planned_start?->format('Y-m-d H:i'),
+        ];
+
+        $project->update($request->validated());
+
+        if ($before['start'] !== $project->refresh()->planned_start?->format('Y-m-d H:i')) {
+            $scheduler->reschedule($project);
+
+            return redirect()
+                ->route('projects.edit', $project)
+                ->with('status', __('projects.updated_and_rescheduled'));
+        }
+
+        return redirect()->route('projects.edit', $project)->with('status', __('projects.updated'));
+    }
+
+    /** Alta y baja de miembros. Ser miembro es lo que da escritura (regla 2). */
+    public function addMember(Request $request, Project $project): RedirectResponse
+    {
+        $this->authorize('update', $project);
+
+        $data = $request->validate([
+            'user_id' => ['required', 'integer', Rule::exists('users', 'id')->withoutTrashed()],
+            'project_role' => ['required', Rule::in([Project::ROLE_MANAGER, Project::ROLE_MEMBER, Project::ROLE_VIEWER])],
+        ]);
+
+        $project->members()->syncWithoutDetaching([
+            $data['user_id'] => ['project_role' => $data['project_role']],
+        ]);
+
+        return back()->with('status', __('projects.member_added'));
+    }
+
+    public function removeMember(Project $project, User $user): RedirectResponse
+    {
+        $this->authorize('update', $project);
+
+        // Quitar al dueño lo dejaría sin poder editar su propio proyecto, y
+        // recuperarlo exigiría a un administrador. Se niega y se dice por qué.
+        if ($project->owner_id === $user->id) {
+            return back()->with('warning', __('projects.cannot_remove_owner'));
+        }
+
+        $project->members()->detach($user->id);
+
+        return back()->with('status', __('projects.member_removed'));
     }
 
     /**

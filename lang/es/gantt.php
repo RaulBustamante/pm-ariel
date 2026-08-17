@@ -20,4 +20,6 @@ return [
 
     'reading_help' => 'Las franjas grises son días no laborables: por eso una barra puede parecer que salta dos días. Pasa el cursor sobre una barra para ver sus fechas.',
 
+    'baseline_bar' => 'Linea base: :from a :to',
+
 ];

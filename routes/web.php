@@ -10,6 +10,7 @@ use App\Http\Controllers\AdvisorController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\BaselineController;
 use App\Http\Controllers\CalendarViewController;
 use App\Http\Controllers\GanttController;
 use App\Http\Controllers\Initiation\InitiationController;
@@ -56,6 +57,14 @@ Route::middleware('auth')->group(function (): void {
     Route::post('projects', [ProjectController::class, 'store'])->name('projects.store');
 
     Route::prefix('projects/{project}')->group(function (): void {
+        Route::get('edit', [ProjectController::class, 'edit'])->name('projects.edit');
+        Route::put('/', [ProjectController::class, 'update'])->name('projects.update');
+        Route::post('members', [ProjectController::class, 'addMember'])->name('projects.members.store');
+        Route::delete('members/{user}', [ProjectController::class, 'removeMember'])->name('projects.members.destroy');
+
+        Route::post('baselines', [BaselineController::class, 'store'])->name('projects.baselines.store');
+        Route::get('baselines/{baseline}', [BaselineController::class, 'compare'])->name('projects.baselines.compare');
+
         Route::get('initiation', [InitiationController::class, 'overview'])
             ->name('projects.initiation.overview');
         Route::get('initiation/package', [InitiationPackageController::class, 'show'])
