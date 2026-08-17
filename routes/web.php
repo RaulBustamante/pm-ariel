@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\HierarchyController;
 use App\Http\Controllers\Admin\OrgUnitController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\AdvisorController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\Auth\PasswordResetController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Initiation\RiskController;
 use App\Http\Controllers\Initiation\StakeholderController;
 use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\TaskController;
 use App\Support\Initiation\InitiationStep;
 use Illuminate\Support\Facades\Route;
@@ -99,6 +101,14 @@ Route::middleware('auth')->group(function (): void {
         Route::post('tasks/recalculate', [TaskController::class, 'recalculate'])->name('projects.tasks.recalculate');
 
         Route::get('gantt', [GanttController::class, 'show'])->name('projects.gantt');
+
+        Route::get('advisor', [AdvisorController::class, 'show'])->name('projects.advisor');
+        Route::post('advisor', [AdvisorController::class, 'analyze'])->name('projects.advisor.analyze');
+
+        Route::post('resources', [ResourceController::class, 'store'])->name('projects.resources.store');
+        Route::delete('resources/{resource}', [ResourceController::class, 'destroy'])->name('projects.resources.destroy');
+        Route::post('tasks/{task}/assignments', [ResourceController::class, 'assign'])->name('projects.assignments.store');
+        Route::delete('tasks/{task}/assignments/{resource}', [ResourceController::class, 'unassign'])->name('projects.assignments.destroy');
     });
 
     Route::prefix('admin')->name('admin.')->group(function (): void {

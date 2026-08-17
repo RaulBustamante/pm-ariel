@@ -2,6 +2,7 @@
     $tabs = [
         'list' => ['route' => 'projects.tasks.index', 'label' => __('tasks.list_view')],
         'gantt' => ['route' => 'projects.gantt', 'label' => __('tasks.gantt_view')],
+        'advisor' => ['route' => 'projects.advisor', 'label' => __('advisor.title')],
     ];
 @endphp
 
