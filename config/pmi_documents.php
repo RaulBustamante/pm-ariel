@@ -249,28 +249,28 @@ return [
         'cost_estimates' => [
             'group' => 'planning',
             'kind' => 'derived',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => 'costs',
         ],
 
         'cost_baseline' => [
             'group' => 'planning',
             'kind' => 'derived',
-            'state' => 'planned',
+            'state' => 'partial',
             'source' => 'costs',
         ],
 
         'resource_requirements' => [
             'group' => 'planning',
             'kind' => 'derived',
-            'state' => 'partial',
+            'state' => 'ready',
             'source' => 'resources',
         ],
 
         'resource_breakdown_structure' => [
             'group' => 'planning',
             'kind' => 'derived',
-            'state' => 'planned',
+            'state' => 'partial',
             'source' => 'resources',
         ],
 
@@ -382,14 +382,14 @@ return [
         'work_performance_data' => [
             'group' => 'monitoring',
             'kind' => 'derived',
-            'state' => 'partial',
+            'state' => 'ready',
             'source' => 'schedule',
         ],
 
         'work_performance_information' => [
             'group' => 'monitoring',
             'kind' => 'derived',
-            'state' => 'partial',
+            'state' => 'ready',
             'source' => 'schedule',
         ],
 
@@ -424,21 +424,21 @@ return [
         'cost_forecasts' => [
             'group' => 'monitoring',
             'kind' => 'derived',
-            'state' => 'planned',
+            'state' => 'partial',
             'source' => 'costs',
         ],
 
         'variance_analysis' => [
             'group' => 'monitoring',
             'kind' => 'derived',
-            'state' => 'partial',
+            'state' => 'ready',
             'source' => 'baselines',
         ],
 
         'earned_value_report' => [
             'group' => 'monitoring',
             'kind' => 'derived',
-            'state' => 'planned',
+            'state' => 'partial',
             'source' => 'costs',
         ],
 

@@ -8,6 +8,7 @@ use App\Models\Baseline;
 use App\Models\BaselineTask;
 use App\Models\Project;
 use App\Models\Task;
+use App\Support\Costing\TaskCost;
 use App\Support\Scheduling\WorkingCalendar;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -30,7 +31,14 @@ final class BaselineManager
     public function capture(Project $project, string $name, ?string $notes = null, bool $makeActive = true): Baseline
     {
         return DB::transaction(function () use ($project, $name, $notes, $makeActive): Baseline {
-            $tasks = Task::query()->where('project_id', $project->id)->get();
+            // Las asignaciones vienen cargadas: el costo de cada tarea se
+            // calcula sobre ellas, y sin esto el guardia de carga perezosa
+            // detiene la captura —o, peor, en produccion haria una consulta por
+            // tarea justo cuando se congela un plan de doscientas.
+            $tasks = Task::query()
+                ->with(['assignments.resource'])
+                ->where('project_id', $project->id)
+                ->get();
 
             $baseline = Baseline::query()->create([
                 'project_id' => $project->id,
@@ -40,7 +48,9 @@ final class BaselineManager
                 'captured_by' => Auth::id(),
                 'project_start' => $tasks->min('early_start'),
                 'project_finish' => $tasks->max('early_finish'),
-                'total_cost' => $tasks->where('is_summary', false)->sum('cost'),
+                'total_cost' => $tasks->where('is_summary', false)->sum(
+                    fn (Task $task): float => TaskCost::of($task)['total'],
+                ),
                 'is_active' => false,
             ]);
 
@@ -53,7 +63,14 @@ final class BaselineManager
                     'start' => $task->early_start,
                     'finish' => $task->early_finish,
                     'duration_minutes' => $task->duration_minutes,
-                    'cost' => $task->cost,
+                    // El costo **completo**, no solo el capturado a mano.
+                    //
+                    // Hasta la Etapa 6 el costo de una tarea era la columna que
+                    // alguien tecleaba, y congelar eso bastaba. Ahora la mayor
+                    // parte sale de los recursos asignados, asi que una linea
+                    // base con solo el costo fijo compararia dos cosas distintas
+                    // y la varianza saldria casi siempre en cero.
+                    'cost' => TaskCost::of($task)['total'],
                 ]);
             }
 

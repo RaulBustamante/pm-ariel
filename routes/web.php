@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\OrgUnitController;
 use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AdvisorController;
+use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordChangeController;
@@ -156,6 +157,8 @@ Route::middleware('auth')->group(function (): void {
         Route::get('documents', [ReportController::class, 'documents'])->name('projects.documents');
         Route::get('reports/gantt', [ReportController::class, 'ganttPrint'])->name('projects.reports.gantt');
         Route::get('reports/csv', [ReportController::class, 'csv'])->name('projects.reports.csv');
+
+        Route::get('analysis', [AnalysisController::class, 'show'])->name('projects.analysis');
 
         Route::get('advisor', [AdvisorController::class, 'show'])->name('projects.advisor');
         Route::post('advisor', [AdvisorController::class, 'analyze'])->name('projects.advisor.analyze');
