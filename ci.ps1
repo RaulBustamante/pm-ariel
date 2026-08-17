@@ -15,7 +15,7 @@
 [CmdletBinding()]
 param(
     [switch] $Fix,
-    [ValidateSet('pint', 'stan', 'branding', 'test')]
+    [ValidateSet('pint', 'stan', 'branding', 'assets', 'test')]
     [string] $Only
 )
 
@@ -77,6 +77,38 @@ $pintArgs = if ($Fix) { @('vendor/bin/pint') } else { @('vendor/bin/pint', '--te
 Invoke-Stage -Key 'pint'     -Title 'Formato (Pint)'          -Arguments $pintArgs
 Invoke-Stage -Key 'stan'     -Title 'Analisis estatico (PHPStan)' -Arguments @('-d', 'memory_limit=1G', 'vendor/bin/phpstan', 'analyse', '--no-progress')
 Invoke-Stage -Key 'branding' -Title 'Marca fuera del codigo'  -Arguments @('artisan', 'branding:verify')
+
+# Tailwind compila las clases que encuentra en las plantillas. Si se agrega una
+# pantalla y no se recompila, la pantalla existe y se ve cruda — que es igual de
+# inutil que no tenerla, y mas confuso, porque parece que no se construyo nada.
+if (-not $Only -or $Only -eq 'assets') {
+    Write-Host ""
+    Write-Host "=== Estilos compilados al dia ===" -ForegroundColor Cyan
+
+    $built = Get-ChildItem -Path "public\build\assets" -Filter "app-*.css" -ErrorAction SilentlyContinue |
+        Sort-Object LastWriteTime -Descending | Select-Object -First 1
+
+    $sources = Get-ChildItem -Path "resources" -Recurse -Include "*.blade.php", "*.css", "*.js" -ErrorAction SilentlyContinue |
+        Sort-Object LastWriteTime -Descending | Select-Object -First 1
+
+    if (-not $built) {
+        Write-Host "  No hay CSS compilado. Corre: npm run build" -ForegroundColor Red
+        $results['Estilos compilados al dia'] = 1
+    } elseif ($sources -and $sources.LastWriteTime -gt $built.LastWriteTime) {
+        Write-Host ("  {0} cambio despues de compilar. Corre: npm run build" -f $sources.Name) -ForegroundColor Red
+        $results['Estilos compilados al dia'] = 1
+    } else {
+        Write-Host "  Al dia." -ForegroundColor DarkGray
+        $results['Estilos compilados al dia'] = 0
+    }
+
+    if ($results['Estilos compilados al dia'] -eq 0) {
+        Write-Host "--- Estilos compilados al dia : bien" -ForegroundColor Green
+    } else {
+        Write-Host "--- Estilos compilados al dia : FALLA" -ForegroundColor Red
+    }
+}
+
 Invoke-Stage -Key 'test'     -Title 'Pruebas'                 -Arguments @('artisan', 'test')
 
 Write-Host ""

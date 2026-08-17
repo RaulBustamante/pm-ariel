@@ -9,12 +9,14 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\GanttController;
 use App\Http\Controllers\Initiation\InitiationController;
 use App\Http\Controllers\Initiation\InitiationPackageController;
 use App\Http\Controllers\Initiation\RiskController;
 use App\Http\Controllers\Initiation\StakeholderController;
 use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\TaskController;
 use App\Support\Initiation\InitiationStep;
 use Illuminate\Support\Facades\Route;
 
@@ -85,6 +87,18 @@ Route::middleware('auth')->group(function (): void {
         Route::delete('risks/{risk}', [RiskController::class, 'destroy'])->name('projects.risks.destroy');
         Route::post('risks/{risk}/responses', [RiskController::class, 'storeResponse'])->name('projects.risks.responses.store');
         Route::delete('risks/{risk}/responses/{response}', [RiskController::class, 'destroyResponse'])->name('projects.risks.responses.destroy');
+
+        // --- El plan de trabajo -------------------------------------------
+        Route::get('tasks', [TaskController::class, 'index'])->name('projects.tasks.index');
+        Route::post('tasks', [TaskController::class, 'store'])->name('projects.tasks.store');
+        Route::put('tasks/{task}', [TaskController::class, 'update'])->name('projects.tasks.update');
+        Route::delete('tasks/{task}', [TaskController::class, 'destroy'])->name('projects.tasks.destroy');
+        Route::post('tasks/{task}/outline/{action}', [TaskController::class, 'outline'])
+            ->whereIn('action', ['indent', 'outdent', 'up', 'down'])
+            ->name('projects.tasks.outline');
+        Route::post('tasks/recalculate', [TaskController::class, 'recalculate'])->name('projects.tasks.recalculate');
+
+        Route::get('gantt', [GanttController::class, 'show'])->name('projects.gantt');
     });
 
     Route::prefix('admin')->name('admin.')->group(function (): void {

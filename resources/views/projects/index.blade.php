@@ -54,10 +54,16 @@
                                 </span>
                             </td>
                             <td class="px-4 py-3 text-right">
-                                <a href="{{ route('projects.initiation.overview', $project) }}"
-                                   class="rounded text-blue-700 underline hover:text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
-                                    {{ $completion === 100 ? __('common.edit') : __('initiation.continue') }}<span class="sr-only"> — {{ $project->name }}</span>
-                                </a>
+                                <div class="flex items-center justify-end gap-3">
+                                    <a href="{{ route('projects.tasks.index', $project) }}"
+                                       class="rounded font-medium text-blue-700 underline hover:text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                        {{ __('tasks.title') }}<span class="sr-only"> — {{ $project->name }}</span>
+                                    </a>
+                                    <a href="{{ route('projects.initiation.overview', $project) }}"
+                                       class="rounded text-slate-600 underline hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+                                        {{ $completion === 100 ? __('initiation.title') : __('initiation.continue') }}<span class="sr-only"> — {{ $project->name }}</span>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     @endforeach
