@@ -52,8 +52,11 @@ final class DevAdminSeeder extends Seeder
         $user->forceFill([
             'name' => $user->name ?? 'Administrador local',
             'password' => $password,
-            'locale' => $user->locale ?? 'es',
-            'timezone' => $user->timezone ?? config('app.timezone', 'UTC'),
+            // Se respeta el idioma que la persona haya elegido; solo se pone uno
+            // cuando no hay ninguno. Restablecer la contraseña no es motivo para
+            // deshacerle a alguien su preferencia.
+            'locale' => $user->locale ?? (string) config('app.locale', 'es'),
+            'timezone' => $user->timezone ?? (string) config('app.timezone', 'UTC'),
             'is_active' => true,
             // Sin cambio obligatorio: en local la fricción no protege nada.
             'must_change_password' => false,

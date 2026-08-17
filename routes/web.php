@@ -10,6 +10,7 @@ use App\Http\Controllers\AdvisorController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\CalendarViewController;
 use App\Http\Controllers\GanttController;
 use App\Http\Controllers\Initiation\InitiationController;
 use App\Http\Controllers\Initiation\InitiationPackageController;
@@ -94,6 +95,12 @@ Route::middleware('auth')->group(function (): void {
         // --- El plan de trabajo -------------------------------------------
         Route::get('tasks', [TaskController::class, 'index'])->name('projects.tasks.index');
         Route::post('tasks', [TaskController::class, 'store'])->name('projects.tasks.store');
+        // Antes de `tasks/{task}` no hace falta: «recalculate» no es un número y
+        // el enlace de modelo no lo confundiría, pero el orden explícito ahorra
+        // el susto a quien lea esto en un año.
+        Route::get('tasks/{task}', [TaskController::class, 'show'])
+            ->whereNumber('task')
+            ->name('projects.tasks.show');
         Route::put('tasks/{task}', [TaskController::class, 'update'])->name('projects.tasks.update');
         Route::delete('tasks/{task}', [TaskController::class, 'destroy'])->name('projects.tasks.destroy');
         Route::post('tasks/{task}/outline/{action}', [TaskController::class, 'outline'])
@@ -102,6 +109,8 @@ Route::middleware('auth')->group(function (): void {
         Route::post('tasks/recalculate', [TaskController::class, 'recalculate'])->name('projects.tasks.recalculate');
 
         Route::get('gantt', [GanttController::class, 'show'])->name('projects.gantt');
+
+        Route::get('calendar', [CalendarViewController::class, 'show'])->name('projects.calendar');
 
         Route::get('kanban', [KanbanController::class, 'show'])->name('projects.kanban');
         Route::post('kanban/{task}/move', [KanbanController::class, 'move'])->name('projects.kanban.move');

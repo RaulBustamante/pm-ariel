@@ -8,7 +8,6 @@ use App\Models\Project;
 use App\Models\Task;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use RuntimeException;
 
 /**
  * Mover tareas dentro del esquema: indentar, desindentar, subir y bajar.
@@ -195,10 +194,16 @@ final class TaskOutliner
         return $index;
     }
 
+    /**
+     * La ruta trae proyecto y tarea por separado. Sin esta comprobación, cambiar
+     * el número en la barra de direcciones alcanzaría la tarea de otro proyecto
+     * — uno al que sí se tiene acceso, así que la Policy no lo detendría.
+     *
+     * Responde 404 y no una excepción: para quien pide esa dirección, la tarea
+     * no existe ahí. Un error 500 diría que el sistema se rompió, y no es cierto.
+     */
     public function assertBelongs(Project $project, Task $task): void
     {
-        if ($task->project_id !== $project->id) {
-            throw new RuntimeException('La tarea no pertenece a este proyecto.');
-        }
+        abort_unless($task->project_id === $project->id, 404);
     }
 }

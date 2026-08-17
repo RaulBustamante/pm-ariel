@@ -71,4 +71,11 @@ return [
 
     'confirm_delete' => 'Delete this task? If it has tasks below it, those go too.',
 
+    'history' => 'History',
+    'no_history' => 'No changes recorded yet.',
+    'system' => 'System',
+    'dates' => 'Calculated dates',
+    'successors' => 'These depend on it',
+    'calendar_view' => 'Calendar',
+
 ];

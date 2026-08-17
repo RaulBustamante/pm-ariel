@@ -71,4 +71,11 @@ return [
 
     'confirm_delete' => '¿Eliminar esta tarea? Si tiene tareas debajo, también se van.',
 
+    'history' => 'Historial',
+    'no_history' => 'Sin cambios registrados todavia.',
+    'system' => 'Sistema',
+    'dates' => 'Fechas calculadas',
+    'successors' => 'De esto dependen',
+    'calendar_view' => 'Calendario',
+
 ];

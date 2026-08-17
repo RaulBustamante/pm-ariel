@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTaskRequest;
+use App\Models\AuditLog;
 use App\Models\Project;
+use App\Models\Resource;
 use App\Models\Task;
+use App\Models\TaskAssignment;
 use App\Models\TaskDependency;
 use App\Services\Scheduling\ProjectScheduler;
 use App\Services\Scheduling\TaskOutliner;
@@ -46,6 +49,39 @@ final class TaskController extends Controller
             'predecessorText' => $this->predecessorTextFor($project, $outline, $durations),
             'members' => $project->members()->orderBy('name')->get(),
             'lastRun' => $project->scheduleRuns()->first(),
+        ]);
+    }
+
+    /**
+     * El detalle de una tarea: todo lo suyo en un lugar, incluida su historia.
+     *
+     * La bitácora de auditoría ya existía desde la Etapa 1 y nunca se había
+     * mostrado donde importa. «¿Quién cambió esta fecha y cuándo?» es la
+     * pregunta que se hace frente a la tarea, no en una pantalla de sistema.
+     */
+    public function show(Project $project, Task $task): View
+    {
+        $this->authorize('view', $project);
+        $this->outliner->assertBelongs($project, $task);
+
+        $task->loadMissing(['owner', 'parent', 'children']);
+
+        return view('tasks.show', [
+            'project' => $project,
+            'task' => $task,
+            'durations' => $this->durationsFor($project),
+            'members' => $project->members()->orderBy('name')->get(),
+            'resources' => Resource::query()->where('project_id', $project->id)->orderBy('name')->get(),
+            'assignments' => TaskAssignment::query()->with('resource')->where('task_id', $task->id)->get(),
+            'predecessors' => $task->predecessorLinks()->with('predecessor')->get(),
+            'successors' => $task->successorLinks()->with('successor')->get(),
+            'history' => AuditLog::query()
+                ->where('auditable_type', Task::class)
+                ->where('auditable_id', $task->id)
+                ->with('user')
+                ->latest('id')
+                ->limit(25)
+                ->get(),
         ]);
     }
 

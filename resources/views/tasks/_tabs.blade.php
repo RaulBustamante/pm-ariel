@@ -3,6 +3,7 @@
         'list' => ['route' => 'projects.tasks.index', 'label' => __('tasks.list_view')],
         'gantt' => ['route' => 'projects.gantt', 'label' => __('tasks.gantt_view')],
         'kanban' => ['route' => 'projects.kanban', 'label' => __('kanban.title')],
+        'calendar' => ['route' => 'projects.calendar', 'label' => __('calendar.title')],
         'advisor' => ['route' => 'projects.advisor', 'label' => __('advisor.title')],
     ];
 @endphp
