@@ -1,170 +1,190 @@
-# pm-ariel
+# Gestión de Proyectos — Ariel Premium Supply
 
-Sistema interno de gestión de proyectos y portafolio, grado PMI. Reemplaza el uso de
-MS Project y Excel.
+Sistema de administración de proyectos con ruta crítica: acta constitutiva
+guiada, plan de trabajo, Gantt, tablero, calendario y avisos proactivos.
 
-> **El nombre del producto no vive en el código.** `pm-ariel` es el nombre del repositorio.
-> El nombre comercial se configura en `config/branding.php` y se consume desde ahí.
-> La planeación completa vive fuera de este repositorio, en
-> `asistente-ejecutivo-trabajo/projects/pm-ariel/`.
+Este archivo existe para que **alguien que nunca ha visto el proyecto lo levante
+desde cero**. Si algo aquí no funciona tal cual está escrito, es un error del
+archivo, no del lector.
 
 ---
 
-## Estado
+## Lo que necesitas
 
-**Etapa 1 — Fundación técnica.** En curso.
-
-| Bloque | Entregable | Estado |
+| Pieza | Versión | Por qué esa |
 |---|---|---|
-| 1.0 | Entorno PHP 8.4 + MySQL 8.4 | ✅ |
-| 1.1 | Repositorio local | ✅ |
-| 1.2 | Laravel 13 instalado | ✅ |
-| 1.3 | Comando de respaldo con restauración probada | ✅ |
-| 1.4 | `config/branding.php` + verificación de marca | ⬜ |
-| 1.5 | Pint, PHPStan y CI local | ⬜ |
-| 1.6+ | Accesos, roles, jerarquía, i18n, auditoría | ⬜ |
+| PHP | **8.4** | `8.2` deja de tener soporte el 31-dic-2026 (riesgo R-12) |
+| MySQL | 8.4 o MariaDB 10.6+ | El código no usa nada exclusivo de un motor (regla R-11) |
+| Node | 20+ | Solo para compilar los estilos |
+| Composer | 2.x | |
+
+Extensiones de PHP: `intl`, `pdo_mysql`, `mbstring`, `openssl`, `fileinfo`,
+`gd`, `zip`.
+
+> **En Windows con Laragon**, PHP y MySQL no quedan en el `PATH`. Se llaman por
+> ruta completa. Los ejemplos de abajo usan la ruta de Laragon; ajústala si tu
+> instalación está en otro lado.
 
 ---
 
-## Entorno
+## Levantarlo desde cero
 
-Verificado, no supuesto:
+```bash
+git clone <repositorio> pm-ariel
+cd pm-ariel
 
-| Componente | Versión | Notas |
-|---|---|---|
-| PHP | 8.4.24 ZTS (VS17) | Laravel 13 exige 8.3+. XAMPP se detiene en 8.2.12 |
-| Laravel | 13.9.0 (framework v13.25.0) | |
-| MySQL | 8.4.3 | Puerto **3307**, `utf8mb4_unicode_ci`, zona horaria del servidor UTC |
-| Node | 24.11.0 | |
-| Composer | 2.8.12 | Debe correr sobre PHP 8.4, no sobre el de XAMPP |
-
-**Por qué el puerto 3307.** La instalación de XAMPP conserva el 3306 y se deja intacta hasta
-que este entorno esté probado. Cuando XAMPP se retire, cambiar `port` en
-`C:\laragon\bin\mysql\mysql-8.4.3-winx64\my.ini` y `DB_PORT` en `.env`.
-
-**Zona horaria.** Aplicación y base corren en UTC. La conversión a la zona del usuario es
-responsabilidad de la vista, nunca de la base ni del dominio.
-
----
-
-## Levantar el proyecto desde cero
-
-1. **PHP 8.4.** Extraer `php-8.4.24-Win32-vs17-x64` en `C:\laragon\bin\php\`. Copiar
-   `php.ini-development` a `php.ini` y habilitar: `curl fileinfo gd intl mbstring openssl
-   pdo_mysql zip opcache sodium sqlite3 pdo_sqlite`.
-   **`intl` no es opcional:** la interfaz es bilingüe.
-
-2. **Arrancar MySQL 8.4**, desde Laragon o a mano:
-
-   ```
-   C:\laragon\bin\mysql\mysql-8.4.3-winx64\bin\mysqld.exe --defaults-file=C:\laragon\bin\mysql\mysql-8.4.3-winx64\my.ini
-   ```
-
-3. **Crear base y usuario de la aplicación:**
-
-   ```sql
-   CREATE DATABASE pm_ariel      CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-   CREATE DATABASE pm_ariel_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-   CREATE USER 'pm_ariel'@'127.0.0.1' IDENTIFIED BY '<contraseña>';
-   GRANT ALL PRIVILEGES ON pm_ariel.*      TO 'pm_ariel'@'127.0.0.1';
-   GRANT ALL PRIVILEGES ON pm_ariel_test.* TO 'pm_ariel'@'127.0.0.1';
-   ```
-
-4. **Dependencias y configuración:**
-
-   ```
-   composer install
-   copy .env.example .env      (y completar DB_PASSWORD)
-   php artisan key:generate
-   php artisan migrate
-   ```
-
-5. **Levantar:** `php artisan serve`
-
-La aplicación **nunca** se conecta como `root`. El usuario `pm_ariel` tiene permisos
-únicamente sobre sus dos esquemas.
-
----
-
-## Respaldo y restauración
-
-Mientras no exista un repositorio remoto, este comando es la única copia del historial.
-
-### Respaldar
-
-```
-php artisan backup:run
+composer install
+cp .env.example .env
+php artisan key:generate
 ```
 
-Produce un `.zip` fechado con tres componentes:
+Edita `.env` con los datos de tu base:
 
-| Componente | Qué contiene |
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=pm_ariel
+DB_USERNAME=pm_ariel
+DB_PASSWORD=…
+
+APP_LOCALE=es
+APP_FALLBACK_LOCALE=es
+APP_TIMEZONE=America/Tijuana
+```
+
+Crea la base y el usuario, y luego:
+
+```bash
+php artisan migrate
+php artisan db:seed --class=RolesAndPermissionsSeeder
+php artisan db:seed --class=ProjectTemplatesSeeder
+
+npm install
+npm run build
+
+php artisan serve
+```
+
+### Para entrar
+
+**En desarrollo** — crea un administrador con contraseña conocida:
+
+```bash
+php artisan db:seed --class=DevAdminSeeder
+```
+
+Deja `admin@localhost` / `Ariel2026!Raul`, ajustables con `DEV_ADMIN_EMAIL` y
+`DEV_ADMIN_PASSWORD`. Se puede correr las veces que haga falta, y **limpia el
+bloqueo por intentos fallidos** — cinco intentos malos bloquean un minuto y eso
+se confunde con una contraseña incorrecta. **Se niega a correr en producción.**
+
+**En producción:**
+
+```bash
+php artisan db:seed
+```
+
+Imprime el correo y la contraseña temporal del primer administrador **una sola
+vez**. Anótala: no se vuelve a mostrar. Si se corre sin consola, falla con un
+mensaje explícito en vez de crear una cuenta cuya contraseña nadie vio.
+
+### Para ver el producto funcionando sin capturar nada
+
+```bash
+php artisan db:seed --class=DemoProjectSeeder
+```
+
+Carga un proyecto realista de 14 tareas con dependencias, tres personas y avance
+parcial. Trae **dos problemas plantados a propósito** —alguien al 200 % y tareas
+críticas sin responsable— porque un demo donde todo está bien no demuestra nada.
+
+---
+
+## Revisión antes de dar algo por bueno
+
+```powershell
+.\ci.ps1
+```
+
+Corre cinco etapas en una pasada y **no se detiene en la primera falla**:
+
+| Etapa | Qué revisa |
 |---|---|
-| `database.sql` | Volcado con `--single-transaction`, rutinas y disparadores |
-| `files/` | El contenido de `storage/app` |
-| `repository.bundle` | El historial completo de git, empacado con `git bundle --all` |
+| Formato | Pint |
+| Análisis estático | PHPStan/Larastan **nivel 6**, sin errores permitidos |
+| Marca | Que el nombre del producto no se filtre al código |
+| Estilos | Que estén compilados después del último cambio de plantilla |
+| Pruebas | La suite completa |
 
-Configuración en `config/backup.php` y `.env`:
+Variantes: `.\ci.ps1 -Fix` deja que Pint corrija · `.\ci.ps1 -Only stan` corre
+una sola etapa.
 
-| Variable | Para qué |
-|---|---|
-| `BACKUP_DESTINATION` | Ruta absoluta de destino. **Apuntar a un disco distinto al de la aplicación** |
-| `BACKUP_KEEP` | Cuántos archivos conservar. La poda ocurre solo tras un respaldo exitoso |
-| `BACKUP_MYSQLDUMP_PATH` | Ruta a `mysqldump` |
+En Linux o macOS, las mismas cuatro órdenes:
 
-Programado a las 02:00 en `routes/console.php`, sin traslape.
-
-### Restaurar — probado, no supuesto
-
-1. **Extraer el archivo:**
-   `Expand-Archive backup_AAAA-MM-DD_HHMMSS.zip -DestinationPath restore\`
-
-2. **Base de datos:**
-
-   ```
-   mysql -u root -P 3307 -e "CREATE DATABASE pm_ariel_restore CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
-   mysql -u root -P 3307 pm_ariel_restore < restore\database.sql
-   ```
-
-3. **Archivos:** copiar `restore\files\storage_app\` sobre `storage\app\`
-
-4. **Repositorio** — recupera todo el historial, no solo la última versión:
-
-   ```
-   git clone restore\repository.bundle pm-ariel-recuperado
-   git bundle verify restore\repository.bundle
-   ```
-
-**Verificado el 2026-08-16:** restauración completa en un esquema limpio — 9 de 9 tablas,
-migraciones íntegras, y `git bundle verify` confirmando historial completo.
-
----
-
-## Pruebas
-
-```
+```bash
+vendor/bin/pint --test
+vendor/bin/phpstan analyse --no-progress
+php artisan branding:verify
 php artisan test
 ```
 
-**La suite corre contra MySQL, no contra SQLite en memoria.** El motor de programación y las
-consultas de reporte dependen del comportamiento real de la base; una suite sobre otro motor
-demuestra que el código funciona en otro lado. La base de pruebas es `pm_ariel_test`.
+---
+
+## Respaldo
+
+```bash
+php artisan backup:run
+```
+
+Copia **base de datos + archivos + bundle del repositorio** a la ruta de
+`BACKUP_DESTINATION`.
+
+> **Si esa variable está vacía, el respaldo cae en `storage/backups`, dentro del
+> mismo disco.** Eso no es un respaldo: un disco que falla se lleva el original
+> y la copia. Apúntala a otro disco o a un recurso de red antes de usar el
+> sistema de verdad.
 
 ---
 
-## Convenciones
+## Cómo está organizado
 
-- **PSR-12**, sin prefijo `_` en propiedades ni métodos. Excepción autorizada y acotada a este
-  repositorio frente a `php-dev-standards.md` — ver D-003 en la planeación.
-- Nombres de archivo: clases PHP en PSR-4 · Blade en kebab-case · migraciones en formato
-  Laravel · assets en kebab-case.
-- Controladores delgados. La lógica de negocio vive en Services y Actions; los cálculos de
-  programación, en clases de dominio puras sin dependencia de Laravel.
-- Autorización solo por Policies. Ocultar un botón no es un permiso.
-- **Ninguna función específica de un motor de base de datos.** Todo por el constructor de
-  consultas y las migraciones. El motor de producción aún no está confirmado.
-- Toda fecha en UTC en la base. Ninguna suma directa de días: la aritmética de fechas pasa por
-  el calendario laboral.
-- Cero cadenas de interfaz escritas duro: todo pasa por el sistema de traducción.
-- Commits atómicos con mensaje convencional (`feat:`, `fix:`, `refactor:`, `test:`, `docs:`,
-  `chore:`).
+```
+app/
+  Support/Scheduling/     El motor de ruta crítica. Sin Eloquent, a propósito:
+                          recibe datos puros y devuelve datos puros, y por eso
+                          se puede probar contra casos resueltos en papel.
+  Support/Initiation/     El recorrido de inicio y su semáforo de completitud.
+  Services/Scheduling/    El puente entre el motor y la base.
+  Services/Advisor/       Las reglas que detectan lo que amenaza la entrega.
+  Services/Import/        El importador de hojas de cálculo.
+  Contracts/              Las costuras: identidad (SSO), sugerencias (IA) y
+                          calendarios externos (Google/Outlook).
+```
+
+Tres cosas que conviene saber antes de tocar el código:
+
+1. **`WorkingCalendar` es el único lugar** que sabe qué es un fin de semana, un
+   feriado o una jornada partida. Toda la aritmética va en **minutos de
+   trabajo**, nunca en días.
+2. **En `tasks`, las columnas se dividen en dos grupos que no se mezclan:** lo
+   que capturó el usuario y lo que produjo el cálculo (`early_*`, `late_*`,
+   holguras, `is_critical`). El motor solo escribe el segundo.
+3. **Las líneas base no se editan ni se borran** — el modelo lanza excepción.
+   Toda su utilidad viene de eso.
+
+---
+
+## Idiomas
+
+Español e inglés, en `lang/es` y `lang/en`. **Ningún texto visible vive en el
+código.** Agregar un idioma es copiar la carpeta y listarlo en
+`config/app.php → supported_locales`.
+
+---
+
+## Marca
+
+El nombre del producto vive en `config/branding.php` y en ningún otro lado. El
+comando `branding:verify` falla si se filtra al código, y corre dentro del CI.
+Cambiar de nombre es editar un archivo.

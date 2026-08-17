@@ -5,6 +5,7 @@
     $carry = isset($filter) ? $filter->toQuery() : [];
 
     $tabs = [
+        'dashboard' => ['route' => 'projects.dashboard', 'label' => __('dashboard.title')],
         'list' => ['route' => 'projects.tasks.index', 'label' => __('tasks.list_view')],
         'gantt' => ['route' => 'projects.gantt', 'label' => __('tasks.gantt_view')],
         'kanban' => ['route' => 'projects.kanban', 'label' => __('kanban.title')],

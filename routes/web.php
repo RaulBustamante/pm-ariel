@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\BaselineController;
 use App\Http\Controllers\CalendarSettingsController;
 use App\Http\Controllers\CalendarViewController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GanttController;
 use App\Http\Controllers\Initiation\InitiationController;
 use App\Http\Controllers\Initiation\InitiationPackageController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\Initiation\StakeholderController;
 use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskImportController;
@@ -137,6 +139,12 @@ Route::middleware('auth')->group(function (): void {
 
         Route::get('kanban', [KanbanController::class, 'show'])->name('projects.kanban');
         Route::post('kanban/{task}/move', [KanbanController::class, 'move'])->name('projects.kanban.move');
+
+        Route::get('dashboard', [DashboardController::class, 'show'])->name('projects.dashboard');
+
+        Route::get('reports/pdf', [ReportController::class, 'pdf'])->name('projects.reports.pdf');
+        Route::get('reports/gantt', [ReportController::class, 'ganttPrint'])->name('projects.reports.gantt');
+        Route::get('reports/csv', [ReportController::class, 'csv'])->name('projects.reports.csv');
 
         Route::get('advisor', [AdvisorController::class, 'show'])->name('projects.advisor');
         Route::post('advisor', [AdvisorController::class, 'analyze'])->name('projects.advisor.analyze');
