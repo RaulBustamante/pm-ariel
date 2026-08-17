@@ -3,7 +3,291 @@
 @source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
 @source '../../storage/framework/views/*.php';
 
+/*
+| Sistema visual — «tablero denso».
+|
+| El producto muestra tablas largas, un Gantt y listas de hallazgos. La densidad
+| manda: se prefiere ver más renglones antes que más aire. Por eso la escala
+| tipográfica es compacta y el color se usa con cuentagotas — cuando casi todo es
+| gris, un renglón rojo se ve de verdad. Si todo tuviera color, nada resaltaría.
+*/
+
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', monospace;
+
+    /* Azul de trabajo, no de marca: la marca vive en config/branding.php. */
+    --color-brand-50: #eff5ff;
+    --color-brand-100: #dbe8fe;
+    --color-brand-200: #bfd7fe;
+    --color-brand-300: #93bbfd;
+    --color-brand-400: #6096fa;
+    --color-brand-500: #3b76f6;
+    --color-brand-600: #2557eb;
+    --color-brand-700: #1e40af;
+    --color-brand-800: #1e3a8a;
+    --color-brand-900: #1e336e;
+
+    /* Ámbar solo para lo que exige atención sin ser un error. */
+    --color-accent-400: #fbbf24;
+    --color-accent-500: #f59e0b;
+    --color-accent-600: #d97706;
+
+    --color-canvas: #f1f5f9;
+    --color-surface: #ffffff;
+
+    --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06);
+    --shadow-raised: 0 4px 12px -2px rgb(15 23 42 / 0.10), 0 2px 4px -2px rgb(15 23 42 / 0.06);
+}
+
+@layer base {
+    body {
+        background-color: var(--color-canvas);
+        color: #0f172a;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    /* Un anillo de foco visible y consistente en toda la aplicación. Sin esto,
+       quien navega por teclado se pierde en cuanto sale de un formulario. */
+    :where(a, button, input, select, textarea, summary):focus-visible {
+        outline: 2px solid var(--color-brand-600);
+        outline-offset: 2px;
+        border-radius: 4px;
+    }
+
+    /* Quien pidió menos movimiento en su sistema no debería tener que pedirlo
+       otra vez aquí. */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+}
+
+@layer components {
+    /* --- Superficies ------------------------------------------------------ */
+
+    .card {
+        background-color: var(--color-surface);
+        border: 1px solid #e2e8f0;
+        border-radius: 0.5rem;
+        box-shadow: var(--shadow-card);
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        border-bottom: 1px solid #f1f5f9;
+        padding: 0.75rem 1rem;
+    }
+
+    .card-title {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+        color: #0f172a;
+    }
+
+    /* --- Tabla de datos --------------------------------------------------- */
+
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.8125rem;
+    }
+
+    .data-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 0.5rem 0.75rem;
+        text-align: left;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #475569;
+        white-space: nowrap;
+    }
+
+    .data-table tbody td {
+        border-bottom: 1px solid #f1f5f9;
+        padding: 0.4375rem 0.75rem;
+        vertical-align: middle;
+    }
+
+    /* Resaltar el renglón bajo el cursor es lo que evita perder la línea al
+       leer una tabla ancha de veinte columnas. */
+    .data-table tbody tr {
+        transition: background-color 150ms ease;
+    }
+
+    .data-table tbody tr:hover {
+        background-color: var(--color-brand-50);
+    }
+
+    /* --- Distintivos de estado -------------------------------------------- */
+
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        border-radius: 9999px;
+        padding: 0.0625rem 0.4375rem;
+        font-size: 0.6875rem;
+        font-weight: 600;
+        line-height: 1.25rem;
+        white-space: nowrap;
+    }
+
+    .badge-neutral { background-color: #f1f5f9; color: #334155; }
+    .badge-brand   { background-color: var(--color-brand-50); color: var(--color-brand-800); }
+    .badge-ok      { background-color: #ecfdf5; color: #065f46; }
+    .badge-warn    { background-color: #fffbeb; color: #92400e; }
+    .badge-danger  { background-color: #fef2f2; color: #991b1b; }
+
+    /* --- Botones ---------------------------------------------------------- */
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.375rem;
+        border-radius: 0.375rem;
+        padding: 0.4375rem 0.875rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+        /* Área de toque cómoda sin engordar el renglón: el relleno visual es
+           chico y el alto mínimo hace el resto. */
+        min-height: 2.25rem;
+    }
+
+    .btn-primary {
+        background-color: var(--color-brand-700);
+        color: #ffffff;
+    }
+
+    .btn-primary:hover { background-color: var(--color-brand-800); }
+
+    .btn-secondary {
+        background-color: var(--color-surface);
+        border: 1px solid #cbd5e1;
+        color: #334155;
+    }
+
+    .btn-secondary:hover { background-color: #f8fafc; border-color: #94a3b8; }
+
+    .btn-ghost {
+        background-color: transparent;
+        color: #475569;
+    }
+
+    .btn-ghost:hover { background-color: #f1f5f9; color: #0f172a; }
+
+    .btn-danger {
+        background-color: transparent;
+        color: #b91c1c;
+    }
+
+    .btn-danger:hover { background-color: #fef2f2; }
+
+    .btn-sm { min-height: 1.75rem; padding: 0.1875rem 0.5rem; font-size: 0.75rem; }
+
+    /* --- Campos ----------------------------------------------------------- */
+
+    .field {
+        display: block;
+        width: 100%;
+        border-radius: 0.375rem;
+        border: 1px solid #cbd5e1;
+        background-color: var(--color-surface);
+        padding: 0.375rem 0.625rem;
+        font-size: 0.8125rem;
+        color: #0f172a;
+        transition: border-color 150ms ease, box-shadow 150ms ease;
+    }
+
+    .field:focus {
+        border-color: var(--color-brand-600);
+        box-shadow: 0 0 0 3px var(--color-brand-100);
+        outline: none;
+    }
+
+    .field-label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 0.25rem;
+    }
+
+    .field-help {
+        font-size: 0.6875rem;
+        line-height: 1.4;
+        color: #64748b;
+    }
+
+    /* Campo dentro de tabla: invisible hasta que se le pasa encima, para que la
+       tabla se lea como tabla y se edite como hoja de cálculo. */
+    .field-inline {
+        width: 100%;
+        border: 1px solid transparent;
+        border-radius: 0.25rem;
+        background-color: transparent;
+        padding: 0.125rem 0.375rem;
+        font-size: 0.8125rem;
+        transition: border-color 150ms ease, background-color 150ms ease;
+    }
+
+    .field-inline:hover { border-color: #cbd5e1; background-color: #ffffff; }
+
+    .field-inline:focus {
+        border-color: var(--color-brand-600);
+        background-color: #ffffff;
+        box-shadow: 0 0 0 2px var(--color-brand-100);
+        outline: none;
+    }
+
+    /* --- Navegación lateral ----------------------------------------------- */
+
+    .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 0.625rem;
+        border-radius: 0.375rem;
+        padding: 0.4375rem 0.625rem;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: #cbd5e1;
+        transition: background-color 150ms ease, color 150ms ease;
+    }
+
+    .nav-item:hover { background-color: #1e293b; color: #ffffff; }
+
+    .nav-item[aria-current] {
+        background-color: var(--color-brand-700);
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    .nav-section {
+        padding: 0 0.625rem;
+        margin-top: 1.25rem;
+        margin-bottom: 0.375rem;
+        font-size: 0.625rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
 }

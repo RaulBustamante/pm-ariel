@@ -7,105 +7,136 @@
     <title>@yield('title') · {{ config('branding.name') }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="h-full bg-slate-50 text-slate-900 antialiased">
-    {{-- Primer elemento enfocable: sin esto, quien navega por teclado recorre
-         todo el menú antes de llegar al contenido, en cada página. --}}
+<body class="h-full">
     <a href="#main-content"
-       class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:shadow focus:ring-2 focus:ring-blue-600">
+       class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-white focus:px-4 focus:py-2 focus:shadow">
         {{ __('common.skip_to_content') }}
     </a>
 
-    <header class="border-b border-slate-200 bg-white">
-        <nav class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3" aria-label="{{ __('common.dashboard') }}">
-            <div class="flex items-center gap-6">
-                <a href="{{ route('dashboard') }}" class="font-semibold tracking-tight">
-                    {{ config('branding.short_name') }}
-                </a>
+    <div class="flex min-h-full">
+        {{-- Navegación lateral oscura. El contraste con el lienzo claro es lo que
+             da estructura: sin él, la pantalla es una hoja en blanco donde nada
+             indica dónde empieza el contenido. --}}
+        <aside class="hidden w-56 shrink-0 flex-col bg-slate-900 lg:flex">
+            <div class="flex h-14 items-center gap-2 border-b border-slate-800 px-4">
+                <span class="flex h-7 w-7 items-center justify-center rounded bg-brand-700 text-xs font-bold text-white">
+                    {{ mb_substr(config('branding.short_name'), 0, 2) }}
+                </span>
+                <span class="truncate text-sm font-semibold text-white">{{ config('branding.short_name') }}</span>
+            </div>
 
-                <div class="hidden gap-1 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('common.dashboard') }}
+            <nav class="flex-1 overflow-y-auto p-2" aria-label="{{ __('common.dashboard') }}">
+                <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" icon="home">
+                    {{ __('common.dashboard') }}
+                </x-nav-link>
+
+                @can('viewAny', App\Models\Project::class)
+                    <p class="nav-section">{{ __('common.projects') }}</p>
+
+                    <x-nav-link :href="route('projects.index')"
+                                :active="request()->routeIs('projects.index') || request()->routeIs('projects.create')"
+                                icon="folder">
+                        {{ __('initiation.projects') }}
+                    </x-nav-link>
+                @endcan
+
+                @canany(['viewAny'], [App\Models\User::class])
+                    <p class="nav-section">{{ __('common.administration') }}</p>
+
+                    <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')" icon="users">
+                        {{ __('common.users') }}
                     </x-nav-link>
 
-                    @can('viewAny', App\Models\Project::class)
-                        <x-nav-link :href="route('projects.index')" :active="request()->routeIs('projects.*')">
-                            {{ __('common.projects') }}
-                        </x-nav-link>
-                    @endcan
+                    <x-nav-link :href="route('admin.hierarchy.index')" :active="request()->routeIs('admin.hierarchy.*')" icon="sitemap">
+                        {{ __('hierarchy.title') }}
+                    </x-nav-link>
+                @endcanany
 
-                    @can('viewAny', App\Models\User::class)
-                        <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')">
-                            {{ __('common.users') }}
-                        </x-nav-link>
-                    @endcan
+                @can('viewAny', App\Models\OrgUnit::class)
+                    <x-nav-link :href="route('admin.org-units.index')" :active="request()->routeIs('admin.org-units.*')" icon="building">
+                        {{ __('org_units.title') }}
+                    </x-nav-link>
+                @endcan
 
-                    @can('viewAny', App\Models\User::class)
-                        <x-nav-link :href="route('admin.hierarchy.index')" :active="request()->routeIs('admin.hierarchy.*')">
-                            {{ __('hierarchy.title') }}
-                        </x-nav-link>
-                    @endcan
+                @can('viewAny', App\Models\User::class)
+                    <x-nav-link :href="route('admin.audit.index')" :active="request()->routeIs('admin.audit.*')" icon="clipboard">
+                        {{ __('common.audit_log') }}
+                    </x-nav-link>
+                @endcan
+            </nav>
 
-                    @can('viewAny', App\Models\OrgUnit::class)
-                        <x-nav-link :href="route('admin.org-units.index')" :active="request()->routeIs('admin.org-units.*')">
-                            {{ __('org_units.title') }}
-                        </x-nav-link>
-                    @endcan
-
-                    @can('viewAny', App\Models\User::class)
-                        <x-nav-link :href="route('admin.audit.index')" :active="request()->routeIs('admin.audit.*')">
-                            {{ __('common.audit_log') }}
-                        </x-nav-link>
-                    @endcan
-                </div>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <a href="{{ route('preferences.edit') }}"
-                   @if (request()->routeIs('preferences.*')) aria-current="page" @endif
-                   class="rounded px-3 py-1.5 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
-                    {{ auth()->user()->name }}
-                    {{-- El modo activo se ve sin entrar a preferencias: si alguien
-                         no encuentra una columna, aquí está la razón. --}}
-                    <span class="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-xs text-slate-600">
-                        {{ auth()->user()->expert_mode ? __('common.expert_mode') : __('common.simple_mode') }}
-                    </span>
+            <div class="border-t border-slate-800 p-2">
+                <a href="{{ route('preferences.edit') }}" class="nav-item" @if (request()->routeIs('preferences.*')) aria-current="page" @endif>
+                    <x-icon name="cog" />
+                    {{ __('common.preferences') }}
                 </a>
-
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit"
-                            class="rounded px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-600">
-                        {{ __('auth.sign_out') }}
-                    </button>
-                </form>
             </div>
-        </nav>
-    </header>
+        </aside>
 
-    <main id="main-content" class="mx-auto max-w-7xl px-4 py-8">
-        @if (session('status'))
-            <div role="status" class="mb-6 rounded-md bg-emerald-50 px-4 py-3 text-sm text-emerald-900 ring-1 ring-emerald-200">
-                {{ session('status') }}
-            </div>
-        @endif
+        <div class="flex min-w-0 flex-1 flex-col">
+            {{-- Barra superior: identidad de quien está dentro, modo activo y
+                 salida. En pantalla chica también hace de navegación. --}}
+            <header class="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-white/95 px-4 backdrop-blur lg:px-6">
+                <div class="flex min-w-0 items-center gap-3">
+                    <span class="flex h-7 w-7 items-center justify-center rounded bg-brand-700 text-xs font-bold text-white lg:hidden">
+                        {{ mb_substr(config('branding.short_name'), 0, 2) }}
+                    </span>
+                    <h1 class="truncate text-base font-semibold tracking-tight text-slate-900">@yield('heading')</h1>
+                </div>
 
-        {{-- Un aviso no es un error: la acción no se hizo, pero nada se rompió.
-             Distinguirlos evita que el usuario crea que perdió lo que escribió. --}}
-        @if (session('warning'))
-            <div role="alert" class="mb-6 rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-900 ring-1 ring-amber-200">
-                {{ session('warning') }}
-            </div>
-        @endif
+                <div class="flex shrink-0 items-center gap-2">
+                    <a href="{{ route('preferences.edit') }}"
+                       class="hidden items-center gap-2 rounded-md px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900 sm:flex">
+                        <span class="max-w-[10rem] truncate">{{ auth()->user()->name }}</span>
+                        <span class="badge {{ auth()->user()->expert_mode ? 'badge-brand' : 'badge-neutral' }}">
+                            {{ auth()->user()->expert_mode ? __('common.expert_mode') : __('common.simple_mode') }}
+                        </span>
+                    </a>
 
-        @if (session('error'))
-            <div role="alert" class="mb-6 rounded-md bg-red-50 px-4 py-3 text-sm text-red-900 ring-1 ring-red-200">
-                {{ session('error') }}
-            </div>
-        @endif
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <button type="submit" class="btn btn-ghost btn-sm">{{ __('auth.sign_out') }}</button>
+                    </form>
+                </div>
+            </header>
 
-        <h1 class="mb-6 text-xl font-semibold tracking-tight">@yield('heading')</h1>
+            {{-- Navegación en pantalla chica: la lateral se oculta, pero el
+                 acceso no puede desaparecer con ella. --}}
+            <nav class="flex gap-1 overflow-x-auto border-b border-slate-200 bg-white px-4 py-2 lg:hidden" aria-label="{{ __('common.dashboard') }}">
+                @foreach ([
+                    ['route' => 'dashboard', 'label' => __('common.dashboard'), 'pattern' => 'dashboard'],
+                    ['route' => 'projects.index', 'label' => __('initiation.projects'), 'pattern' => 'projects.*'],
+                    ['route' => 'admin.users.index', 'label' => __('common.users'), 'pattern' => 'admin.users.*'],
+                    ['route' => 'admin.hierarchy.index', 'label' => __('hierarchy.title'), 'pattern' => 'admin.hierarchy.*'],
+                    ['route' => 'admin.org-units.index', 'label' => __('org_units.title'), 'pattern' => 'admin.org-units.*'],
+                ] as $link)
+                    <a href="{{ route($link['route']) }}"
+                       @if (request()->routeIs($link['pattern'])) aria-current="page" @endif
+                       class="shrink-0 rounded-md px-3 py-1.5 text-sm font-medium
+                              {{ request()->routeIs($link['pattern']) ? 'bg-brand-700 text-white' : 'text-slate-600 hover:bg-slate-100' }}">
+                        {{ $link['label'] }}
+                    </a>
+                @endforeach
+            </nav>
 
-        @yield('content')
-    </main>
+            <main id="main-content" class="min-w-0 flex-1 px-4 py-5 lg:px-6 lg:py-6">
+                <div class="mx-auto max-w-[1600px] space-y-4">
+                    @foreach ([
+                        'status' => ['bg-emerald-50 text-emerald-900 ring-emerald-200', 'status'],
+                        'warning' => ['bg-amber-50 text-amber-900 ring-amber-200', 'alert'],
+                        'error' => ['bg-red-50 text-red-900 ring-red-200', 'alert'],
+                    ] as $key => [$classes, $role])
+                        @if (session($key))
+                            <div role="{{ $role }}" class="rounded-md px-4 py-2.5 text-sm ring-1 {{ $classes }}">
+                                {{ session($key) }}
+                            </div>
+                        @endif
+                    @endforeach
+
+                    @yield('content')
+                </div>
+            </main>
+        </div>
+    </div>
 </body>
 </html>

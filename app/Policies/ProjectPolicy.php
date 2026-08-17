@@ -45,6 +45,20 @@ final class ProjectPolicy
     }
 
     /**
+     * Crear un proyecto no se decide por membresía —todavía no hay proyecto del
+     * cual ser miembro— sino por el permiso de gestionar proyectos.
+     *
+     * Faltaba este método, y su ausencia no fallaba con un error: `@can('create')`
+     * simplemente devolvía false, el botón de «Nuevo proyecto» nunca se dibujaba
+     * y la pantalla respondía 403. Un permiso que falta se ve igual que un
+     * permiso denegado, y por eso hay que probar también lo que sí debe pasar.
+     */
+    public function create(User $user): bool
+    {
+        return ! $this->isReadOnly($user) && $user->hasPermission(Permission::PROJECTS_MANAGE);
+    }
+
+    /**
      * Regla 2. Ser jefe de alguien del proyecto da lectura, nunca escritura:
      * la comprobación es la membresía, no la jerarquía.
      */

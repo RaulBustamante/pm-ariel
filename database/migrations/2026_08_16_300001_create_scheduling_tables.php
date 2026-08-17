@@ -202,8 +202,16 @@ return new class extends Migration
         Schema::dropIfExists('tasks');
         Schema::dropIfExists('calendars');
 
+        // Se comprueba antes de soltar: si la migración se aplicó en una versión
+        // anterior que no traía estas columnas, un `down()` ciego se atora y deja
+        // la base a medio revertir — con las tablas ya borradas y la migración
+        // todavía marcada como aplicada.
         Schema::table('projects', function (Blueprint $table): void {
-            $table->dropColumn(['planned_start', 'planned_finish']);
+            foreach (['planned_start', 'planned_finish'] as $column) {
+                if (Schema::hasColumn('projects', $column)) {
+                    $table->dropColumn($column);
+                }
+            }
         });
     }
 };

@@ -121,6 +121,22 @@ class Project extends Model
     }
 
     /**
+     * @return HasMany<\App\Models\Resource, $this>
+     */
+    public function resources(): HasMany
+    {
+        return $this->hasMany(Resource::class)->orderBy('name');
+    }
+
+    /**
+     * @return HasMany<ProjectFinding, $this>
+     */
+    public function findings(): HasMany
+    {
+        return $this->hasMany(ProjectFinding::class);
+    }
+
+    /**
      * @return BelongsTo<User, $this>
      */
     public function owner(): BelongsTo
