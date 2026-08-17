@@ -15,6 +15,7 @@ use App\Http\Controllers\Initiation\InitiationController;
 use App\Http\Controllers\Initiation\InitiationPackageController;
 use App\Http\Controllers\Initiation\RiskController;
 use App\Http\Controllers\Initiation\StakeholderController;
+use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ResourceController;
@@ -101,6 +102,9 @@ Route::middleware('auth')->group(function (): void {
         Route::post('tasks/recalculate', [TaskController::class, 'recalculate'])->name('projects.tasks.recalculate');
 
         Route::get('gantt', [GanttController::class, 'show'])->name('projects.gantt');
+
+        Route::get('kanban', [KanbanController::class, 'show'])->name('projects.kanban');
+        Route::post('kanban/{task}/move', [KanbanController::class, 'move'])->name('projects.kanban.move');
 
         Route::get('advisor', [AdvisorController::class, 'show'])->name('projects.advisor');
         Route::post('advisor', [AdvisorController::class, 'analyze'])->name('projects.advisor.analyze');
