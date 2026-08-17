@@ -27,26 +27,37 @@ final class PaletteContrastTest extends TestCase
 
     private const LARGE_TEXT = 3.0;
 
-    /** @var array<string, string> */
+    /**
+     * La paleta del centro de mando. Los nombres son los del papel de cada
+     * color, no los del token: lo que se verifica es «el texto secundario sobre
+     * una tarjeta», no «slate-600».
+     *
+     * @var array<string, string>
+     */
     private const PALETTE = [
-        'canvas' => '#f1f5f9',
-        'surface' => '#ffffff',
-        'ink' => '#0f172a',
-        'muted' => '#475569',
-        'brand-700' => '#1e40af',
-        'brand-800' => '#1e3a8a',
-        'brand-50' => '#eff5ff',
-        'sidebar' => '#0f172a',
-        'sidebar-text' => '#cbd5e1',
-        'danger-700' => '#b91c1c',
-        'danger-50' => '#fef2f2',
-        'danger-900' => '#991b1b',
-        'ok-50' => '#ecfdf5',
-        'ok-800' => '#065f46',
-        'warn-50' => '#fffbeb',
-        'warn-900' => '#92400e',
-        'neutral-50' => '#f1f5f9',
-        'neutral-700' => '#334155',
+        'canvas' => '#070b14',
+        'surface' => '#0e1526',
+        'surface-raised' => '#131c30',
+        'shell' => '#060a12',
+        'ink' => '#eef3fb',
+        'muted' => '#a8b6d1',
+        'dim' => '#8f9fbd',
+        'hud-400' => '#22d3ee',
+        'hud-500' => '#06b6d4',
+        'hud-ink' => '#04141a',
+        'brand-700' => '#7cbcfd',
+        'brand-800' => '#a8d3fe',
+        'nav-active' => '#10233f',
+        'ok-bg' => '#06281f',
+        'ok-text' => '#6ee7b7',
+        'warn-bg' => '#2c1f05',
+        'warn-text' => '#fcd34d',
+        'danger-bg' => '#2e0f18',
+        'danger-text' => '#fda4af',
+        'neutral-bg' => '#1b2740',
+        'neutral-text' => '#c3cee2',
+        'bar' => '#38bdf8',
+        'bar-critical' => '#fb7185',
         'white' => '#ffffff',
     ];
 
@@ -56,35 +67,37 @@ final class PaletteContrastTest extends TestCase
     public static function combinations(): array
     {
         return [
-            // --- Texto sobre las dos superficies -------------------------
+            // --- Texto sobre las tres superficies -------------------------
             'texto principal sobre tarjeta' => ['ink', 'surface', self::NORMAL_TEXT, 'El texto de todas las pantallas.'],
             'texto principal sobre lienzo' => ['ink', 'canvas', self::NORMAL_TEXT, 'El fondo de la aplicación.'],
             'texto secundario sobre tarjeta' => ['muted', 'surface', self::NORMAL_TEXT, 'Las ayudas bajo cada campo.'],
             'texto secundario sobre lienzo' => ['muted', 'canvas', self::NORMAL_TEXT, 'Los pies de sección.'],
+            'texto secundario sobre panel elevado' => ['muted', 'surface-raised', self::NORMAL_TEXT, 'El encabezado de las tablas.'],
+            'texto tenue sobre tarjeta' => ['dim', 'surface', self::NORMAL_TEXT, 'Las etiquetas de los indicadores.'],
 
-            // --- Menú lateral oscuro -------------------------------------
-            'menu lateral' => ['sidebar-text', 'sidebar', self::NORMAL_TEXT, 'La navegación completa.'],
-            'menu lateral activo' => ['white', 'brand-700', self::NORMAL_TEXT, 'La sección en la que estás.'],
+            // --- Menú lateral ---------------------------------------------
+            'menu lateral' => ['muted', 'shell', self::NORMAL_TEXT, 'La navegación completa.'],
+            'menu lateral activo' => ['white', 'nav-active', self::NORMAL_TEXT, 'La sección en la que estás.'],
 
             // --- Botones --------------------------------------------------
-            'boton primario' => ['white', 'brand-700', self::NORMAL_TEXT, 'Guardar, crear, aplicar.'],
-            'boton primario al pasar encima' => ['white', 'brand-800', self::NORMAL_TEXT, 'El mismo botón con el cursor.'],
-            'boton secundario' => ['neutral-700', 'surface', self::NORMAL_TEXT, 'Cancelar, ver, imprimir.'],
+            'boton primario' => ['hud-ink', 'hud-500', self::NORMAL_TEXT, 'Guardar, crear, aplicar.'],
+            'boton primario al pasar encima' => ['hud-ink', 'hud-400', self::NORMAL_TEXT, 'El mismo botón con el cursor.'],
+            'boton secundario' => ['neutral-text', 'surface-raised', self::NORMAL_TEXT, 'Cancelar, ver, imprimir.'],
 
             // --- Distintivos de estado -----------------------------------
-            'distintivo neutro' => ['neutral-700', 'neutral-50', self::NORMAL_TEXT, 'Estado sin alarma.'],
-            'distintivo correcto' => ['ok-800', 'ok-50', self::NORMAL_TEXT, 'Terminado, vigente.'],
-            'distintivo de aviso' => ['warn-900', 'warn-50', self::NORMAL_TEXT, 'Conviene revisar.'],
-            'distintivo de peligro' => ['danger-900', 'danger-50', self::NORMAL_TEXT, 'Amenaza la entrega.'],
+            'distintivo neutro' => ['neutral-text', 'neutral-bg', self::NORMAL_TEXT, 'Estado sin alarma.'],
+            'distintivo correcto' => ['ok-text', 'ok-bg', self::NORMAL_TEXT, 'Terminado, vigente.'],
+            'distintivo de aviso' => ['warn-text', 'warn-bg', self::NORMAL_TEXT, 'Conviene revisar.'],
+            'distintivo de peligro' => ['danger-text', 'danger-bg', self::NORMAL_TEXT, 'Amenaza la entrega.'],
 
             // --- Lo crítico -----------------------------------------------
-            'ruta critica sobre tarjeta' => ['danger-700', 'surface', self::NORMAL_TEXT, 'La holgura negativa y la ruta crítica.'],
+            'ruta critica sobre tarjeta' => ['bar-critical', 'surface', self::NORMAL_TEXT, 'La holgura negativa y la ruta crítica.'],
             'enlace sobre tarjeta' => ['brand-700', 'surface', self::NORMAL_TEXT, 'Todos los enlaces del sistema.'],
-            'renglon resaltado' => ['ink', 'brand-50', self::NORMAL_TEXT, 'La fila bajo el cursor en las tablas.'],
+            'acento sobre tarjeta' => ['hud-400', 'surface', self::NORMAL_TEXT, 'Los números vivos y los acentos.'],
 
             // --- Barras y elementos gráficos (umbral de interfaz) ---------
-            'barra del Gantt' => ['brand-700', 'surface', self::LARGE_TEXT, 'Las barras del diagrama.'],
-            'barra critica del Gantt' => ['danger-700', 'surface', self::LARGE_TEXT, 'Las barras de la ruta crítica.'],
+            'barra del Gantt' => ['bar', 'surface', self::LARGE_TEXT, 'Las barras del diagrama.'],
+            'barra critica del Gantt' => ['bar-critical', 'surface', self::LARGE_TEXT, 'Las barras de la ruta crítica.'],
         ];
     }
 
@@ -116,8 +129,8 @@ final class PaletteContrastTest extends TestCase
     #[Test]
     public function critical_and_normal_bars_differ_in_more_than_hue(): void
     {
-        $normal = $this->relativeLuminance(self::PALETTE['brand-700']);
-        $critical = $this->relativeLuminance(self::PALETTE['danger-700']);
+        $normal = $this->relativeLuminance(self::PALETTE['bar']);
+        $critical = $this->relativeLuminance(self::PALETTE['bar-critical']);
 
         $this->assertNotEqualsWithDelta(
             $normal,

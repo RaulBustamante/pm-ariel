@@ -5,7 +5,7 @@
 
 @section('content')
     <form method="POST" action="{{ route('admin.hierarchy.update', $user) }}"
-          class="max-w-2xl space-y-6 rounded-lg bg-white p-6 ring-1 ring-slate-200">
+          class="max-w-2xl space-y-6 rounded-lg bg-surface p-6 ring-1 ring-slate-200">
         @csrf
         @method('PUT')
 

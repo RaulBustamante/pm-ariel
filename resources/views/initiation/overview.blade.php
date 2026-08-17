@@ -20,7 +20,7 @@
             <section class="rounded-lg p-4 ring-1 {{ $lightClasses }}">
                 <div class="flex items-start gap-3">
                     <span aria-hidden="true"
-                          class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/70 text-sm font-bold">
+                          class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface/70 text-sm font-bold">
                         {{ $lightMark }}
                     </span>
                     <div>
@@ -31,7 +31,7 @@
 
                 {{-- La barra repite el mismo dato que el texto de arriba: quien no
                      ve color lo lee, quien no lee lo ve. --}}
-                <div class="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/60"
+                <div class="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-surface/60"
                      role="progressbar" aria-valuenow="{{ $completion }}" aria-valuemin="0" aria-valuemax="100"
                      aria-label="{{ __('initiation.health_complete_pct', ['percent' => $completion]) }}">
                     <div class="h-full bg-current opacity-60" style="width: {{ $completion }}%"></div>
@@ -41,14 +41,14 @@
             @include('initiation._findings')
 
             @if ($findings === [])
-                <div class="rounded-lg border border-dashed border-emerald-300 bg-white p-6 text-center text-sm text-slate-700">
+                <div class="rounded-lg border border-dashed border-emerald-300 bg-surface p-6 text-center text-sm text-slate-700">
                     {{ __('initiation.health_green') }}
                 </div>
             @endif
         </div>
 
         <aside class="space-y-4">
-            <div class="rounded-lg bg-white p-4 ring-1 ring-slate-200">
+            <div class="rounded-lg bg-surface p-4 ring-1 ring-slate-200">
                 <dl class="space-y-2 text-sm">
                     <div class="flex justify-between gap-3">
                         <dt class="text-slate-600">{{ __('initiation.project_code') }}</dt>

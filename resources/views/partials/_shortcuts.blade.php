@@ -8,7 +8,7 @@
         <span class="sr-only">{{ __('shortcuts.title') }}</span>
     </summary>
 
-    <div class="absolute right-0 top-7 z-30 w-72 rounded-lg border border-slate-200 bg-white p-3 shadow-raised">
+    <div class="absolute right-0 top-7 z-30 w-72 rounded-lg border border-slate-200 bg-surface p-3 shadow-raised">
         <p class="text-xs font-semibold text-slate-900">{{ __('shortcuts.title') }}</p>
 
         <dl class="mt-2 space-y-1">

@@ -18,18 +18,18 @@
             <a href="{{ route('projects.gantt', ['project' => $project, 'zoom' => $value]) }}"
                @if ($zoom === $value) aria-current="true" @endif
                class="rounded-md px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-600
-                      {{ $zoom === $value ? 'bg-blue-700 text-white' : 'bg-white text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50' }}">
+                      {{ $zoom === $value ? 'bg-blue-700 text-white' : 'bg-surface text-slate-700 ring-1 ring-slate-300 hover:bg-slate-50' }}">
                 {{ $label }}
             </a>
         @endforeach
     </div>
 
     @if ($tasks->isEmpty())
-        <div class="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-600">
+        <div class="rounded-lg border border-dashed border-slate-300 bg-surface p-8 text-center text-sm text-slate-600">
             {{ __('gantt.empty') }}
         </div>
     @else
-        <div class="rounded-lg bg-white ring-1 ring-slate-200">
+        <div class="rounded-lg bg-surface ring-1 ring-slate-200">
             <div class="flex">
                 {{-- Los nombres van en una tabla aparte y no dentro del SVG: así
                      se pueden leer, copiar y buscar con Ctrl+F, que dentro de un

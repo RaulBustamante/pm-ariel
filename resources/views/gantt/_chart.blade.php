@@ -18,7 +18,7 @@
 
     <defs>
         <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 1 L 7 4 L 0 7 z" fill="#64748b" />
+            <path d="M 0 1 L 7 4 L 0 7 z" class="g-link" />
         </marker>
     </defs>
 
@@ -27,30 +27,30 @@
     @foreach ($layout->weekendBands() as $band)
         <rect x="{{ $band['x'] }}" y="{{ \App\Support\Scheduling\GanttLayout::HEADER_HEIGHT }}"
               width="{{ $band['width'] }}" height="{{ $layout->height }}"
-              fill="#f1f5f9" />
+              class="g-weekend" />
     @endforeach
 
     {{-- Escala de tiempo --}}
-    <rect x="0" y="0" width="{{ max(320, $layout->width) }}" height="{{ \App\Support\Scheduling\GanttLayout::HEADER_HEIGHT }}" fill="#f8fafc" />
+    <rect x="0" y="0" width="{{ max(320, $layout->width) }}" height="{{ \App\Support\Scheduling\GanttLayout::HEADER_HEIGHT }}" class="g-header" />
     <line x1="0" y1="{{ \App\Support\Scheduling\GanttLayout::HEADER_HEIGHT }}"
           x2="{{ max(320, $layout->width) }}" y2="{{ \App\Support\Scheduling\GanttLayout::HEADER_HEIGHT }}"
-          stroke="#e2e8f0" />
+          class="g-rule" />
 
     @foreach ($layout->ticks() as $tick)
         <line x1="{{ $tick['x'] }}" y1="{{ $tick['major'] ? 14 : 26 }}"
               x2="{{ $tick['x'] }}" y2="{{ $layout->height }}"
-              stroke="{{ $tick['major'] ? '#cbd5e1' : '#e2e8f0' }}" stroke-width="1" />
+              class="{{ $tick['major'] ? 'g-grid-major' : 'g-grid' }}" stroke-width="1" />
         <text x="{{ $tick['x'] + 3 }}" y="{{ $tick['major'] ? 12 : 24 }}"
-              font-size="9" fill="#64748b" font-family="system-ui, sans-serif">{{ $tick['label'] }}</text>
+              font-size="9" class="g-axis" font-family="system-ui, sans-serif">{{ $tick['label'] }}</text>
     @endforeach
 
     {{-- Hoy --}}
     @if (($todayX = $layout->todayX()) !== null)
         <line x1="{{ $todayX }}" y1="{{ \App\Support\Scheduling\GanttLayout::HEADER_HEIGHT }}"
               x2="{{ $todayX }}" y2="{{ $layout->height }}"
-              stroke="#dc2626" stroke-width="1.5" stroke-dasharray="3 3" />
+              class="g-today" stroke-width="1.5" stroke-dasharray="3 3" />
         <text x="{{ $todayX + 3 }}" y="{{ \App\Support\Scheduling\GanttLayout::HEADER_HEIGHT - 4 }}"
-              font-size="9" fill="#dc2626" font-family="system-ui, sans-serif">{{ __('gantt.today') }}</text>
+              font-size="9" class="g-today-label" font-family="system-ui, sans-serif">{{ __('gantt.today') }}</text>
     @endif
 
     {{-- Flechas de dependencia, con ruteo ortogonal: salen del fin de la
@@ -79,7 +79,7 @@
         @endphp
 
         <path d="M {{ $x1 }} {{ $y1 }} H {{ $elbow }} V {{ $y2 }} H {{ $x2 - 2 }}"
-              fill="none" stroke="#94a3b8" stroke-width="1" marker-end="url(#arrow)" />
+              fill="none" class="g-link" stroke-width="1" marker-end="url(#arrow)" />
     @endforeach
 
     {{-- Barras --}}
@@ -100,7 +100,7 @@
             <rect x="{{ $layout->x($frozen->start) }}"
                   y="{{ $y + $barHeight - 1 }}"
                   width="{{ $layout->barWidth($frozen->start, $frozen->finish) }}"
-                  height="3" rx="1" fill="#94a3b8">
+                  height="3" rx="1" class="g-summary">
                 <title>{{ __('gantt.baseline_bar', [
                     'from' => $frozen->start->format('d/m/y'),
                     'to' => $frozen->finish->format('d/m/y'),
@@ -114,19 +114,23 @@
             <path d="M {{ $x }} {{ $y + 4 }} L {{ $x }} {{ $y }} L {{ $x + $width }} {{ $y }} L {{ $x + $width }} {{ $y + 4 }}
                      L {{ $x + $width - 3 }} {{ $y + 8 }} L {{ $x + $width - 3 }} {{ $y + 3 }}
                      L {{ $x + 3 }} {{ $y + 3 }} L {{ $x + 3 }} {{ $y + 8 }} Z"
-                  fill="#334155">
+                  class="g-label">
                 <title>{{ $label }}</title>
             </path>
         @elseif ($task->isMilestone())
             @php $cx = $x; $cy = $y + $barHeight / 2; @endphp
             <path d="M {{ $cx }} {{ $cy - 6 }} L {{ $cx + 6 }} {{ $cy }} L {{ $cx }} {{ $cy + 6 }} L {{ $cx - 6 }} {{ $cy }} Z"
-                  fill="{{ $task->is_critical ? '#dc2626' : '#1d4ed8' }}">
+                  class="{{ $task->is_critical ? 'g-bar-critical' : 'g-bar' }}">
                 <title>{{ $label }}</title>
             </path>
         @else
-            <rect @can('update', $project) data-task-bar data-task-id="{{ $task->id }}" data-task-name="{{ $task->name }}" class="cursor-ew-resize" @endcan
+            {{-- Un solo atributo `class`.
+                 Estuvo partido en dos —uno con el cursor de arrastre y otro con
+                 el color— y el navegador se queda con el primero y descarta el
+                 segundo en silencio: las barras salían sin color y nada fallaba. --}}
+            <rect @can('update', $project) data-task-bar data-task-id="{{ $task->id }}" data-task-name="{{ $task->name }}" @endcan
                   x="{{ $x }}" y="{{ $y }}" width="{{ $width }}" height="{{ $barHeight }}" rx="2"
-                  fill="{{ $task->is_critical ? '#dc2626' : '#2563eb' }}">
+                  class="{{ $task->is_critical ? 'g-bar-critical' : 'g-bar' }}@can('update', $project) cursor-ew-resize @endcan">
                 <title>{{ $label }}</title>
             </rect>
 
@@ -135,7 +139,7 @@
                      barra encima haría creer que son dos tareas. --}}
                 <rect x="{{ $x }}" y="{{ $y + 3 }}"
                       width="{{ $width * min(1, (float) $task->percent_complete / 100) }}" height="{{ $barHeight - 6 }}"
-                      fill="#0f172a" fill-opacity="0.45" />
+                      class="g-progress" />
             @endif
         @endif
     @endforeach

@@ -22,7 +22,7 @@
                    class="flex h-full flex-col gap-1 rounded-md border px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600
                           {{ $isCurrent
                                 ? 'border-blue-600 bg-blue-50 ring-1 ring-blue-600'
-                                : ($isDone ? 'border-emerald-200 bg-white hover:border-emerald-400' : 'border-slate-200 bg-white hover:border-slate-400') }}">
+                                : ($isDone ? 'border-emerald-200 bg-surface hover:border-emerald-400' : 'border-slate-200 bg-surface hover:border-slate-400') }}">
                     <span class="flex items-center gap-2 font-medium text-slate-900">
                         {{-- Número y palomita: el estado nunca se comunica solo con color. --}}
                         <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-semibold

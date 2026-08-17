@@ -229,7 +229,11 @@ final class ProjectSettingsTest extends TestCase
             ->get(route('projects.gantt', $this->project))
             ->assertOk()
             ->assertSee('Original')
-            ->assertSee('#94a3b8', escape: false);
+            // Se busca la clase y no un color: los colores del Gantt viven en
+            // la hoja de estilos porque el mismo SVG se pinta en tema claro,
+            // oscuro y papel. Buscar un `#94a3b8` aquí ataba la prueba a una
+            // paleta y fallaba cada vez que alguien la ajustaba.
+            ->assertSee('g-summary', escape: false);
     }
 
     #[Test]

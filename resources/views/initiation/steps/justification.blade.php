@@ -8,7 +8,7 @@
 
     <div class="grid gap-6 lg:grid-cols-3">
         <form method="POST" action="{{ route($step->route().'.update', $project) }}"
-              class="space-y-6 rounded-lg bg-white p-6 ring-1 ring-slate-200 lg:col-span-2">
+              class="space-y-6 rounded-lg bg-surface p-6 ring-1 ring-slate-200 lg:col-span-2">
             @csrf
             @method('PUT')
 

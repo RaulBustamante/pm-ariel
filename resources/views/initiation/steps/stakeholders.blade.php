@@ -17,7 +17,7 @@
 
             {{-- Alta de interesado --}}
             <form method="POST" action="{{ route('projects.stakeholders.store', $project) }}"
-                  class="space-y-4 rounded-lg bg-white p-5 ring-1 ring-slate-200">
+                  class="space-y-4 rounded-lg bg-surface p-5 ring-1 ring-slate-200">
                 @csrf
 
                 <h2 class="text-sm font-semibold text-slate-900">{{ __('initiation.add_stakeholder') }}</h2>
@@ -48,13 +48,13 @@
 
             {{-- Lista --}}
             @if ($project->stakeholders->isEmpty())
-                <div class="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-600">
+                <div class="rounded-lg border border-dashed border-slate-300 bg-surface p-6 text-center text-sm text-slate-600">
                     {{ __('initiation.no_stakeholders') }}
                 </div>
             @else
                 <ul class="space-y-3">
                     @foreach ($project->stakeholders as $person)
-                        <li class="rounded-lg bg-white p-4 ring-1 ring-slate-200">
+                        <li class="rounded-lg bg-surface p-4 ring-1 ring-slate-200">
                             <div class="flex flex-wrap items-start justify-between gap-3">
                                 <div>
                                     <p class="text-sm font-semibold text-slate-900">{{ $person->name }}</p>
@@ -102,7 +102,7 @@
             @endif
 
             <form method="POST" action="{{ route($step->route().'.update', $project) }}"
-                  class="rounded-lg bg-white p-5 ring-1 ring-slate-200">
+                  class="rounded-lg bg-surface p-5 ring-1 ring-slate-200">
                 @csrf
                 @method('PUT')
                 @include('initiation._actions')

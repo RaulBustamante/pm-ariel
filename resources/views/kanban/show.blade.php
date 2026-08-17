@@ -17,7 +17,7 @@
                 <a href="{{ route('projects.kanban', ['project' => $project, 'lane' => $value]) }}"
                    @if ($swimlane === $value) aria-current="true" @endif
                    class="rounded-md px-2.5 py-1 text-xs font-medium
-                          {{ $swimlane === $value ? 'bg-brand-700 text-white' : 'bg-white text-slate-600 ring-1 ring-slate-300 hover:bg-slate-50' }}">
+                          {{ $swimlane === $value ? 'bg-brand-700 text-white' : 'bg-surface text-slate-600 ring-1 ring-slate-300 hover:bg-slate-50' }}">
                     {{ $label }}
                 </a>
             @endforeach

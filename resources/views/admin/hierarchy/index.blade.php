@@ -18,7 +18,7 @@
         </div>
     @endif
 
-    <div class="overflow-x-auto rounded-lg bg-white ring-1 ring-slate-200">
+    <div class="overflow-x-auto rounded-lg bg-surface ring-1 ring-slate-200">
         <table class="min-w-full divide-y divide-slate-200 text-sm">
             <caption class="sr-only">{{ __('hierarchy.heading') }}</caption>
             <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-600">

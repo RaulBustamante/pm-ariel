@@ -17,7 +17,7 @@
                 @endif
             </div>
 
-            <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-slate-200">
+            <div class="rounded-lg bg-surface p-6 shadow-sm ring-1 ring-slate-200">
                 @yield('content')
             </div>
         </div>

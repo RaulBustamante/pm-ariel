@@ -25,7 +25,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-100">
+<body class="paper bg-slate-100">
     <div class="no-print sticky top-0 z-10 border-b border-slate-200 bg-white px-4 py-3">
         <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3">
             <a href="{{ route('projects.gantt', $project) }}" class="text-sm text-brand-700 underline">

@@ -4,7 +4,7 @@
 @endphp
 
 <form method="GET" action="{{ route($route, $project) }}"
-      class="mb-4 flex flex-wrap items-end gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2.5">
+      class="mb-4 flex flex-wrap items-end gap-2 rounded-lg border border-slate-200 bg-surface px-3 py-2.5">
 
     <div class="min-w-[12rem] flex-1">
         <label for="filter-q" class="sr-only">{{ __('filters.search') }}</label>

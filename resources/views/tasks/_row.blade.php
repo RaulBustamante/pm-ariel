@@ -29,7 +29,7 @@
 
             <input type="text" name="name" form="task-{{ $task->id }}" value="{{ $task->name }}"
                    aria-label="{{ __('tasks.name') }} — {{ __('tasks.row') }} {{ $row }}"
-                   class="w-full min-w-[10rem] rounded border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600">
+                   class="w-full min-w-[10rem] rounded border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 focus:border-blue-600 focus:bg-surface focus:ring-1 focus:ring-blue-600">
 
             @if ($isCritical && ! $task->is_summary)
                 {{-- Texto además del color: la ruta crítica no puede depender de
@@ -46,7 +46,7 @@
             <input type="text" name="duration" form="task-{{ $task->id }}"
                    value="{{ $durations->toHuman((int) $task->duration_minutes) }}"
                    aria-label="{{ __('tasks.duration') }} — {{ $task->name }}"
-                   class="w-16 rounded border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600">
+                   class="w-16 rounded border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 focus:border-blue-600 focus:bg-surface focus:ring-1 focus:ring-blue-600">
         @else
             <span class="text-xs text-slate-400">—</span>
         @endunless
@@ -57,7 +57,7 @@
             <input type="text" name="predecessors" form="task-{{ $task->id }}" value="{{ $predecessors }}"
                    placeholder="12FS+2d"
                    aria-label="{{ __('tasks.predecessors') }} — {{ $task->name }}"
-                   class="w-24 rounded border-transparent bg-transparent px-1 py-0.5 font-mono text-xs hover:border-slate-300 focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600">
+                   class="w-24 rounded border-transparent bg-transparent px-1 py-0.5 font-mono text-xs hover:border-slate-300 focus:border-blue-600 focus:bg-surface focus:ring-1 focus:ring-blue-600">
         @endunless
     </td>
 
@@ -83,7 +83,7 @@
         @unless ($task->is_summary)
             <select name="owner_id" form="task-{{ $task->id }}"
                     aria-label="{{ __('tasks.owner') }} — {{ $task->name }}"
-                    class="w-full min-w-[7rem] rounded border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600">
+                    class="w-full min-w-[7rem] rounded border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 focus:border-blue-600 focus:bg-surface focus:ring-1 focus:ring-blue-600">
                 <option value="">—</option>
                 @foreach ($members as $member)
                     <option value="{{ $member->id }}" @selected((int) $task->owner_id === $member->id)>{{ $member->name }}</option>

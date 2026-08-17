@@ -9,7 +9,7 @@
     };
 @endphp
 
-<li class="rounded-lg bg-white p-4 ring-1 ring-slate-200">
+<li class="rounded-lg bg-surface p-4 ring-1 ring-slate-200">
     <div class="flex flex-wrap items-start justify-between gap-3">
         <div class="min-w-0">
             <p class="text-sm font-semibold text-slate-900">

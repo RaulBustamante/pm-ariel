@@ -21,7 +21,7 @@
         @page { margin: 18mm 14mm; }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-900">
+<body class="paper bg-slate-100 text-slate-900">
     <div class="no-print sticky top-0 z-10 border-b border-slate-200 bg-white px-4 py-3">
         <div class="mx-auto flex max-w-4xl flex-wrap items-center justify-between gap-3">
             <a href="{{ route('projects.initiation.overview', $project) }}"

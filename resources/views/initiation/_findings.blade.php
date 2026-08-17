@@ -8,7 +8,7 @@
 
 @if ($findings !== [])
     <section aria-labelledby="findings-heading"
-             class="mb-6 rounded-lg border border-slate-200 bg-white p-4">
+             class="mb-6 rounded-lg border border-slate-200 bg-surface p-4">
         <h2 id="findings-heading" class="text-sm font-semibold text-slate-900">
             {{ __('initiation.health') }}
         </h2>

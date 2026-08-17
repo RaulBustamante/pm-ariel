@@ -7,7 +7,7 @@
     <p class="mb-5 max-w-2xl text-sm text-slate-600">{{ __('initiation.intro') }}</p>
 
     <form method="POST" action="{{ route('projects.store') }}"
-          class="max-w-2xl space-y-5 rounded-lg bg-white p-6 ring-1 ring-slate-200">
+          class="max-w-2xl space-y-5 rounded-lg bg-surface p-6 ring-1 ring-slate-200">
         @csrf
 
         <x-form-field name="name" :label="__('initiation.project_name')"

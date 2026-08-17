@@ -16,7 +16,7 @@
             @include('initiation._findings')
 
             <form method="POST" action="{{ route('projects.risks.store', $project) }}"
-                  class="space-y-4 rounded-lg bg-white p-5 ring-1 ring-slate-200">
+                  class="space-y-4 rounded-lg bg-surface p-5 ring-1 ring-slate-200">
                 @csrf
 
                 <h2 class="text-sm font-semibold text-slate-900">{{ __('initiation.add_risk') }}</h2>
@@ -78,7 +78,7 @@
             </form>
 
             @if ($project->risks->isEmpty())
-                <div class="rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-600">
+                <div class="rounded-lg border border-dashed border-slate-300 bg-surface p-6 text-center text-sm text-slate-600">
                     {{ __('initiation.no_risks') }}
                 </div>
             @else
@@ -90,7 +90,7 @@
             @endif
 
             <form method="POST" action="{{ route($step->route().'.update', $project) }}"
-                  class="rounded-lg bg-white p-5 ring-1 ring-slate-200">
+                  class="rounded-lg bg-surface p-5 ring-1 ring-slate-200">
                 @csrf
                 @method('PUT')
                 @include('initiation._actions')

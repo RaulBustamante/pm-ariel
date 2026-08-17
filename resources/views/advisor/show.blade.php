@@ -19,7 +19,7 @@
         <div class="space-y-5 lg:col-span-2">
             <section class="flex items-start gap-3 rounded-lg p-4 ring-1 {{ $lightClasses }}">
                 <span aria-hidden="true"
-                      class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/70 text-sm font-bold">
+                      class="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface/70 text-sm font-bold">
                     {{ $lightMark }}
                 </span>
                 <div>
@@ -45,7 +45,7 @@
                     };
                 @endphp
 
-                <article class="rounded-lg bg-white p-4 ring-1 ring-slate-200">
+                <article class="rounded-lg bg-surface p-4 ring-1 ring-slate-200">
                     <div class="flex items-start gap-3">
                         {{-- Símbolo y etiqueta además del color: la gravedad no
                              puede depender de distinguir rojo de ámbar. --}}
@@ -93,7 +93,7 @@
                 </button>
             </form>
 
-            <section class="rounded-lg bg-white p-4 ring-1 ring-slate-200">
+            <section class="rounded-lg bg-surface p-4 ring-1 ring-slate-200">
                 <h2 class="text-sm font-semibold text-slate-900">{{ __('advisor.workload') }}</h2>
                 <p class="mt-1 text-xs text-slate-600">{{ __('advisor.workload_intro') }}</p>
 
@@ -134,7 +134,7 @@
 
             @can('update', $project)
                 <form method="POST" action="{{ route('projects.resources.store', $project) }}"
-                      class="space-y-3 rounded-lg bg-white p-4 ring-1 ring-slate-200">
+                      class="space-y-3 rounded-lg bg-surface p-4 ring-1 ring-slate-200">
                     @csrf
 
                     <h2 class="text-sm font-semibold text-slate-900">{{ __('resources.add') }}</h2>

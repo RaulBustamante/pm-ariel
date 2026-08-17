@@ -21,4 +21,9 @@ return [
 
     'timezone_help' => 'Con qué huso se muestran las fechas y horas. Ejemplo: America/Mexico_City.',
 
+    'theme' => 'Tema',
+    'theme_system' => 'Sistema',
+    'theme_light' => 'Claro',
+    'theme_dark' => 'Oscuro',
+    'theme_help' => 'Con «Sistema» se usa lo que ya tengas configurado en tu computadora. El tema viaja contigo: si entras desde otro equipo, lo encuentras igual.',
 ];

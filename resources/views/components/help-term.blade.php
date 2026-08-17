@@ -21,7 +21,7 @@
         </summary>
 
         <span id="{{ $id }}"
-              class="absolute left-0 top-6 z-20 block w-72 rounded-md border border-slate-200 bg-white p-3 text-left text-xs font-normal leading-relaxed text-slate-700 shadow-lg">
+              class="absolute left-0 top-6 z-20 block w-72 rounded-md border border-slate-200 bg-surface p-3 text-left text-xs font-normal leading-relaxed text-slate-700 shadow-lg">
             <span class="block font-semibold text-slate-900">{{ __("glossary.{$term}_label") }}</span>
             <span class="mt-1 block">{{ $text }}</span>
             @if ($hasExample)

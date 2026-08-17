@@ -20,7 +20,7 @@
     };
 @endphp
 
-<section aria-labelledby="matrix-heading" class="rounded-lg bg-white p-4 ring-1 ring-slate-200">
+<section aria-labelledby="matrix-heading" class="rounded-lg bg-surface p-4 ring-1 ring-slate-200">
     <h2 id="matrix-heading" class="text-sm font-semibold text-slate-900">{{ __('initiation.matrix_title') }}</h2>
     <p class="mt-1 text-xs text-slate-600">{{ __('initiation.matrix_help') }}</p>
 
@@ -41,7 +41,7 @@
                             @php $inCell = $cells->get("{$power}-{$interest}", collect()); @endphp
                             <div class="min-h-[3.25rem] rounded border border-slate-200 p-1 {{ $quadrantOf($power, $interest) }}">
                                 @foreach ($inCell as $person)
-                                    <span class="mb-0.5 block truncate rounded bg-white/80 px-1 text-[11px] leading-tight text-slate-800 ring-1 ring-slate-300"
+                                    <span class="mb-0.5 block truncate rounded bg-surface/80 px-1 text-[11px] leading-tight text-slate-800 ring-1 ring-slate-300"
                                           title="{{ $person->name }}">
                                         {{ $person->name }}
                                     </span>

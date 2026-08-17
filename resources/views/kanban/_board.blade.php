@@ -39,7 +39,7 @@
 
             <div class="min-h-[4rem] space-y-2 p-2">
                 @forelse ($tasks as $task)
-                    <article class="rounded-md border border-slate-200 bg-white p-2.5 shadow-card transition-colors hover:border-brand-300">
+                    <article class="rounded-md border border-slate-200 bg-surface p-2.5 shadow-card transition-colors hover:border-brand-300">
                         <div class="flex items-start justify-between gap-2">
                             <p class="min-w-0 flex-1 text-[13px] font-medium leading-snug text-slate-900">
                                 {{ $task->name }}

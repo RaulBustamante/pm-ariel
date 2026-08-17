@@ -22,12 +22,12 @@
     @endcan
 
     @if ($tree->isEmpty())
-        <div class="rounded-lg border border-dashed border-slate-300 bg-white p-8 text-center">
+        <div class="rounded-lg border border-dashed border-slate-300 bg-surface p-8 text-center">
             <h2 class="text-base font-semibold">{{ __('common.empty_title') }}</h2>
             <p class="mx-auto mt-2 max-w-lg text-sm text-slate-600">{{ __('org_units.empty') }}</p>
         </div>
     @else
-        <div class="overflow-x-auto rounded-lg bg-white ring-1 ring-slate-200">
+        <div class="overflow-x-auto rounded-lg bg-surface ring-1 ring-slate-200">
             <table class="min-w-full divide-y divide-slate-200 text-sm">
                 <caption class="sr-only">{{ __('org_units.heading') }}</caption>
                 <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-600">

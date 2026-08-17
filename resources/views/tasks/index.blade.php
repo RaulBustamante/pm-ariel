@@ -25,11 +25,11 @@
     @endif
 
     @if ($tasks->isEmpty())
-        <div class="mb-6 rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-600">
+        <div class="mb-6 rounded-lg border border-dashed border-slate-300 bg-surface p-6 text-center text-sm text-slate-600">
             {{ __('tasks.empty') }}
         </div>
     @else
-        <div class="mb-6 overflow-x-auto rounded-lg bg-white ring-1 ring-slate-200">
+        <div class="mb-6 overflow-x-auto rounded-lg bg-surface ring-1 ring-slate-200">
             <table class="min-w-full divide-y divide-slate-200 text-sm">
                 <caption class="sr-only">{{ __('tasks.title') }}</caption>
                 <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-600">
@@ -66,7 +66,7 @@
              una pantalla aparte por cada tarea es lo que hace que capturar un
              plan de sesenta tareas se sienta interminable. --}}
         <form method="POST" action="{{ route('projects.tasks.store', $project) }}"
-              class="space-y-4 rounded-lg bg-white p-5 ring-1 ring-slate-200 lg:col-span-2">
+              class="space-y-4 rounded-lg bg-surface p-5 ring-1 ring-slate-200 lg:col-span-2">
             @csrf
 
             <h2 class="text-sm font-semibold text-slate-900">{{ __('tasks.new_task') }}</h2>
@@ -103,7 +103,7 @@
         </form>
 
         <aside class="space-y-4">
-            <div class="rounded-lg bg-white p-4 ring-1 ring-slate-200">
+            <div class="rounded-lg bg-surface p-4 ring-1 ring-slate-200">
                 <dl class="space-y-2 text-sm">
                     <div class="flex justify-between gap-3">
                         <dt class="text-slate-600">{{ __('tasks.project_start') }}</dt>

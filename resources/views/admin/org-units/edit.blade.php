@@ -4,7 +4,7 @@
 @section('heading', __('org_units.edit'))
 
 @section('content')
-    <form method="POST" action="{{ route('admin.org-units.update', $unit) }}" class="max-w-2xl rounded-lg bg-white p-6 ring-1 ring-slate-200">
+    <form method="POST" action="{{ route('admin.org-units.update', $unit) }}" class="max-w-2xl rounded-lg bg-surface p-6 ring-1 ring-slate-200">
         @csrf
         @method('PUT')
 

@@ -4,19 +4,81 @@
 @source '../../storage/framework/views/*.php';
 
 /*
-| Sistema visual — «tablero denso».
+| Sistema visual v2 — «centro de mando», en claro y en oscuro.
 |
-| El producto muestra tablas largas, un Gantt y listas de hallazgos. La densidad
-| manda: se prefiere ver más renglones antes que más aire. Por eso la escala
-| tipográfica es compacta y el color se usa con cuentagotas — cuando casi todo es
-| gris, un renglón rojo se ve de verdad. Si todo tuviera color, nada resaltaría.
+| El producto muestra tablas largas, un Gantt, histogramas de carga y reportes de
+| costo. La densidad manda: se prefiere ver más renglones antes que más aire.
+|
+| ---------------------------------------------------------------------------
+| Cómo está armado — leer esto antes de tocar un color
+| ---------------------------------------------------------------------------
+|
+| Hay 716 utilidades de color escritas a mano en las 69 plantillas, de la Etapa 1
+| a la 5, y todas usan la escala `slate` **semánticamente**: 900 para el texto
+| fuerte, 600 para el secundario, 200 para las líneas, 50 para los rellenos.
+|
+| Por eso el tema no se cambia tocando plantillas: se cambia **redefiniendo la
+| escala**. En claro, `slate-900` es casi negro; en oscuro es casi blanco. El
+| número sigue significando «lo más contrastado», que es como se venía usando, y
+| las 716 utilidades quedan correctas en los dos temas por construcción.
+|
+| Regla para lo que se escriba de aquí en adelante: **ningún color literal dentro
+| de un componente.** Todo sale de un token. Un `#0f172a` suelto en una regla es
+| un color que se va a ver mal en uno de los dos temas, y no hay forma de que la
+| prueba de contraste lo detecte.
+|
+| Los tres estados del tema, y por qué son tres:
+|   - sin atributo  → lo que prefiera el sistema operativo de quien mira
+|   - data-theme="light" / "dark" → lo que la persona eligió, que gana siempre
+|
+| El atributo lo escribe el servidor en el `<html>` desde la preferencia
+| guardada. No hay JavaScript de por medio, y por eso no hay parpadeo: la página
+| llega ya con su tema puesto.
 */
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
     --font-mono: ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', monospace;
 
-    /* Azul de trabajo, no de marca: la marca vive en config/branding.php. */
+    /* --- Escala neutra. Tema claro: 50 es lo más pálido --------------- */
+    --color-slate-50: #f8fafc;
+    --color-slate-100: #f1f5f9;
+    --color-slate-200: #e2e8f0;
+    --color-slate-300: #cbd5e1;
+    --color-slate-400: #94a3b8;
+    --color-slate-500: #64748b;
+    --color-slate-600: #475569;
+    --color-slate-700: #334155;
+    --color-slate-800: #1e293b;
+    --color-slate-900: #0f172a;
+    --color-slate-950: #020617;
+
+    /* `gray` se usa poco y siempre con la misma intención que `slate`. */
+    --color-gray-100: #f1f5f9;
+    --color-gray-200: #e2e8f0;
+    --color-gray-300: #cbd5e1;
+    --color-gray-400: #94a3b8;
+    --color-gray-600: #475569;
+    --color-gray-700: #334155;
+    --color-gray-800: #1e293b;
+
+    /* --- Superficies -------------------------------------------------- */
+    --color-canvas: #eef2f7;
+    --color-surface: #ffffff;
+    --color-surface-raised: #f8fafc;
+    --color-shell: #0b1220;
+
+    /* --- Líneas ------------------------------------------------------- */
+    --color-line: #e2e8f0;
+    --color-line-soft: #f1f5f9;
+    --color-line-strong: #cbd5e1;
+
+    /* --- Texto -------------------------------------------------------- */
+    --color-ink: #0f172a;
+    --color-muted: #475569;
+    --color-dim: #64748b;
+
+    /* --- Azul de trabajo. La marca vive en config/branding.php --------- */
     --color-brand-50: #eff5ff;
     --color-brand-100: #dbe8fe;
     --color-brand-200: #bfd7fe;
@@ -28,31 +90,350 @@
     --color-brand-800: #1e3a8a;
     --color-brand-900: #1e336e;
 
-    /* Ámbar solo para lo que exige atención sin ser un error. */
+    /* --- Cian: el acento del sistema ---------------------------------- */
+    --color-hud-300: #67e8f9;
+    --color-hud-400: #22d3ee;
+    --color-hud-500: #0891b2;
+    --color-hud-600: #0e7490;
+    --color-hud-ink: #ffffff;
+    --color-hud-soft: #ecfeff;
+
+    /* --- Ámbar solo para lo que exige atención sin ser un error -------- */
     --color-accent-400: #fbbf24;
     --color-accent-500: #f59e0b;
     --color-accent-600: #d97706;
 
-    --color-canvas: #f1f5f9;
-    --color-surface: #ffffff;
+    /* --- Distintivos de estado ---------------------------------------- */
+    --color-badge-neutral-bg: #f1f5f9;
+    --color-badge-neutral-fg: #334155;
+    --color-badge-neutral-line: #e2e8f0;
+    --color-badge-ok-bg: #ecfdf5;
+    --color-badge-ok-fg: #065f46;
+    --color-badge-ok-line: #a7f3d0;
+    --color-badge-warn-bg: #fffbeb;
+    --color-badge-warn-fg: #92400e;
+    --color-badge-warn-line: #fde68a;
+    --color-badge-danger-bg: #fef2f2;
+    --color-badge-danger-fg: #991b1b;
+    --color-badge-danger-line: #fecaca;
+    --color-badge-brand-bg: #eff5ff;
+    --color-badge-brand-fg: #1e3a8a;
+    --color-badge-brand-line: #bfd7fe;
 
+    /*
+    | Paleta categórica para gráficas.
+    |
+    | Ocho series distinguibles entre sí **y también en escala de grises**: cada
+    | una salta de luminosidad respecto de sus vecinas, no solo de tono. Quien no
+    | distingue rojo de verde sigue pudiendo leer un histograma de carga, y la
+    | misma gráfica impresa en blanco y negro se entiende.
+    */
+    --color-viz-1: #0891b2;
+    --color-viz-2: #7c3aed;
+    --color-viz-3: #d97706;
+    --color-viz-4: #059669;
+    --color-viz-5: #e11d48;
+    --color-viz-6: #2563eb;
+    --color-viz-7: #c026d3;
+    --color-viz-8: #64748b;
+
+    /* --- El Gantt ----------------------------------------------------- */
+    --color-g-weekend: #f1f5f9;
+    --color-g-header: #f8fafc;
+    --color-g-rule: #e2e8f0;
+    --color-g-grid: #e2e8f0;
+    --color-g-grid-major: #cbd5e1;
+    --color-g-axis: #64748b;
+    --color-g-label: #334155;
+    --color-g-link: #94a3b8;
+    --color-g-summary: #94a3b8;
+    --color-g-bar: #1d4ed8;
+    --color-g-bar-critical: #dc2626;
+    --color-g-today: #dc2626;
+
+    /* --- Profundidad -------------------------------------------------- */
     --shadow-card: 0 1px 2px 0 rgb(15 23 42 / 0.04), 0 1px 3px 0 rgb(15 23 42 / 0.06);
-    --shadow-raised: 0 4px 12px -2px rgb(15 23 42 / 0.10), 0 2px 4px -2px rgb(15 23 42 / 0.06);
+    --shadow-raised: 0 12px 28px -10px rgb(15 23 42 / 0.22), 0 2px 6px -2px rgb(15 23 42 / 0.10);
+    --shadow-glow: 0 0 0 1px rgb(8 145 178 / 0.35), 0 4px 14px -4px rgb(8 145 178 / 0.35);
+
+    --ease-out-hud: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/*
+| El tema oscuro.
+|
+| Solo cambian los tokens. Ni un componente se redefine aquí abajo — si algún día
+| hace falta hacerlo, es señal de que ese componente tiene un color literal
+| adentro y lo que hay que arreglar es el componente.
+|
+| El bloque está escrito una vez y se aplica por dos caminos: cuando la persona
+| eligió «oscuro», y cuando no eligió nada pero su sistema está en oscuro. El
+| segundo se protege con `:not([data-theme='light'])` para que quien eligió claro
+| con el sistema en oscuro obtenga lo que pidió.
+*/
+@layer theme {
+    :root[data-theme='dark'],
+    :root[data-theme='dark'] .themed {
+        --color-slate-50: #131c30;
+        --color-slate-100: #18233a;
+        --color-slate-200: #1f2c46;
+        --color-slate-300: #2b3a58;
+        --color-slate-400: #7c8ba6;
+        --color-slate-500: #8f9fbd;
+        --color-slate-600: #a8b6d1;
+        --color-slate-700: #c3cee2;
+        --color-slate-800: #dde5f2;
+        --color-slate-900: #eef3fb;
+        --color-slate-950: #ffffff;
+
+        --color-gray-100: #18233a;
+        --color-gray-200: #1f2c46;
+        --color-gray-300: #2b3a58;
+        --color-gray-400: #7c8ba6;
+        --color-gray-600: #a8b6d1;
+        --color-gray-700: #c3cee2;
+        --color-gray-800: #dde5f2;
+
+        --color-canvas: #070b14;
+        --color-surface: #0e1526;
+        --color-surface-raised: #131c30;
+        --color-shell: #060a12;
+
+        --color-line: #1f2c46;
+        --color-line-soft: #18233a;
+        --color-line-strong: #2b3a58;
+
+        --color-ink: #eef3fb;
+        --color-muted: #a8b6d1;
+        --color-dim: #8f9fbd;
+
+        --color-brand-50: #0f2038;
+        --color-brand-100: #12294a;
+        --color-brand-200: #163866;
+        --color-brand-300: #1d4f92;
+        --color-brand-400: #2b6fd0;
+        --color-brand-500: #3b8ef6;
+        --color-brand-600: #59a5fb;
+        --color-brand-700: #7cbcfd;
+        --color-brand-800: #a8d3fe;
+        --color-brand-900: #cfe7ff;
+
+        --color-hud-300: #a5f3fc;
+        --color-hud-400: #22d3ee;
+        --color-hud-500: #06b6d4;
+        --color-hud-600: #0891b2;
+        --color-hud-ink: #04141a;
+        --color-hud-soft: #0b2b33;
+
+        --color-badge-neutral-bg: #1b2740;
+        --color-badge-neutral-fg: #c3cee2;
+        --color-badge-neutral-line: #2b3a58;
+        --color-badge-ok-bg: #06281f;
+        --color-badge-ok-fg: #6ee7b7;
+        --color-badge-ok-line: #10603f;
+        --color-badge-warn-bg: #2c1f05;
+        --color-badge-warn-fg: #fcd34d;
+        --color-badge-warn-line: #78500a;
+        --color-badge-danger-bg: #2e0f18;
+        --color-badge-danger-fg: #fda4af;
+        --color-badge-danger-line: #8a2140;
+        --color-badge-brand-bg: #10233f;
+        --color-badge-brand-fg: #a8d3fe;
+        --color-badge-brand-line: #1d4f92;
+
+        --color-viz-1: #22d3ee;
+        --color-viz-2: #a78bfa;
+        --color-viz-3: #fbbf24;
+        --color-viz-4: #34d399;
+        --color-viz-5: #fb7185;
+        --color-viz-6: #60a5fa;
+        --color-viz-7: #f0abfc;
+        --color-viz-8: #94a3b8;
+
+        --color-g-weekend: #0b1220;
+        --color-g-header: #101a2e;
+        --color-g-rule: #253451;
+        --color-g-grid: #17223a;
+        --color-g-grid-major: #253451;
+        --color-g-axis: #8f9fbd;
+        --color-g-label: #dde5f2;
+        --color-g-link: #64748b;
+        --color-g-summary: #7c8ba6;
+        --color-g-bar: #38bdf8;
+        --color-g-bar-critical: #fb7185;
+        --color-g-today: #fb7185;
+
+        --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.5), 0 0 0 1px rgb(56 189 248 / 0.06);
+        --shadow-raised: 0 12px 32px -8px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(56 189 248 / 0.10);
+        --shadow-glow: 0 0 0 1px rgb(34 211 238 / 0.35), 0 0 20px -4px rgb(34 211 238 / 0.35);
+    }
+}
+
+/* El mismo bloque, para quien no eligió y trae el sistema en oscuro. */
+@media (prefers-color-scheme: dark) {
+    @layer theme {
+        :root:not([data-theme='light']) {
+            --color-slate-50: #131c30;
+            --color-slate-100: #18233a;
+            --color-slate-200: #1f2c46;
+            --color-slate-300: #2b3a58;
+            --color-slate-400: #7c8ba6;
+            --color-slate-500: #8f9fbd;
+            --color-slate-600: #a8b6d1;
+            --color-slate-700: #c3cee2;
+            --color-slate-800: #dde5f2;
+            --color-slate-900: #eef3fb;
+            --color-slate-950: #ffffff;
+
+            --color-gray-100: #18233a;
+            --color-gray-200: #1f2c46;
+            --color-gray-300: #2b3a58;
+            --color-gray-400: #7c8ba6;
+            --color-gray-600: #a8b6d1;
+            --color-gray-700: #c3cee2;
+            --color-gray-800: #dde5f2;
+
+            --color-canvas: #070b14;
+            --color-surface: #0e1526;
+            --color-surface-raised: #131c30;
+            --color-shell: #060a12;
+
+            --color-line: #1f2c46;
+            --color-line-soft: #18233a;
+            --color-line-strong: #2b3a58;
+
+            --color-ink: #eef3fb;
+            --color-muted: #a8b6d1;
+            --color-dim: #8f9fbd;
+
+            --color-brand-50: #0f2038;
+            --color-brand-100: #12294a;
+            --color-brand-200: #163866;
+            --color-brand-300: #1d4f92;
+            --color-brand-400: #2b6fd0;
+            --color-brand-500: #3b8ef6;
+            --color-brand-600: #59a5fb;
+            --color-brand-700: #7cbcfd;
+            --color-brand-800: #a8d3fe;
+            --color-brand-900: #cfe7ff;
+
+            --color-hud-300: #a5f3fc;
+            --color-hud-400: #22d3ee;
+            --color-hud-500: #06b6d4;
+            --color-hud-600: #0891b2;
+            --color-hud-ink: #04141a;
+            --color-hud-soft: #0b2b33;
+
+            --color-badge-neutral-bg: #1b2740;
+            --color-badge-neutral-fg: #c3cee2;
+            --color-badge-neutral-line: #2b3a58;
+            --color-badge-ok-bg: #06281f;
+            --color-badge-ok-fg: #6ee7b7;
+            --color-badge-ok-line: #10603f;
+            --color-badge-warn-bg: #2c1f05;
+            --color-badge-warn-fg: #fcd34d;
+            --color-badge-warn-line: #78500a;
+            --color-badge-danger-bg: #2e0f18;
+            --color-badge-danger-fg: #fda4af;
+            --color-badge-danger-line: #8a2140;
+            --color-badge-brand-bg: #10233f;
+            --color-badge-brand-fg: #a8d3fe;
+            --color-badge-brand-line: #1d4f92;
+
+            --color-viz-1: #22d3ee;
+            --color-viz-2: #a78bfa;
+            --color-viz-3: #fbbf24;
+            --color-viz-4: #34d399;
+            --color-viz-5: #fb7185;
+            --color-viz-6: #60a5fa;
+            --color-viz-7: #f0abfc;
+            --color-viz-8: #94a3b8;
+
+            --color-g-weekend: #0b1220;
+            --color-g-header: #101a2e;
+            --color-g-rule: #253451;
+            --color-g-grid: #17223a;
+            --color-g-grid-major: #253451;
+            --color-g-axis: #8f9fbd;
+            --color-g-label: #dde5f2;
+            --color-g-link: #64748b;
+            --color-g-summary: #7c8ba6;
+            --color-g-bar: #38bdf8;
+            --color-g-bar-critical: #fb7185;
+            --color-g-today: #fb7185;
+
+            --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.5), 0 0 0 1px rgb(56 189 248 / 0.06);
+            --shadow-raised: 0 12px 32px -8px rgb(0 0 0 / 0.7), 0 0 0 1px rgb(56 189 248 / 0.10);
+            --shadow-glow: 0 0 0 1px rgb(34 211 238 / 0.35), 0 0 20px -4px rgb(34 211 238 / 0.35);
+        }
+    }
 }
 
 @layer base {
     body {
         background-color: var(--color-canvas);
-        color: #0f172a;
+        color: var(--color-ink);
         -webkit-font-smoothing: antialiased;
+        transition: background-color 200ms ease, color 200ms ease;
+    }
+
+    /*
+    | La retícula del fondo.
+    |
+    | Dos degradados de un solo píxel repetidos. Casi no se ve —y esa es la
+    | idea: da la sensación de superficie técnica sin competir con el
+    | contenido. Va en el `body` y no en un elemento, para que no haya un
+    | nodo más en el árbol solo para decorar.
+    */
+    :root[data-theme='dark'] body {
+        background-image:
+            linear-gradient(rgb(56 189 248 / 0.030) 1px, transparent 1px),
+            linear-gradient(90deg, rgb(56 189 248 / 0.030) 1px, transparent 1px);
+        background-size: 44px 44px;
+        background-attachment: fixed;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) body {
+            background-image:
+                linear-gradient(rgb(56 189 248 / 0.030) 1px, transparent 1px),
+                linear-gradient(90deg, rgb(56 189 248 / 0.030) 1px, transparent 1px);
+            background-size: 44px 44px;
+            background-attachment: fixed;
+        }
+    }
+
+    /*
+    | Números que se pueden comparar de un vistazo.
+    |
+    | Sin esto, en una columna de costos el «1» ocupa menos que el «8» y las
+    | cifras no alinean: hay que leerlas una por una en vez de ver de golpe cuál
+    | es la más grande. En un producto de costos eso no es un detalle.
+    */
+    table,
+    .tabular {
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: 'tnum' 1;
     }
 
     /* Un anillo de foco visible y consistente en toda la aplicación. Sin esto,
        quien navega por teclado se pierde en cuanto sale de un formulario. */
     :where(a, button, input, select, textarea, summary):focus-visible {
-        outline: 2px solid var(--color-brand-600);
+        outline: 2px solid var(--color-hud-500);
         outline-offset: 2px;
         border-radius: 4px;
+    }
+
+    ::selection {
+        background-color: color-mix(in srgb, var(--color-hud-400) 35%, transparent);
+    }
+
+    /* La barra de desplazamiento también es parte de la pantalla. Una barra
+       blanca de sistema sobre un lienzo oscuro es lo que delata a un tema
+       oscuro puesto encima de un diseño claro. */
+    * {
+        scrollbar-color: var(--color-line-strong) transparent;
+        scrollbar-width: thin;
     }
 
     /* Quien pidió menos movimiento en su sistema no debería tener que pedirlo
@@ -62,6 +443,7 @@
         *::before,
         *::after {
             animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
             transition-duration: 0.01ms !important;
         }
     }
@@ -71,10 +453,36 @@
     /* --- Superficies ------------------------------------------------------ */
 
     .card {
+        position: relative;
         background-color: var(--color-surface);
-        border: 1px solid #e2e8f0;
-        border-radius: 0.5rem;
+        border: 1px solid var(--color-line);
+        border-radius: 0.625rem;
         box-shadow: var(--shadow-card);
+    }
+
+    /*
+    | El filo superior.
+    |
+    | Una línea de luz de un píxel que se desvanece hacia los lados. Es lo que
+    | hace que un panel se lea como una superficie iluminada y no como un
+    | rectángulo más oscuro. Cuesta un pseudo-elemento y no toca el marcado.
+    | En claro casi no se percibe, y así debe ser: sobre blanco no hay nada que
+    | iluminar.
+    */
+    .card::before {
+        content: '';
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 1px;
+        border-radius: 0.625rem 0.625rem 0 0;
+        background: linear-gradient(
+            90deg,
+            transparent,
+            color-mix(in srgb, var(--color-hud-400) 35%, transparent) 30%,
+            color-mix(in srgb, var(--color-hud-400) 35%, transparent) 70%,
+            transparent
+        );
+        pointer-events: none;
     }
 
     .card-header {
@@ -82,7 +490,7 @@
         align-items: center;
         justify-content: space-between;
         gap: 0.75rem;
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: 1px solid var(--color-line-soft);
         padding: 0.75rem 1rem;
     }
 
@@ -90,7 +498,73 @@
         font-size: 0.8125rem;
         font-weight: 600;
         letter-spacing: 0.01em;
-        color: #0f172a;
+        color: var(--color-ink);
+    }
+
+    /* Panel que responde al cursor: para tarjetas que son enlaces. */
+    .card-interactive {
+        cursor: pointer;
+        transition:
+            border-color 200ms var(--ease-out-hud),
+            box-shadow 200ms var(--ease-out-hud),
+            transform 200ms var(--ease-out-hud);
+    }
+
+    .card-interactive:hover {
+        border-color: color-mix(in srgb, var(--color-hud-400) 45%, transparent);
+        box-shadow: var(--shadow-raised);
+        /* Se levanta un pixel. Más que eso mueve el texto y marea. */
+        transform: translateY(-1px);
+    }
+
+    /*
+    | Esquinas de visor.
+    |
+    | Cuatro escuadras en las esquinas de un panel. Se reserva para los paneles
+    | que de verdad importan —los indicadores de arriba, el reporte de costos—
+    | porque si todos las tuvieran dejarían de significar «mira aquí».
+    */
+    .card-hud::after {
+        content: '';
+        position: absolute;
+        inset: 6px;
+        border-radius: 0.375rem;
+        pointer-events: none;
+        background:
+            linear-gradient(var(--color-hud-400), var(--color-hud-400)) 0 0 / 10px 1px no-repeat,
+            linear-gradient(var(--color-hud-400), var(--color-hud-400)) 0 0 / 1px 10px no-repeat,
+            linear-gradient(var(--color-hud-400), var(--color-hud-400)) 100% 0 / 10px 1px no-repeat,
+            linear-gradient(var(--color-hud-400), var(--color-hud-400)) 100% 0 / 1px 10px no-repeat,
+            linear-gradient(var(--color-hud-400), var(--color-hud-400)) 0 100% / 10px 1px no-repeat,
+            linear-gradient(var(--color-hud-400), var(--color-hud-400)) 0 100% / 1px 10px no-repeat,
+            linear-gradient(var(--color-hud-400), var(--color-hud-400)) 100% 100% / 10px 1px no-repeat,
+            linear-gradient(var(--color-hud-400), var(--color-hud-400)) 100% 100% / 1px 10px no-repeat;
+        opacity: 0.45;
+    }
+
+    /* --- Indicadores ------------------------------------------------------ */
+
+    .stat-label {
+        font-size: 0.6875rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--color-dim);
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+        color: var(--color-ink);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .stat-unit {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--color-dim);
     }
 
     /* --- Tabla de datos --------------------------------------------------- */
@@ -106,20 +580,20 @@
         position: sticky;
         top: 0;
         z-index: 10;
-        background-color: #f8fafc;
-        border-bottom: 1px solid #e2e8f0;
+        background-color: var(--color-surface-raised);
+        border-bottom: 1px solid var(--color-line);
         padding: 0.5rem 0.75rem;
         text-align: left;
         font-size: 0.6875rem;
         font-weight: 600;
         letter-spacing: 0.06em;
         text-transform: uppercase;
-        color: #475569;
+        color: var(--color-muted);
         white-space: nowrap;
     }
 
     .data-table tbody td {
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: 1px solid var(--color-line-soft);
         padding: 0.4375rem 0.75rem;
         vertical-align: middle;
     }
@@ -127,11 +601,13 @@
     /* Resaltar el renglón bajo el cursor es lo que evita perder la línea al
        leer una tabla ancha de veinte columnas. */
     .data-table tbody tr {
-        transition: background-color 150ms ease;
+        transition: background-color 150ms ease, box-shadow 150ms ease;
     }
 
     .data-table tbody tr:hover {
         background-color: var(--color-brand-50);
+        /* Un filo encendido a la izquierda: marca el renglón sin taparlo. */
+        box-shadow: inset 2px 0 0 0 var(--color-hud-400);
     }
 
     /* --- Distintivos de estado -------------------------------------------- */
@@ -146,13 +622,38 @@
         font-weight: 600;
         line-height: 1.25rem;
         white-space: nowrap;
+        border: 1px solid transparent;
     }
 
-    .badge-neutral { background-color: #f1f5f9; color: #334155; }
-    .badge-brand   { background-color: var(--color-brand-50); color: var(--color-brand-800); }
-    .badge-ok      { background-color: #ecfdf5; color: #065f46; }
-    .badge-warn    { background-color: #fffbeb; color: #92400e; }
-    .badge-danger  { background-color: #fef2f2; color: #991b1b; }
+    .badge-neutral {
+        background-color: var(--color-badge-neutral-bg);
+        color: var(--color-badge-neutral-fg);
+        border-color: var(--color-badge-neutral-line);
+    }
+
+    .badge-brand {
+        background-color: var(--color-badge-brand-bg);
+        color: var(--color-badge-brand-fg);
+        border-color: var(--color-badge-brand-line);
+    }
+
+    .badge-ok {
+        background-color: var(--color-badge-ok-bg);
+        color: var(--color-badge-ok-fg);
+        border-color: var(--color-badge-ok-line);
+    }
+
+    .badge-warn {
+        background-color: var(--color-badge-warn-bg);
+        color: var(--color-badge-warn-fg);
+        border-color: var(--color-badge-warn-line);
+    }
+
+    .badge-danger {
+        background-color: var(--color-badge-danger-bg);
+        color: var(--color-badge-danger-fg);
+        border-color: var(--color-badge-danger-line);
+    }
 
     /* --- Botones ---------------------------------------------------------- */
 
@@ -166,40 +667,55 @@
         font-size: 0.8125rem;
         font-weight: 600;
         cursor: pointer;
-        transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+        transition:
+            background-color 150ms ease,
+            border-color 150ms ease,
+            color 150ms ease,
+            box-shadow 200ms var(--ease-out-hud);
         /* Área de toque cómoda sin engordar el renglón: el relleno visual es
            chico y el alto mínimo hace el resto. */
         min-height: 2.25rem;
     }
 
     .btn-primary {
-        background-color: var(--color-brand-700);
-        color: #ffffff;
+        background-color: var(--color-hud-500);
+        color: var(--color-hud-ink);
     }
 
-    .btn-primary:hover { background-color: var(--color-brand-800); }
+    .btn-primary:hover {
+        background-color: var(--color-hud-600);
+        box-shadow: var(--shadow-glow);
+    }
+
+    :root[data-theme='dark'] .btn-primary:hover {
+        background-color: var(--color-hud-400);
+    }
 
     .btn-secondary {
         background-color: var(--color-surface);
-        border: 1px solid #cbd5e1;
-        color: #334155;
+        border: 1px solid var(--color-line-strong);
+        color: var(--color-slate-700);
     }
 
-    .btn-secondary:hover { background-color: #f8fafc; border-color: #94a3b8; }
+    .btn-secondary:hover {
+        background-color: var(--color-surface-raised);
+        border-color: var(--color-slate-400);
+        color: var(--color-ink);
+    }
 
     .btn-ghost {
         background-color: transparent;
-        color: #475569;
+        color: var(--color-muted);
     }
 
-    .btn-ghost:hover { background-color: #f1f5f9; color: #0f172a; }
+    .btn-ghost:hover { background-color: var(--color-slate-100); color: var(--color-ink); }
 
     .btn-danger {
         background-color: transparent;
-        color: #b91c1c;
+        color: var(--color-badge-danger-fg);
     }
 
-    .btn-danger:hover { background-color: #fef2f2; }
+    .btn-danger:hover { background-color: var(--color-badge-danger-bg); }
 
     .btn-sm { min-height: 1.75rem; padding: 0.1875rem 0.5rem; font-size: 0.75rem; }
 
@@ -209,32 +725,43 @@
         display: block;
         width: 100%;
         border-radius: 0.375rem;
-        border: 1px solid #cbd5e1;
+        border: 1px solid var(--color-line-strong);
         background-color: var(--color-surface);
         padding: 0.375rem 0.625rem;
         font-size: 0.8125rem;
-        color: #0f172a;
+        color: var(--color-ink);
         transition: border-color 150ms ease, box-shadow 150ms ease;
     }
 
+    :root[data-theme='dark'] .field { background-color: #0a1120; }
+
+    .field::placeholder { color: var(--color-slate-400); }
+
     .field:focus {
-        border-color: var(--color-brand-600);
-        box-shadow: 0 0 0 3px var(--color-brand-100);
+        border-color: var(--color-hud-500);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-hud-400) 22%, transparent);
         outline: none;
+    }
+
+    /* Los desplegables nativos heredan el fondo del sistema, que en oscuro sale
+       blanco en varios navegadores. Hay que decirlo explícitamente. */
+    .field option {
+        background-color: var(--color-surface);
+        color: var(--color-ink);
     }
 
     .field-label {
         display: block;
         font-size: 0.75rem;
         font-weight: 600;
-        color: #334155;
+        color: var(--color-slate-700);
         margin-bottom: 0.25rem;
     }
 
     .field-help {
         font-size: 0.6875rem;
         line-height: 1.4;
-        color: #64748b;
+        color: var(--color-dim);
     }
 
     /* Campo dentro de tabla: invisible hasta que se le pasa encima, para que la
@@ -246,21 +773,30 @@
         background-color: transparent;
         padding: 0.125rem 0.375rem;
         font-size: 0.8125rem;
+        color: var(--color-ink);
         transition: border-color 150ms ease, background-color 150ms ease;
     }
 
-    .field-inline:hover { border-color: #cbd5e1; background-color: #ffffff; }
+    .field-inline:hover { border-color: var(--color-line-strong); background-color: var(--color-surface); }
 
     .field-inline:focus {
-        border-color: var(--color-brand-600);
-        background-color: #ffffff;
-        box-shadow: 0 0 0 2px var(--color-brand-100);
+        border-color: var(--color-hud-500);
+        background-color: var(--color-surface);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-hud-400) 22%, transparent);
         outline: none;
     }
 
     /* --- Navegación lateral ----------------------------------------------- */
 
+    /*
+    | La barra lateral es oscura en los dos temas.
+    |
+    | En claro da la estructura que a una hoja en blanco le falta; en oscuro
+    | hunde el chasis y deja el contenido al frente. Por eso usa el token
+    | `shell` y valores propios, y no la escala neutra que se invierte.
+    */
     .nav-item {
+        position: relative;
         display: flex;
         align-items: center;
         gap: 0.625rem;
@@ -268,16 +804,30 @@
         padding: 0.4375rem 0.625rem;
         font-size: 0.8125rem;
         font-weight: 500;
-        color: #cbd5e1;
+        color: #a8b6d1;
         transition: background-color 150ms ease, color 150ms ease;
     }
 
-    .nav-item:hover { background-color: #1e293b; color: #ffffff; }
+    .nav-item:hover { background-color: #16203a; color: #ffffff; }
 
     .nav-item[aria-current] {
-        background-color: var(--color-brand-700);
+        background-color: #10233f;
         color: #ffffff;
         font-weight: 600;
+    }
+
+    /* La sección activa se marca con una barra encendida a la izquierda, no
+       solo con un fondo: se distingue aunque el monitor esté mal calibrado. */
+    .nav-item[aria-current]::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 20%;
+        bottom: 20%;
+        width: 2px;
+        border-radius: 9999px;
+        background-color: #22d3ee;
+        box-shadow: 0 0 8px 0 rgb(34 211 238 / 0.8);
     }
 
     .nav-section {
@@ -288,6 +838,181 @@
         font-weight: 700;
         letter-spacing: 0.08em;
         text-transform: uppercase;
-        color: #64748b;
+        color: #7c8ba6;
     }
+
+    /* --- Barras y medidores ----------------------------------------------- */
+
+    .meter {
+        position: relative;
+        overflow: hidden;
+        border-radius: 9999px;
+        background-color: var(--color-slate-100);
+    }
+
+    .meter-fill {
+        height: 100%;
+        border-radius: 9999px;
+        background: linear-gradient(90deg, var(--color-hud-600), var(--color-hud-400));
+        transition: width 600ms var(--ease-out-hud);
+    }
+
+    .meter-fill-warn {
+        background: linear-gradient(90deg, var(--color-accent-600), var(--color-accent-400));
+    }
+
+    .meter-fill-danger {
+        background: linear-gradient(90deg, #be123c, #fb7185);
+    }
+
+    :root[data-theme='dark'] .meter-fill { box-shadow: 0 0 12px -2px rgb(34 211 238 / 0.7); }
+    :root[data-theme='dark'] .meter-fill-warn { box-shadow: 0 0 12px -2px rgb(251 191 36 / 0.7); }
+    :root[data-theme='dark'] .meter-fill-danger { box-shadow: 0 0 12px -2px rgb(251 113 133 / 0.7); }
+
+    /* --- Entrada de los paneles ------------------------------------------- */
+
+    /*
+    | Los paneles aparecen con un desplazamiento de seis píxeles.
+    |
+    | Es la única animación de entrada del sistema y dura 400 ms. No es adorno:
+    | el escalonado hace que la vista siga un orden de lectura en vez de
+    | encontrarse doce cosas de golpe. Con `prefers-reduced-motion` desaparece,
+    | y el contenido queda visible igual —nunca depende de que la animación
+    | termine, porque si algo fallara la pantalla se quedaría en blanco.
+    */
+    @keyframes hud-in {
+        from { opacity: 0; transform: translateY(6px); }
+        to   { opacity: 1; transform: none; }
+    }
+
+    .hud-in {
+        animation: hud-in 400ms var(--ease-out-hud) both;
+    }
+
+    .hud-in-1 { animation-delay: 40ms; }
+    .hud-in-2 { animation-delay: 80ms; }
+    .hud-in-3 { animation-delay: 120ms; }
+    .hud-in-4 { animation-delay: 160ms; }
+
+    /* --- Gantt ------------------------------------------------------------ */
+
+    /*
+    | El mismo SVG se pinta en pantalla y en papel.
+    |
+    | Por eso los colores viven aquí y no en atributos `fill` dentro del Blade:
+    | el diagrama que se ve en oscuro no puede ser el que sale de la impresora,
+    | que se llevaría el tóner y no se leería. Un solo marcado, tres
+    | calibraciones —claro, oscuro y papel.
+    */
+    .g-weekend      { fill: var(--color-g-weekend); }
+    .g-header       { fill: var(--color-g-header); }
+    .g-rule         { stroke: var(--color-g-rule); }
+    .g-grid         { stroke: var(--color-g-grid); }
+    .g-grid-major   { stroke: var(--color-g-grid-major); }
+    .g-axis         { fill: var(--color-g-axis); }
+    .g-label        { fill: var(--color-g-label); }
+    .g-link         { stroke: var(--color-g-link); fill: var(--color-g-link); }
+    .g-summary      { fill: var(--color-g-summary); }
+    .g-progress     { fill: var(--color-ink); fill-opacity: 0.45; }
+
+    /* La barra normal y la crítica se separan en **tono y luminosidad**: quien
+       no distingue rojo de azul todavía ve cuál de las dos es más clara. */
+    .g-bar          { fill: var(--color-g-bar); }
+    .g-bar-critical { fill: var(--color-g-bar-critical); }
+    .g-today        { stroke: var(--color-g-today); }
+    .g-today-label  { fill: var(--color-g-today); }
+
+    /* Las barras responden al cursor: en un diagrama de doscientos renglones,
+       saber cuál se está señalando es la diferencia entre leerlo y adivinarlo. */
+    .g-bar,
+    .g-bar-critical {
+        transition: filter 150ms ease;
+    }
+
+    .g-bar:hover          { filter: brightness(1.2) drop-shadow(0 0 5px color-mix(in srgb, var(--color-g-bar) 80%, transparent)); }
+    .g-bar-critical:hover { filter: brightness(1.2) drop-shadow(0 0 5px color-mix(in srgb, var(--color-g-bar-critical) 80%, transparent)); }
+}
+
+/*
+| El ámbito «papel».
+|
+| Las pantallas que son la vista previa de un documento —el paquete de inicio, el
+| Gantt para imprimir— tienen que verse claras **aunque la persona haya elegido
+| el tema oscuro**: quien las abre está mirando cómo va a salir la hoja, y una
+| vista previa oscura de un documento que sale blanco no sirve para revisar nada.
+|
+| Repone los tokens a sus valores claros solo dentro del elemento marcado.
+*/
+.paper {
+    --color-slate-50: #f8fafc;
+    --color-slate-100: #f1f5f9;
+    --color-slate-200: #e2e8f0;
+    --color-slate-300: #cbd5e1;
+    --color-slate-400: #94a3b8;
+    --color-slate-500: #64748b;
+    --color-slate-600: #475569;
+    --color-slate-700: #334155;
+    --color-slate-800: #1e293b;
+    --color-slate-900: #0f172a;
+
+    --color-canvas: #f1f5f9;
+    --color-surface: #ffffff;
+    --color-surface-raised: #f8fafc;
+    --color-line: #e2e8f0;
+    --color-line-soft: #f1f5f9;
+    --color-line-strong: #cbd5e1;
+    --color-ink: #0f172a;
+    --color-muted: #475569;
+    --color-dim: #64748b;
+
+    --color-brand-50: #eff5ff;
+    --color-brand-600: #2557eb;
+    --color-brand-700: #1e40af;
+    --color-brand-800: #1e3a8a;
+
+    --color-g-weekend: #f1f5f9;
+    --color-g-header: #f8fafc;
+    --color-g-rule: #e2e8f0;
+    --color-g-grid: #e2e8f0;
+    --color-g-grid-major: #cbd5e1;
+    --color-g-axis: #64748b;
+    --color-g-label: #334155;
+    --color-g-link: #94a3b8;
+    --color-g-summary: #94a3b8;
+    --color-g-bar: #1d4ed8;
+    --color-g-bar-critical: #dc2626;
+    --color-g-today: #dc2626;
+
+    background-color: #f1f5f9;
+    background-image: none;
+    color: #0f172a;
+}
+
+.paper .card::before { display: none; }
+
+/*
+| Papel de verdad. Va fuera de las capas a propósito: así gana sin depender del
+| orden de las capas ni de la especificidad de lo que haya arriba.
+*/
+@media print {
+    body {
+        background: #ffffff !important;
+        background-image: none !important;
+        color: #0f172a !important;
+    }
+
+    .g-weekend      { fill: #f1f5f9; }
+    .g-header       { fill: #f8fafc; }
+    .g-rule         { stroke: #e2e8f0; }
+    .g-grid         { stroke: #e2e8f0; }
+    .g-grid-major   { stroke: #cbd5e1; }
+    .g-axis         { fill: #64748b; }
+    .g-label        { fill: #334155; }
+    .g-link         { stroke: #94a3b8; fill: #94a3b8; }
+    .g-summary      { fill: #94a3b8; }
+    .g-progress     { fill: #0f172a; fill-opacity: 0.45; }
+    .g-bar          { fill: #1d4ed8; }
+    .g-bar-critical { fill: #dc2626; }
+    .g-today        { stroke: #dc2626; }
+    .g-today-label  { fill: #dc2626; }
 }

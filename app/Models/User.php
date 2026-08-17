@@ -18,7 +18,7 @@ use Illuminate\Support\Collection;
 
 #[Fillable([
     'name', 'email', 'password', 'auth_provider', 'external_id', 'locale',
-    'timezone', 'expert_mode', 'position_id', 'org_unit_id', 'is_active',
+    'theme', 'timezone', 'expert_mode', 'position_id', 'org_unit_id', 'is_active',
     'must_change_password',
 ])]
 #[Hidden(['password', 'remember_token'])]
@@ -26,6 +26,25 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, RecordsAudit, SoftDeletes;
+
+    /**
+     * Los tres temas.
+     *
+     * `system` no es «ninguno»: es una elección con significado —«haz lo que
+     * diga mi computadora»— y es la que viene de fábrica, porque quien ya puso
+     * su sistema en oscuro no debería tener que repetirlo aquí.
+     */
+    public const THEME_SYSTEM = 'system';
+
+    public const THEME_LIGHT = 'light';
+
+    public const THEME_DARK = 'dark';
+
+    /** @return list<string> */
+    public static function themes(): array
+    {
+        return [self::THEME_SYSTEM, self::THEME_LIGHT, self::THEME_DARK];
+    }
 
     /**
      * @return array<string, string>

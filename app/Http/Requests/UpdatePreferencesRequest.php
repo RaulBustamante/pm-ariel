@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -28,6 +29,12 @@ final class UpdatePreferencesRequest extends FormRequest
 
         return [
             'locale' => ['required', 'string', Rule::in($supported)],
+            // `sometimes` y no `required`: quien mande el formulario sin el
+            // tema —una pantalla vieja en caché, una petición de una integración
+            // futura— conserva el suyo en vez de recibir un error por un campo
+            // que no sabía que existía. Lo que sí llega tiene que ser uno de los
+            // tres; un valor inventado se rechaza.
+            'theme' => ['sometimes', 'required', 'string', Rule::in(User::themes())],
             'timezone' => ['required', 'string', 'timezone'],
             'expert_mode' => ['boolean'],
         ];

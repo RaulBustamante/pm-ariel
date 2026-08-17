@@ -21,4 +21,9 @@ return [
 
     'timezone_help' => 'Which time zone dates and times are shown in. For example: America/Mexico_City.',
 
+    'theme' => 'Theme',
+    'theme_system' => 'System',
+    'theme_light' => 'Light',
+    'theme_dark' => 'Dark',
+    'theme_help' => 'With «System» it follows whatever your computer is set to. The theme travels with you: sign in from another machine and you find it the same.',
 ];

@@ -15,7 +15,7 @@
     };
 @endphp
 
-<section aria-labelledby="risk-matrix-heading" class="rounded-lg bg-white p-4 ring-1 ring-slate-200">
+<section aria-labelledby="risk-matrix-heading" class="rounded-lg bg-surface p-4 ring-1 ring-slate-200">
     <h2 id="risk-matrix-heading" class="text-sm font-semibold text-slate-900">{{ __('initiation.matrix_risk_title') }}</h2>
     <p class="mt-1 text-xs text-slate-600">{{ __('initiation.matrix_risk_help') }}</p>
 
@@ -33,7 +33,7 @@
                         @php $inCell = $cells->get("{$probability}-{$impact}", collect()); @endphp
                         <div class="flex min-h-[2.75rem] flex-wrap content-start gap-0.5 rounded border p-1 {{ $shade($probability, $impact) }}">
                             @foreach ($inCell as $risk)
-                                <span class="rounded bg-white/80 px-1 text-[11px] font-medium leading-tight text-slate-800 ring-1 ring-slate-300"
+                                <span class="rounded bg-surface/80 px-1 text-[11px] font-medium leading-tight text-slate-800 ring-1 ring-slate-300"
                                       title="{{ $risk->description }}">
                                     {{ $risk->code }}
                                 </span>

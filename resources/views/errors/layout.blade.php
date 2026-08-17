@@ -18,7 +18,7 @@
 
         <p class="mt-3 text-sm leading-relaxed text-slate-600">@yield('message')</p>
 
-        <p class="mt-4 rounded-md bg-white px-4 py-3 text-sm text-slate-700 ring-1 ring-slate-200">
+        <p class="mt-4 rounded-md bg-surface px-4 py-3 text-sm text-slate-700 ring-1 ring-slate-200">
             @yield('what_to_do')
         </p>
 
