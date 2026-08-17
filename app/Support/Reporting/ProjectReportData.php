@@ -59,6 +59,17 @@ final class ProjectReportData
     /** Reserva: solo se usa cuando no hay tareas que medir. */
     private const ROWS_PER_PAGE = 22;
 
+    /*
+    | El diagrama del corte semanal.
+    |
+    | Va derecho sobre la hoja vertical, así que su ancho es el útil de la carta
+    | con los márgenes del semanal (14 mm): (215.9 − 28) ÷ 25.4 × 96 ≈ 710. Se
+    | reparte entre la columna de nombres y la barra de tiempo.
+    */
+    private const FOCUS_NAME_WIDTH = 175;
+
+    private const FOCUS_CHART_WIDTH = 525;
+
     public function __construct(
         private readonly TaskOutliner $outliner,
         private readonly ProjectAdvisor $advisor,
@@ -127,6 +138,49 @@ final class ProjectReportData
                 'width' => GanttLayout::HEADER_HEIGHT + ($chunks->first()?->count() ?? 0) * $rowHeight + 4,
             ],
         ];
+    }
+
+    /**
+     * El diagrama del corte semanal: el horizonte cercano, no el proyecto.
+     *
+     * Va derecho y no girado, porque cabe a lo ancho de la hoja: son doce
+     * renglones sobre unas pocas semanas, no cincuenta y cuatro sobre nueve
+     * meses. Y va con ventana fija —de la semana pasada a la que entra— para que
+     * una tarea atrasada que arrancó hace tres meses no estire la escala y
+     * aplaste contra el borde justo lo que se quiere enseñar.
+     *
+     * Devuelve `null` cuando no hay nada que dibujar. El reporte lo omite sin
+     * dejar un hueco, que es mejor que un recuadro vacío pidiendo explicación.
+     *
+     * @param  array<string, mixed>  $week
+     */
+    public function focusChart(Project $project, array $week): ?string
+    {
+        /** @var Collection<int, Task> $focus */
+        $focus = $week['focus'];
+
+        if ($focus->isEmpty()) {
+            return null;
+        }
+
+        $layout = new GanttLayout(
+            $focus,
+            GanttLayout::ZOOM_WEEK,
+            fitWidth: self::FOCUS_CHART_WIDTH,
+            windowStart: $week['from']->subWeek()->toDateTimeImmutable(),
+            windowEnd: $week['next_to']->addDays(2)->toDateTimeImmutable(),
+        );
+
+        $svg = view('reports._gantt-page', [
+            'layout' => $layout,
+            'pageTasks' => $focus,
+            'project' => $project,
+            'nameWidth' => self::FOCUS_NAME_WIDTH,
+            'rotate' => false,
+            'compactRowHeight' => 15.0,
+        ])->render();
+
+        return 'data:image/svg+xml;base64,'.base64_encode(trim($svg));
     }
 
     /**

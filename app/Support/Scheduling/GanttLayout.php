@@ -55,6 +55,8 @@ final class GanttLayout
         private readonly Collection $tasks,
         string $zoom = self::ZOOM_WEEK,
         ?float $fitWidth = null,
+        ?DateTimeImmutable $windowStart = null,
+        ?DateTimeImmutable $windowEnd = null,
     ) {
         $this->zoom = array_key_exists($zoom, self::PIXELS_PER_DAY) ? $zoom : self::ZOOM_WEEK;
         $this->pixelsPerDay = self::PIXELS_PER_DAY[$this->zoom];
@@ -74,6 +76,26 @@ final class GanttLayout
 
         $this->finish = ($last ? DateTimeImmutable::createFromInterface($last) : $today)
             ->setTime(0, 0)->modify('+2 days');
+
+        /*
+        | Ventana impuesta desde afuera.
+        |
+        | Por omisión el diagrama abarca lo que duren las tareas que recibe, que
+        | es lo correcto para ver un proyecto. El corte semanal necesita lo
+        | contrario: un horizonte fijo de unas semanas alrededor de hoy, porque
+        | lo que se está preguntando es «qué pasa ahora», no «cuánto dura todo».
+        |
+        | Sin esto, una sola tarea atrasada que arrancó hace tres meses estiraba
+        | la escala y aplastaba contra el borde derecho justo las dos semanas que
+        | el reporte quiere mostrar.
+        */
+        if ($windowStart !== null) {
+            $this->start = $windowStart->setTime(0, 0);
+        }
+
+        if ($windowEnd !== null) {
+            $this->finish = $windowEnd->setTime(0, 0);
+        }
 
         $this->totalDays = max(1, (int) $this->start->diff($this->finish)->days);
         $this->width = $this->totalDays * $this->pixelsPerDay;

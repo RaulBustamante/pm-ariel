@@ -61,7 +61,14 @@ final class DemoProjectSeeder extends Seeder
             'status' => 'active',
             // Arranque el lunes de la semana entrante: el Gantt se ve con «hoy»
             // dentro del cuadro, que es como se ve un proyecto real.
-            'planned_start' => now()->startOfWeek()->setTime(9, 0),
+            // Arranca tres semanas atrás, no hoy.
+            //
+            // Un ejemplo que empieza hoy no tiene nada que contar: el corte
+            // semanal sale con las cuatro listas vacías y el atraso contra la
+            // línea base en cero, que es justo lo que hay que poder enseñar.
+            // Con historia, el demo muestra tareas cerradas, tareas que se
+            // pasaron de su fecha y una entrega que ya se corrió.
+            'planned_start' => now()->startOfWeek()->subWeeks(3)->setTime(9, 0),
         ]);
 
         $project->members()->attach($owner->id, ['project_role' => Project::ROLE_MANAGER]);
@@ -84,6 +91,7 @@ final class DemoProjectSeeder extends Seeder
         app(ProjectScheduler::class)->reschedule($project->refresh());
 
         $this->baselineWithSlip($project, $tasks);
+        $this->stampActualDates($project);
 
         app(ProjectAdvisor::class)->analyze($project->refresh());
 
@@ -265,7 +273,10 @@ final class DemoProjectSeeder extends Seeder
             $tasks[$key] = $task;
         }
 
-        // Un poco de avance real, para que las barras no se vean todas vacías.
+        // Un poco de avance real, para que las barras no se vean todas vacías y
+        // para que el corte semanal tenga algo que contar. Las fechas reales de
+        // cierre se ponen después de programar, en `stampActualDates()`: antes
+        // de eso las tareas todavía no tienen fechas calculadas.
         foreach ([
             'entrevistas' => 100, 'inventario' => 100, 'procesos' => 100,
             'requerimientos' => 80, 'revision_req' => 40,
@@ -276,6 +287,42 @@ final class DemoProjectSeeder extends Seeder
         }
 
         return $tasks;
+    }
+
+    /**
+     * Cuándo se cerró de verdad cada tarea terminada.
+     *
+     * El modelo las anota solas al capturar avance, pero el sembrado marca todo
+     * en el mismo instante: quedarían las nueve cerradas hoy, y el corte semanal
+     * las mostraría todas en la misma semana. Un ejemplo así no enseña lo que el
+     * documento hace, que es distinguir esta semana de las anteriores.
+     *
+     * Se cierran en su fecha planeada, salvo una que se pasa dos días: sin al
+     * menos una desviación, la comparación contra la línea base no se entiende.
+     */
+    private function stampActualDates(Project $project): void
+    {
+        $done = $project->tasks()
+            ->where('percent_complete', '>=', 100)
+            ->whereNotNull('early_finish')
+            ->get();
+
+        foreach ($done as $index => $task) {
+            $task->forceFill([
+                'actual_start' => $task->early_start,
+                // La última cae dentro de la semana en curso: sin al menos un
+                // cierre reciente, el bloque «cerrado esta semana» del corte
+                // sale vacío y no se entiende para qué está.
+                'actual_finish' => $index === $done->count() - 1
+                    // Miércoles de la semana en curso: cae dentro de la ventana
+                    // sin importar qué día se siembre el ejemplo. Con `subDay()`
+                    // se salía por un día cuando se sembraba en lunes.
+                    ? now()->startOfWeek()->addDays(2)->setTime(17, 0)
+                    : ($index === 0
+                        ? $task->early_finish?->copy()->addDays(2)
+                        : $task->early_finish),
+            ])->save();
+        }
     }
 
     /**

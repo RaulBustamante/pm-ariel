@@ -11,7 +11,6 @@ use App\Support\Reporting\ProjectReportData;
 use App\Support\Reporting\WeeklyReport;
 use App\Support\Scheduling\ProjectDurations;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Carbon\CarbonImmutable;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -74,8 +73,8 @@ final class ReportController extends Controller
             ...$data,
             'project' => $project,
             'digest' => $this->digest->group($findings),
-            'today' => CarbonImmutable::now()->startOfDay(),
             'generatedAt' => now(),
+            'focusChart' => $this->report->focusChart($project, $data),
         ])->setPaper('letter')->setOption('isRemoteEnabled', false);
 
         return $pdf->download($this->filename($project, 'semana-'.$data['from']->format('Y-m-d').'.pdf'));

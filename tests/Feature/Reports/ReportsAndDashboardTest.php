@@ -17,6 +17,8 @@ use App\Support\Initiation\InitiationStep;
 use App\Support\Reporting\FindingDigest;
 use App\Support\Reporting\ProjectDashboard;
 use App\Support\Reporting\ProjectReportData;
+use App\Support\Reporting\WeeklyReport;
+use Carbon\CarbonImmutable;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -440,5 +442,132 @@ final class ReportsAndDashboardTest extends TestCase
         ), true);
 
         $this->assertStringContainsString('Levantamiento', (string) $svg);
+    }
+
+    /**
+     * El documento sale en el idioma de quien lo genera.
+     *
+     * Ya funcionaba —los reportes usan las mismas claves que la interfaz y el
+     * middleware fija el idioma desde la preferencia—, pero no había nada que lo
+     * sostuviera. Un solo texto escrito a mano dentro de una plantilla y la
+     * mitad del PDF queda en un idioma y la mitad en otro sin que falle nada.
+     *
+     * Se revisa el HTML de la plantilla y no los bytes del PDF: es lo mismo que
+     * dompdf va a maquetar, y aquí sí se puede leer qué dice.
+     */
+    #[Test]
+    public function every_document_follows_the_language_of_whoever_generates_it(): void
+    {
+        $this->task('Levantamiento');
+
+        $views = [
+            'reports.project-pdf' => fn (): array => app(ProjectReportData::class)->for($this->project),
+            'reports.weekly-pdf' => fn (): array => [
+                ...app(WeeklyReport::class)->for($this->project),
+                'project' => $this->project,
+                'digest' => [],
+                'generatedAt' => now(),
+                'focusChart' => null,
+            ],
+        ];
+
+        foreach ($views as $view => $data) {
+            app()->setLocale('es');
+            $spanish = view($view, $data())->render();
+
+            app()->setLocale('en');
+            $english = view($view, $data())->render();
+
+            $this->assertStringContainsString(__('reports.kpi_progress', [], 'es'), $spanish);
+            $this->assertStringContainsString(__('reports.kpi_progress', [], 'en'), $english);
+
+            $this->assertStringNotContainsString(
+                __('reports.kpi_progress', [], 'es'),
+                $english,
+                "El documento {$view} dejó texto en español dentro de la versión en inglés.",
+            );
+        }
+
+        app()->setLocale('es');
+    }
+
+    /**
+     * El corte se manda al cierre del viernes. A esa hora, una tarea que vencía
+     * hoy y sigue abierta va atrasada — comparando contra el inicio del día
+     * quedaba fuera, y el documento salía diciendo que no hay nada tarde justo
+     * el día en que se acaba de acumular.
+     */
+    #[Test]
+    public function a_task_due_today_counts_as_late_at_the_close_of_the_day(): void
+    {
+        $task = $this->task('Revision con el area');
+        $task->forceFill([
+            'early_start' => now()->startOfDay()->setTime(9, 0),
+            'early_finish' => now()->startOfDay()->setTime(18, 0),
+            'percent_complete' => 40,
+        ])->save();
+
+        $report = app(WeeklyReport::class);
+
+        $morning = $report->for($this->project, CarbonImmutable::now()->startOfDay()->setTime(9, 0));
+        $this->assertFalse(
+            $morning['late']->contains('id', $task->id),
+            'A las nueve de la mañana una tarea que termina hoy a las seis todavía no está tarde.',
+        );
+
+        $closing = $report->for($this->project, CarbonImmutable::now()->startOfDay()->setTime(19, 0));
+        $this->assertTrue(
+            $closing['late']->contains('id', $task->id),
+            'Al cierre del día, una tarea que vencía hoy y sigue abierta sí está tarde.',
+        );
+    }
+
+    /**
+     * Las cuatro listas no se traslapan. Un renglón que sale dos veces obliga a
+     * quien lee a compararlas, y entonces deja de ser un resumen.
+     */
+    #[Test]
+    public function no_task_appears_in_two_lists_of_the_weekly_report(): void
+    {
+        foreach (range(1, 12) as $index) {
+            $this->task("Tarea {$index}");
+        }
+
+        $week = app(WeeklyReport::class)->for($this->project);
+
+        $ids = collect([$week['closed'], $week['late'], $week['doing'], $week['next']])
+            ->flatMap(fn ($list) => $list->pluck('id'))
+            ->all();
+
+        $this->assertSame(
+            count($ids),
+            count(array_unique($ids)),
+            'Una misma tarea salió en dos de las cuatro listas del corte semanal.',
+        );
+    }
+
+    /**
+     * Las columnas existían desde la Etapa 3 y nadie las escribía. Sin ellas el
+     * corte no puede distinguir lo que se cerró de verdad de lo que estaba
+     * planeado cerrarse.
+     */
+    #[Test]
+    public function recording_progress_stamps_the_real_dates(): void
+    {
+        $task = $this->task('Levantamiento');
+
+        $this->assertNull($task->actual_start);
+
+        $task->update(['percent_complete' => 50]);
+        $this->assertNotNull($task->refresh()->actual_start);
+        $this->assertNull($task->actual_finish);
+
+        $task->update(['percent_complete' => 100]);
+        $this->assertNotNull($task->refresh()->actual_finish);
+
+        // Reabrirla borra el cierre: dejarlo puesto haría que el corte de la
+        // semana que entra siguiera presumiendo como terminado algo que no lo está.
+        $task->update(['percent_complete' => 70]);
+        $this->assertNull($task->refresh()->actual_finish);
     }
 }

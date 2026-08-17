@@ -33,7 +33,7 @@ return [
 
     // --- Reporte semanal ---------------------------------------------
     'weekly' => 'Reporte semanal',
-    'weekly_help' => 'Cómo vamos esta semana. Es lo que se manda cada lunes.',
+    'weekly_help' => 'Cómo vamos esta semana. Es lo que se manda al cierre de la semana.',
     'weekly_title' => 'Corte semanal',
     'week_of' => 'Semana del :from al :to',
     'closed_this_week' => 'Cerrado esta semana',
@@ -56,11 +56,11 @@ return [
     'documents' => 'Documentos',
     'documents_intro' => 'Cada documento responde una pregunta distinta y se emite en su momento. No son versiones cortas del mismo archivo.',
 
-    'weekly_badge' => 'Cada lunes',
+    'weekly_badge' => 'Cada viernes',
     'when_charter' => 'Se emite una vez, al arrancar',
     'answers_charter' => '¿De qué se trata este proyecto, quién lo pide, qué entrega y qué no incluye? Es el documento que se firma y no se vuelve a tocar.',
     'when_weekly' => 'Se emite cada semana',
-    'answers_weekly' => '¿Cómo vamos? Qué se cerró esta semana, qué está atrasado, qué corre ahora y qué arranca la que entra. Una hoja, para mandar el lunes.',
+    'answers_weekly' => '¿Cómo vamos? Qué se cerró esta semana, qué está atrasado, qué corre ahora y qué arranca la que entra, con el diagrama del horizonte cercano. Una hoja, para mandar el viernes.',
     'when_complete' => 'Se emite al cerrar una etapa o cuando lo piden',
     'answers_complete' => 'El expediente: ficha, plan de trabajo completo y diagrama. Es para quien va a revisar el detalle, no para el corte semanal.',
     'when_csv' => 'Cuando alguien va a seguir trabajando el plan',

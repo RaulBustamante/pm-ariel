@@ -7,7 +7,8 @@
         /*
         | Una hoja, y que quepa en una hoja.
         |
-        | Es lo que distingue este documento de la ficha: se manda cada lunes a
+        | Es lo que distingue este documento de la ficha: se manda al cierre de la
+        | semana a
         | alguien que va a mirarlo treinta segundos en el teléfono antes de una
         | junta. Si pasa de una página deja de leerse completo, y entonces da
         | igual lo que diga la segunda.
@@ -134,6 +135,15 @@
         @endforeach
     @endif
 
+    @if ($focusChart)
+        {{-- El horizonte cercano, dibujado.
+             Las listas dicen qué hay; el diagrama dice **cómo se encima**, que
+             es lo que no se ve en una lista y lo que hace obvio por qué algo va
+             a atorarse la semana que entra. --}}
+        <h2>{{ __('reports.schedule_chart') }}</h2>
+        <img src="{{ $focusChart }}" alt="" style="width: 700px">
+    @endif
+
     <h2>{{ __('reports.late') }}</h2>
     @if ($late->isEmpty())
         <p class="vacio">{{ __('reports.nothing_late') }}</p>
@@ -147,7 +157,7 @@
                     </td>
                     <td class="meta tarde">
                         {{ $task->early_finish?->format('d/m') }} ·
-                        {{ (int) $task->early_finish?->diffInDays($today) }} {{ __('reports.days_late') }}
+                        {{ (int) $task->early_finish?->diffInDays($now) }} {{ __('reports.days_late') }}
                     </td>
                 </tr>
             @endforeach

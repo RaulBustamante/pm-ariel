@@ -32,7 +32,7 @@ return [
     'turn_the_page' => 'The chart is rotated: turn the sheet to read it.',
 
     'weekly' => 'Weekly report',
-    'weekly_help' => 'How this week went. This is what goes out every Monday.',
+    'weekly_help' => 'How this week went. This is what goes out at the close of the week.',
     'weekly_title' => 'Weekly status',
     'week_of' => 'Week of :from to :to',
     'closed_this_week' => 'Closed this week',
@@ -54,11 +54,11 @@ return [
     'documents' => 'Documents',
     'documents_intro' => 'Each document answers a different question and is issued at its own moment. They are not short versions of the same file.',
 
-    'weekly_badge' => 'Every Monday',
+    'weekly_badge' => 'Every Friday',
     'when_charter' => 'Issued once, at the start',
     'answers_charter' => 'What is this project, who asked for it, what it delivers and what it leaves out. The document that gets signed and is not touched again.',
     'when_weekly' => 'Issued every week',
-    'answers_weekly' => 'How are we doing? What closed this week, what is late, what is running and what starts next. One sheet, to send on Monday.',
+    'answers_weekly' => 'How are we doing? What closed this week, what is late, what is running and what starts next, with a chart of the near horizon. One sheet, to send on Friday.',
     'when_complete' => 'Issued at a stage close, or on request',
     'answers_complete' => 'The full file: sheet, complete work plan and chart. For whoever reviews the detail, not for the weekly check-in.',
     'when_csv' => 'When someone is going to keep working the plan',

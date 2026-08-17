@@ -31,7 +31,7 @@ final class WeeklyReport
 
     /**
      * @return array{
-     *     from: CarbonImmutable, to: CarbonImmutable, next_to: CarbonImmutable,
+     *     now: CarbonImmutable, from: CarbonImmutable, to: CarbonImmutable, next_to: CarbonImmutable,
      *     closed: Collection<int, Task>, late: Collection<int, Task>,
      *     doing: Collection<int, Task>, next: Collection<int, Task>,
      *     kpis: array<string, mixed>, slip_days: ?int, baseline_finish: ?CarbonImmutable
@@ -39,16 +39,34 @@ final class WeeklyReport
      */
     public function for(Project $project, ?CarbonImmutable $asOf = null): array
     {
-        $today = ($asOf ?? CarbonImmutable::now())->startOfDay();
+        /*
+        | El corte se mide contra el **instante** en que se genera, no contra el
+        | inicio del día.
+        |
+        | Importa porque este reporte se manda al cierre del viernes. A esa hora,
+        | una tarea que vencía hoy y no está terminada va atrasada, y comparando
+        | contra el inicio del día quedaba fuera de la lista: el documento salía
+        | diciendo que no hay nada tarde justo el día en que se acaba de acumular.
+        |
+        | Medido contra el instante real funciona en los dos sentidos sin que haya
+        | que elegir un día de emisión: un lunes a las nueve, una tarea que
+        | termina ese mismo lunes a las seis todavía no está tarde, y no se
+        | reporta como tal.
+        */
+        $now = $asOf ?? CarbonImmutable::now();
+        $today = $now->startOfDay();
 
-        // La semana corre de lunes a domingo, no «los últimos siete días»: el
-        // reporte se manda el lunes y tiene que hablar de una semana que quien
-        // lo recibe reconozca, no de una ventana que se mueve sola.
+        // La semana corre de lunes a domingo, no «los últimos siete días»: tiene
+        // que ser una semana que quien recibe el reporte reconozca, no una
+        // ventana que se mueve sola según el día en que alguien oprima el botón.
         $from = $today->startOfWeek();
         $to = $today->endOfWeek();
         $nextTo = $to->addWeek();
 
+        // `owner` se trae de una vez: la lista de atrasadas lo pinta en cada
+        // renglón, y sin esto el guardia de carga perezosa detiene el reporte.
         $leaves = $project->tasks()
+            ->with('owner')
             ->where('is_summary', false)
             ->orderBy('early_start')
             ->get();
@@ -61,7 +79,7 @@ final class WeeklyReport
         $stillOpen = $leaves->filter(fn (Task $t): bool => (float) $t->percent_complete < 100);
 
         $late = $stillOpen->filter(
-            fn (Task $t): bool => $t->early_finish !== null && $t->early_finish->lt($today),
+            fn (Task $t): bool => $t->early_finish !== null && $t->early_finish->lt($now),
         )->sortBy('early_finish')->values();
 
         $doing = $stillOpen
@@ -78,6 +96,7 @@ final class WeeklyReport
             ->values();
 
         return [
+            'now' => $now,
             'from' => $from,
             'to' => $to,
             'next_to' => $nextTo,
@@ -85,9 +104,40 @@ final class WeeklyReport
             'late' => $late,
             'doing' => $doing,
             'next' => $next,
+            'focus' => $this->focus($closed, $late, $doing, $next),
             'kpis' => $this->dashboard->kpis($project),
             ...$this->againstBaseline($project),
         ];
+    }
+
+    /**
+     * Las tareas que salen en el diagrama del corte.
+     *
+     * No es el proyecto entero: es lo que está en juego ahora mismo. Un Gantt de
+     * cincuenta y cuatro renglones dentro de un reporte semanal obliga a buscar,
+     * y buscar es justo lo que un resumen tiene que evitar.
+     *
+     * El orden es el de la urgencia y no el cronológico —lo atrasado arriba—
+     * porque es el orden en que se van a tomar decisiones sobre ellas.
+     *
+     * @param  Collection<int, Task>  $closed
+     * @param  Collection<int, Task>  $late
+     * @param  Collection<int, Task>  $doing
+     * @param  Collection<int, Task>  $next
+     * @return Collection<int, Task>
+     */
+    private function focus(Collection $closed, Collection $late, Collection $doing, Collection $next): Collection
+    {
+        return $late
+            ->concat($doing)
+            ->concat($next)
+            ->concat($closed)
+            ->unique('id')
+            // Doce renglones es lo que cabe sin empujar el reporte a una segunda
+            // hoja. Pasado eso el diagrama deja de caber y con él la promesa de
+            // que esto se lee de un vistazo.
+            ->take(12)
+            ->values();
     }
 
     /**
