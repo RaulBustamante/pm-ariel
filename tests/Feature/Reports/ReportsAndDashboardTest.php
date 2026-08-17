@@ -394,6 +394,31 @@ final class ReportsAndDashboardTest extends TestCase
         // en píxeles a 96 ppp, que es como dompdf los convierte.
         $this->assertLessThanOrEqual(695, $width, 'El diagrama girado se sale por el canto de la hoja.');
         $this->assertLessThanOrEqual(897, $height, 'El diagrama girado no cabe a lo alto de la hoja.');
+
+        // Y cabe **entero**: un diagrama repartido en varias hojas deja de
+        // servir para lo que uno lo abre, que es ver el proyecto de un golpe.
+        $this->assertCount(1, $data['ganttImages']);
+    }
+
+    /**
+     * Se comprime el renglón para que quepa, pero no sin límite: por debajo de
+     * nueve píxeles el nombre deja de leerse impreso, y una hoja ilegible es
+     * peor que dos legibles.
+     */
+    #[Test]
+    public function a_project_too_big_to_fit_goes_back_to_several_sheets(): void
+    {
+        foreach (range(1, 90) as $index) {
+            $this->task("Tarea {$index}");
+        }
+
+        $data = app(ProjectReportData::class)->for($this->project, complete: true);
+
+        $this->assertGreaterThan(
+            1,
+            count($data['ganttImages']),
+            'Con noventa tareas el renglón habría quedado por debajo del mínimo legible.',
+        );
     }
 
     /**

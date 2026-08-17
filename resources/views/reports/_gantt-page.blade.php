@@ -20,6 +20,21 @@
     $nameWidth = $nameWidth ?? 0;
     $rotate = $rotate ?? false;
 
+    /*
+    | Alto de renglón variable, para que el proyecto entero quepa en una hoja.
+    |
+    | Con 26 px fijos, cincuenta y cuatro tareas eran tres hojas, y un diagrama
+    | repartido en tres hojas ya no se lee como diagrama: se pierde justo lo que
+    | uno va a buscar, que es ver el proyecto completo de un golpe.
+    |
+    | Se comprime hasta 9 px. Por debajo de eso el texto deja de ser legible
+    | impreso, así que a partir de ~70 tareas se vuelve a paginar en vez de
+    | seguir apretando: preferible dos hojas legibles que una ilegible.
+    */
+    $rowHeight = $compactRowHeight ?? $rowHeight;
+    $barHeight = max(4, min(11, $rowHeight - 5));
+    $fontSize = $rowHeight >= 20 ? 7.5 : max(4.8, $rowHeight * 0.55);
+
     $chartWidth = max(320, $layout->width);
     $width = $nameWidth + $chartWidth;
     $height = $headerHeight + ($pageTasks->count() * $rowHeight) + 4;
@@ -53,13 +68,13 @@
                 @endphp
 
                 @if ($task->is_critical && ! $task->is_summary)
-                    <circle cx="{{ $indent + 2 }}" cy="{{ $ty - 3 }}" r="2" fill="#dc2626" />
+                    <circle cx="{{ $indent + 2 }}" cy="{{ $ty - $fontSize * 0.35 }}" r="{{ min(2, $rowHeight / 7) }}" fill="#dc2626" />
                 @endif
 
                 <text x="{{ $indent + ($task->is_critical && ! $task->is_summary ? 8 : 0) }}" y="{{ $ty }}"
-                      font-size="7.5" font-family="sans-serif"
+                      font-size="{{ $fontSize }}" font-family="sans-serif"
                       fill="{{ $task->is_summary ? '#0f172a' : '#334155' }}"
-                      font-weight="{{ $task->is_summary ? 'bold' : 'normal' }}">{{ \Illuminate\Support\Str::limit($task->name, 38) }}</text>
+                      font-weight="{{ $task->is_summary ? 'bold' : 'normal' }}">{{ \Illuminate\Support\Str::limit($task->name, (int) ($nameWidth / max(3.2, $fontSize * 0.52))) }}</text>
             @endforeach
 
             <line x1="{{ $nameWidth }}" y1="0" x2="{{ $nameWidth }}" y2="{{ $height }}" stroke="#cbd5e1" stroke-width="0.5" />
@@ -68,6 +83,17 @@
         {{-- El diagrama se recorre a la derecha de la columna de nombres. Así el
              cálculo de `x` del motor no cambia por dibujar aquí o allá. --}}
         <g @if ($nameWidth > 0) transform="translate({{ $nameWidth }} 0)" @endif>
+
+            {{-- Bandas alternas por renglón.
+                 En un diagrama ancho, seguir con la vista desde el nombre hasta
+                 su barra es lo que más cuesta, y una regla horizontal a lápiz es
+                 lo que la gente acaba dibujando encima del papel. --}}
+            @foreach ($pageTasks as $bandIndex => $bandTask)
+                @if ($bandIndex % 2 === 1)
+                    <rect x="0" y="{{ $headerHeight + ($bandIndex * $rowHeight) }}"
+                          width="{{ $chartWidth }}" height="{{ $rowHeight }}" fill="#f8fafc" />
+                @endif
+            @endforeach
 
             @foreach ($layout->weekendBands() as $band)
                 <rect x="{{ $band['x'] }}" y="{{ $headerHeight }}" width="{{ $band['width'] }}" height="{{ $height }}" fill="#f1f5f9" />

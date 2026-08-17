@@ -44,7 +44,19 @@ final class ProjectReportData
 
     private const NAME_WIDTH = 165;
 
-    /** Renglones por hoja: ninguna barra queda partida entre dos páginas. */
+    /**
+     * Alto útil de la hoja, en píxeles a 96 ppp.
+     *
+     * Girado el diagrama, este número es el **ancho** de la carta menos los
+     * márgenes de la plantilla: (215.9 mm − 32 mm) ÷ 25.4 × 96 ≈ 695, con quince
+     * de holgura para que un redondeo no lo empuje fuera.
+     */
+    private const SHEET_HEIGHT = 680;
+
+    /** Por debajo de esto el nombre de la tarea deja de leerse impreso. */
+    private const MIN_ROW_HEIGHT = 9;
+
+    /** Reserva: solo se usa cuando no hay tareas que medir. */
     private const ROWS_PER_PAGE = 22;
 
     public function __construct(
@@ -97,22 +109,58 @@ final class ProjectReportData
         // hoja no. Se recalculan los píxeles por día para que el proyecto
         // entero quepa en vez de recortarlo por la derecha.
         $layout = new GanttLayout($scheduled, GanttLayout::ZOOM_WEEK, fitWidth: self::GANTT_WIDTH);
-        $chunks = $scheduled->chunk(self::ROWS_PER_PAGE);
+
+        [$rowHeight, $rowsPerPage] = $this->fitRows($scheduled->count());
+
+        $chunks = $scheduled->chunk($rowsPerPage);
 
         return [
             ...$data,
             'ganttLayout' => $layout,
             'ganttPages' => $chunks,
             'ganttImages' => $chunks->map(
-                fn ($pageTasks): string => $this->svgAsImage($layout, $pageTasks, $project),
+                fn ($pageTasks): string => $this->svgAsImage($layout, $pageTasks, $project, $rowHeight),
             ),
             // Girado, el ancho que ocupa en la hoja es el **alto** natural del
-            // dibujo. Se calcula aquí y no en la plantilla porque depende de las
-            // mismas constantes que fijan la paginación.
+            // dibujo, y por eso se calcula con el renglón ya comprimido.
             'ganttSheet' => [
-                'width' => GanttLayout::HEADER_HEIGHT + (self::ROWS_PER_PAGE * GanttLayout::ROW_HEIGHT) + 4,
+                'width' => GanttLayout::HEADER_HEIGHT + ($chunks->first()?->count() ?? 0) * $rowHeight + 4,
             ],
         ];
+    }
+
+    /**
+     * Cuánto se comprime el renglón para que el proyecto entre en una hoja.
+     *
+     * Un diagrama repartido en tres hojas deja de leerse como diagrama: se
+     * pierde justo lo que uno va a buscar, que es ver el proyecto completo de un
+     * golpe. Así que primero se intenta que quepa entero, comprimiendo.
+     *
+     * **Pero se comprime hasta un límite y no más.** Por debajo de nueve píxeles
+     * el nombre de la tarea deja de leerse impreso, y una hoja ilegible es peor
+     * que dos legibles. Pasado ese punto se vuelve a paginar. El límite está
+     * aquí escrito y no repartido en la plantilla, para que se pueda subir o
+     * bajar en un solo lugar cuando alguien lo mida en papel de verdad.
+     *
+     * @return array{float, int} alto de renglón y renglones por hoja
+     */
+    private function fitRows(int $tasks): array
+    {
+        $usable = self::SHEET_HEIGHT - GanttLayout::HEADER_HEIGHT - 4;
+
+        if ($tasks < 1) {
+            return [(float) GanttLayout::ROW_HEIGHT, self::ROWS_PER_PAGE];
+        }
+
+        $needed = $usable / $tasks;
+
+        if ($needed >= self::MIN_ROW_HEIGHT) {
+            // Cabe entero. No se estira más allá del alto normal: un proyecto de
+            // seis tareas con renglones de cien píxeles se ve absurdo.
+            return [min((float) GanttLayout::ROW_HEIGHT, $needed), $tasks];
+        }
+
+        return [(float) self::MIN_ROW_HEIGHT, (int) floor($usable / self::MIN_ROW_HEIGHT)];
     }
 
     /**
@@ -130,7 +178,7 @@ final class ProjectReportData
      *
      * @param  Collection<int, Task>  $pageTasks
      */
-    private function svgAsImage(GanttLayout $layout, $pageTasks, Project $project): string
+    private function svgAsImage(GanttLayout $layout, $pageTasks, Project $project, float $rowHeight): string
     {
         $svg = view('reports._gantt-page', [
             'layout' => $layout,
@@ -138,6 +186,7 @@ final class ProjectReportData
             'project' => $project,
             'nameWidth' => self::NAME_WIDTH,
             'rotate' => true,
+            'compactRowHeight' => $rowHeight,
         ])->render();
 
         // El espacio de nombres es obligatorio cuando el SVG viaja solo. Dentro

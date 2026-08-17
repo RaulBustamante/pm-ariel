@@ -150,6 +150,8 @@ Route::middleware('auth')->group(function (): void {
 
         Route::get('reports/pdf', [ReportController::class, 'pdf'])->name('projects.reports.pdf');
         Route::get('reports/complete', [ReportController::class, 'complete'])->name('projects.reports.complete');
+        Route::get('reports/weekly', [ReportController::class, 'weekly'])->name('projects.reports.weekly');
+        Route::get('documents', [ReportController::class, 'documents'])->name('projects.documents');
         Route::get('reports/gantt', [ReportController::class, 'ganttPrint'])->name('projects.reports.gantt');
         Route::get('reports/csv', [ReportController::class, 'csv'])->name('projects.reports.csv');
 

@@ -6,9 +6,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Services\Scheduling\TaskOutliner;
+use App\Support\Reporting\FindingDigest;
 use App\Support\Reporting\ProjectReportData;
+use App\Support\Reporting\WeeklyReport;
 use App\Support\Scheduling\ProjectDurations;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\CarbonImmutable;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -28,6 +31,8 @@ final class ReportController extends Controller
     public function __construct(
         private readonly TaskOutliner $outliner,
         private readonly ProjectReportData $report,
+        private readonly WeeklyReport $weeklyReport,
+        private readonly FindingDigest $digest,
     ) {}
 
     /** Ficha del proyecto y lista de tareas, con portada y numeración. */
@@ -47,6 +52,41 @@ final class ReportController extends Controller
     public function complete(Project $project): Response
     {
         return $this->render($project, complete: true);
+    }
+
+    /**
+     * El corte de la semana, en una hoja.
+     *
+     * Documento distinto de la ficha, no una versión corta: la ficha responde
+     * «de qué se trata esto» y se emite una vez; esto responde «cómo vamos» y se
+     * manda cada lunes a alguien que ya sabe de qué se trata.
+     */
+    public function weekly(Project $project): Response
+    {
+        $this->authorize('view', $project);
+
+        $project->loadMissing(['owner']);
+
+        $data = $this->weeklyReport->for($project);
+        $findings = $project->findings()->with(['task', 'resource'])->get();
+
+        $pdf = Pdf::loadView('reports.weekly-pdf', [
+            ...$data,
+            'project' => $project,
+            'digest' => $this->digest->group($findings),
+            'today' => CarbonImmutable::now()->startOfDay(),
+            'generatedAt' => now(),
+        ])->setPaper('letter')->setOption('isRemoteEnabled', false);
+
+        return $pdf->download($this->filename($project, 'semana-'.$data['from']->format('Y-m-d').'.pdf'));
+    }
+
+    /** El juego completo de documentos del proyecto. */
+    public function documents(Project $project): View
+    {
+        $this->authorize('view', $project);
+
+        return view('reports.documents', ['project' => $project]);
     }
 
     private function render(Project $project, bool $complete): Response

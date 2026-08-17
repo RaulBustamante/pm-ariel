@@ -71,6 +71,52 @@ class Task extends Model
     }
 
     /**
+     * Las fechas reales se anotan solas al capturar avance.
+     *
+     * Las columnas existían desde la Etapa 3 y **nadie las escribía nunca**.
+     * Eso no rompía ninguna pantalla, porque ninguna las leía; se notó al
+     * intentar armar el reporte semanal, que necesita saber qué se cerró de
+     * verdad esta semana y no qué estaba planeado cerrarse.
+     *
+     * Va en el modelo y no en los tres controladores que capturan avance —la
+     * lista, el tablero, el detalle— porque el cuarto que se agregue se
+     * olvidaría, y el hueco volvería a pasar inadvertido por la misma razón.
+     *
+     * El motor de programación no lo dispara: escribe con `query()->update()`,
+     * que no pasa por los eventos del modelo. Y hace bien, porque solo toca
+     * columnas calculadas.
+     */
+    protected static function booted(): void
+    {
+        static::saving(function (self $task): void {
+            if (! $task->isDirty('percent_complete')) {
+                return;
+            }
+
+            $progress = (float) $task->percent_complete;
+
+            if ($progress > 0 && $task->actual_start === null) {
+                $task->actual_start = now();
+            }
+
+            if ($progress >= 100 && $task->actual_finish === null) {
+                $task->actual_finish = now();
+            }
+
+            // Reabrir una tarea borra su fecha de cierre. Dejarla puesta haría
+            // que el reporte de la semana que entra siguiera presumiendo como
+            // terminado algo que se volvió a abrir.
+            if ($progress < 100) {
+                $task->actual_finish = null;
+            }
+
+            if ($progress <= 0) {
+                $task->actual_start = null;
+            }
+        });
+    }
+
+    /**
      * @return BelongsTo<Project, $this>
      */
     public function project(): BelongsTo
