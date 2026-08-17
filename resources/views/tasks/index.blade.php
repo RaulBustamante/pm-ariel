@@ -16,6 +16,14 @@
         @endcan
     </div>
 
+    @include('tasks._filters')
+
+    @if ($capped)
+        <div role="status" class="mb-3 rounded-md bg-slate-100 px-4 py-2 text-xs text-slate-700 ring-1 ring-slate-200">
+            {{ __('tasks.showing_capped', ['shown' => $maxRows, 'total' => $visibleCount]) }}
+        </div>
+    @endif
+
     @if ($tasks->isEmpty())
         <div class="mb-6 rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-600">
             {{ __('tasks.empty') }}

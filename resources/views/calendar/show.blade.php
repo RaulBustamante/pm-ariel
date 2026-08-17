@@ -6,6 +6,8 @@
 @section('content')
     @include('tasks._tabs', ['active' => 'calendar'])
 
+    @include('tasks._filters', ['filterRoute' => 'projects.calendar'])
+
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-2">
             <a href="{{ route('projects.calendar', ['project' => $project, 'month' => $previousMonth]) }}"

@@ -78,4 +78,6 @@ return [
     'successors' => 'These depend on it',
     'calendar_view' => 'Calendar',
 
+    'showing_capped' => 'Showing :shown of :total tasks. Use the filter to narrow the list.',
+
 ];

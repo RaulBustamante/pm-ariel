@@ -78,4 +78,6 @@ return [
     'successors' => 'De esto dependen',
     'calendar_view' => 'Calendario',
 
+    'showing_capped' => 'Se muestran :shown de :total tareas. Usa el filtro para acotar la lista.',
+
 ];

@@ -1,4 +1,9 @@
 @php
+    // El filtro viaja en la dirección, así que se arrastra a cada pestaña: si
+    // cada vista tuviera el suyo, la gente filtraría en la Lista, saltaría al
+    // Gantt, vería todo otra vez y concluiría que el filtro no sirve.
+    $carry = isset($filter) ? $filter->toQuery() : [];
+
     $tabs = [
         'list' => ['route' => 'projects.tasks.index', 'label' => __('tasks.list_view')],
         'gantt' => ['route' => 'projects.gantt', 'label' => __('tasks.gantt_view')],
@@ -13,13 +18,13 @@
 @endphp
 
 <div class="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200">
-    <nav class="flex gap-1" aria-label="{{ __('tasks.title') }}">
+    <nav class="flex gap-1 overflow-x-auto" aria-label="{{ __('tasks.title') }}">
         @foreach ($tabs as $key => $tab)
-            <a href="{{ route($tab['route'], $project) }}"
+            <a href="{{ route($tab['route'], ['project' => $project, ...$carry]) }}"
                @if ($active === $key) aria-current="page" @endif
-               class="-mb-px border-b-2 px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-600
+               class="-mb-px shrink-0 border-b-2 px-3 py-2 text-sm font-medium transition-colors
                       {{ $active === $key
-                            ? 'border-blue-700 text-blue-800'
+                            ? 'border-brand-700 text-brand-800'
                             : 'border-transparent text-slate-600 hover:border-slate-300 hover:text-slate-900' }}">
                 {{ $tab['label'] }}
             </a>
@@ -27,7 +32,7 @@
     </nav>
 
     <a href="{{ route('projects.initiation.overview', $project) }}"
-       class="mb-1 rounded text-sm text-slate-600 underline hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-600">
+       class="mb-1 rounded text-sm text-slate-600 underline hover:text-slate-900">
         {{ __('initiation.title') }}
     </a>
 </div>

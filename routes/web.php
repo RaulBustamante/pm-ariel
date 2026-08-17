@@ -7,10 +7,12 @@ use App\Http\Controllers\Admin\HierarchyController;
 use App\Http\Controllers\Admin\OrgUnitController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AdvisorController;
+use App\Http\Controllers\AttachmentController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\BaselineController;
+use App\Http\Controllers\CalendarSettingsController;
 use App\Http\Controllers\CalendarViewController;
 use App\Http\Controllers\GanttController;
 use App\Http\Controllers\Initiation\InitiationController;
@@ -62,6 +64,12 @@ Route::middleware('auth')->group(function (): void {
         Route::put('/', [ProjectController::class, 'update'])->name('projects.update');
         Route::post('members', [ProjectController::class, 'addMember'])->name('projects.members.store');
         Route::delete('members/{user}', [ProjectController::class, 'removeMember'])->name('projects.members.destroy');
+
+        Route::get('calendars', [CalendarSettingsController::class, 'index'])->name('projects.calendars.index');
+        Route::post('calendars', [CalendarSettingsController::class, 'store'])->name('projects.calendars.store');
+        Route::post('calendars/{calendar}/preview', [CalendarSettingsController::class, 'preview'])->name('projects.calendars.preview');
+        Route::post('calendars/{calendar}/exception', [CalendarSettingsController::class, 'applyException'])->name('projects.calendars.exception');
+        Route::post('calendars/{calendar}/default', [CalendarSettingsController::class, 'makeDefault'])->name('projects.calendars.default');
 
         Route::post('baselines', [BaselineController::class, 'store'])->name('projects.baselines.store');
         Route::get('baselines/{baseline}', [BaselineController::class, 'compare'])->name('projects.baselines.compare');
@@ -123,6 +131,7 @@ Route::middleware('auth')->group(function (): void {
         Route::post('import', [TaskImportController::class, 'store'])->name('projects.tasks.import.store');
 
         Route::get('gantt', [GanttController::class, 'show'])->name('projects.gantt');
+        Route::post('gantt/move', [GanttController::class, 'move'])->name('projects.gantt.move');
 
         Route::get('calendar', [CalendarViewController::class, 'show'])->name('projects.calendar');
 
@@ -134,6 +143,10 @@ Route::middleware('auth')->group(function (): void {
 
         Route::post('resources', [ResourceController::class, 'store'])->name('projects.resources.store');
         Route::delete('resources/{resource}', [ResourceController::class, 'destroy'])->name('projects.resources.destroy');
+        Route::post('tasks/{task}/attachments', [AttachmentController::class, 'store'])->name('projects.attachments.store');
+        Route::get('attachments/{attachment}', [AttachmentController::class, 'download'])->name('projects.attachments.download');
+        Route::delete('attachments/{attachment}', [AttachmentController::class, 'destroy'])->name('projects.attachments.destroy');
+
         Route::post('tasks/{task}/assignments', [ResourceController::class, 'assign'])->name('projects.assignments.store');
         Route::delete('tasks/{task}/assignments/{resource}', [ResourceController::class, 'unassign'])->name('projects.assignments.destroy');
     });

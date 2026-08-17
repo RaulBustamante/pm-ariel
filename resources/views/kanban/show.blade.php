@@ -6,6 +6,8 @@
 @section('content')
     @include('tasks._tabs', ['active' => 'kanban'])
 
+    @include('tasks._filters', ['filterRoute' => 'projects.kanban'])
+
     <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
         <p class="max-w-2xl text-xs text-slate-600">{{ __('kanban.intro') }}</p>
 

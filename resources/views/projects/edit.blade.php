@@ -73,8 +73,12 @@
                     <textarea id="description-field" name="description" rows="2" class="field">{{ old('description', $project->description) }}</textarea>
                 </div>
 
-                <div class="border-t border-slate-100 pt-3">
+                <div class="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-3">
                     <button type="submit" class="btn btn-primary">{{ __('common.save') }}</button>
+
+                    <a href="{{ route('projects.calendars.index', $project) }}" class="btn btn-secondary">
+                        {{ __('calendars.title') }}
+                    </a>
                 </div>
             </div>
         </form>

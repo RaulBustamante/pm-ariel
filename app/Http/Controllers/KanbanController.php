@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\Task;
 use App\Services\Scheduling\TaskOutliner;
+use App\Support\Scheduling\TaskFilter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -46,6 +47,9 @@ final class KanbanController extends Controller
             ->reject(fn (Task $task): bool => (bool) $task->is_summary)
             ->values();
 
+        $filter = TaskFilter::fromRequest($request);
+        $tasks = $filter->apply($tasks, auth()->id());
+
         $swimlane = (string) $request->query('lane', 'none');
 
         return view('kanban.show', [
@@ -54,6 +58,8 @@ final class KanbanController extends Controller
             'lanes' => $swimlane === 'package' ? $this->byPackage($project, $tasks) : null,
             'swimlane' => $swimlane,
             'total' => $tasks->count(),
+            'filter' => $filter,
+            'visibleCount' => $tasks->count(),
         ]);
     }
 

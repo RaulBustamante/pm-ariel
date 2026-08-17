@@ -8,7 +8,9 @@ use App\Models\Project;
 use App\Models\ProjectFinding;
 use App\Models\Resource;
 use App\Services\Advisor\ProjectAdvisor;
+use App\Support\Scheduling\TaskFilter;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 /**
@@ -25,7 +27,7 @@ final class AdvisorController extends Controller
         private readonly ProjectAdvisor $advisor,
     ) {}
 
-    public function show(Project $project): View
+    public function show(Request $request, Project $project): View
     {
         $this->authorize('view', $project);
 
@@ -48,6 +50,7 @@ final class AdvisorController extends Controller
             'light' => $this->advisor->light($findings),
             'workload' => $this->advisor->workload($project),
             'lastCheck' => $findings->first()?->detected_at,
+            'filter' => TaskFilter::fromRequest($request),
             'resources' => Resource::query()->where('project_id', $project->id)->orderBy('name')->get(),
         ]);
     }

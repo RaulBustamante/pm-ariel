@@ -36,7 +36,37 @@ final class StoreProjectRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'org_unit_id' => ['nullable', 'integer', Rule::exists('org_units', 'id')->withoutTrashed()],
             'template_id' => ['nullable', 'integer', Rule::exists('project_templates', 'id')->withoutTrashed()],
+
+            // Paso 2 — quién
+            'members' => ['nullable', 'array'],
+            'members.*' => ['integer', Rule::exists('users', 'id')->withoutTrashed()],
+
+            // Paso 3 — cuándo
+            'planned_start' => ['nullable', 'date'],
+
+            // Paso 4 — cómo se mide. Los entregables entran como tareas de
+            // primer nivel, que es lo que evita terminar el asistente en una
+            // pantalla vacía.
+            'success_criteria' => ['nullable', 'string', 'max:2000'],
+            'deliverables' => ['nullable', 'string', 'max:2000'],
         ];
+    }
+
+    /**
+     * Los entregables, uno por renglón, ya limpios.
+     *
+     * @return list<string>
+     */
+    public function deliverableList(): array
+    {
+        $raw = (string) $this->input('deliverables', '');
+
+        $lines = array_map(
+            fn (string $line): string => trim(ltrim(trim($line), '-•* ')),
+            preg_split('/\r\n|\r|\n/', $raw) ?: [],
+        );
+
+        return array_values(array_filter($lines, fn (string $line): bool => $line !== ''));
     }
 
     /**

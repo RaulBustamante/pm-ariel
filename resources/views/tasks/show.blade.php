@@ -147,6 +147,49 @@
                 </div>
             </section>
 
+            {{-- Archivos --}}
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">{{ __('attachments.title') }}</h2>
+                </div>
+
+                <div class="p-4">
+                    @forelse ($attachments as $attachment)
+                        <div class="flex items-center justify-between gap-3 border-b border-slate-100 py-1.5 text-sm last:border-0">
+                            <a href="{{ route('projects.attachments.download', [$project, $attachment]) }}"
+                               class="min-w-0 truncate text-brand-700 underline hover:text-brand-800">
+                                {{ $attachment->original_name }}
+                            </a>
+
+                            <div class="flex shrink-0 items-center gap-3 text-xs text-slate-500">
+                                <span>{{ $attachment->humanSize() }}</span>
+                                @can('update', $project)
+                                    <form method="POST" action="{{ route('projects.attachments.destroy', [$project, $attachment]) }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm">{{ __('common.delete') }}</button>
+                                    </form>
+                                @endcan
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-xs text-slate-500">{{ __('attachments.none') }}</p>
+                    @endforelse
+
+                    @can('update', $project)
+                        <form method="POST" action="{{ route('projects.attachments.store', [$project, $task]) }}"
+                              enctype="multipart/form-data" class="mt-3 space-y-2 border-t border-slate-100 pt-3">
+                            @csrf
+                            <label for="attachment-field" class="field-label">{{ __('attachments.add') }}</label>
+                            <input id="attachment-field" type="file" name="file" class="field" required>
+                            <p class="field-help">{{ __('attachments.help') }}</p>
+                            @error('file') <p role="alert" class="text-xs text-red-700">{{ $message }}</p> @enderror
+                            <button type="submit" class="btn btn-secondary">{{ __('attachments.add') }}</button>
+                        </form>
+                    @endcan
+                </div>
+            </section>
+
             {{-- Historial: la bitácora de auditoría, mostrada donde se pregunta --}}
             <section class="card">
                 <div class="card-header">

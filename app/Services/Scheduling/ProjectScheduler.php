@@ -109,6 +109,35 @@ final class ProjectScheduler
     }
 
     /**
+     * Calcula **sin guardar nada**, con el calendario que se le pase.
+     *
+     * Es lo que permite responder «¿qué pasaría si el 16 de septiembre fuera
+     * feriado?» antes de decidir. El motor nunca tocó la base, así que simular
+     * no exige ningún truco: es la misma llamada con otro calendario.
+     */
+    public function simulate(Project $project, WorkingCalendar $calendar): ?ScheduleResult
+    {
+        $tasks = Task::query()->where('project_id', $project->id)->orderBy('sort_order')->get();
+
+        if ($tasks->isEmpty()) {
+            return null;
+        }
+
+        [, $extra, $keyByTaskId] = $this->calendarsFor($project);
+
+        $network = new ScheduleNetwork(
+            $tasks->map(fn (Task $task) => $task->toNode($keyByTaskId[$task->id] ?? null))->all(),
+            $project->taskDependencies()->get()->map->toLink()->all(),
+        );
+
+        try {
+            return $this->scheduler->schedule($network, $this->startOf($project, $calendar), $calendar, $extra);
+        } catch (CircularDependencyException) {
+            return null;
+        }
+    }
+
+    /**
      * El calendario del proyecto, los de las tareas con calendario propio, y de
      * qué clave usa cada tarea.
      *

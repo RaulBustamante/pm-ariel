@@ -65,15 +65,57 @@
             </div>
         </fieldset>
 
+        {{-- Paso 2 — quién --}}
+        <fieldset class="space-y-2 border-t border-slate-100 pt-5">
+            <legend class="text-sm font-semibold text-slate-900">{{ __('wizard.step_who') }}</legend>
+            <p class="field-help">{{ __('wizard.step_who_help') }}</p>
+
+            <div class="max-h-40 space-y-1 overflow-y-auto rounded-md border border-slate-200 p-2">
+                @foreach ($candidates as $candidate)
+                    <label class="flex items-center gap-2 text-sm">
+                        <input type="checkbox" name="members[]" value="{{ $candidate->id }}"
+                               class="rounded border-slate-300 text-brand-700">
+                        {{ $candidate->name }}
+                    </label>
+                @endforeach
+            </div>
+        </fieldset>
+
+        {{-- Paso 3 — cuándo --}}
+        <fieldset class="space-y-2 border-t border-slate-100 pt-5">
+            <legend class="text-sm font-semibold text-slate-900">{{ __('wizard.step_when') }}</legend>
+
+            <div class="max-w-xs">
+                <label for="start-field" class="field-label">{{ __('tasks.project_start') }}</label>
+                <input id="start-field" type="date" name="planned_start" class="field"
+                       value="{{ old('planned_start', now()->startOfWeek()->addWeek()->format('Y-m-d')) }}">
+                <p class="field-help mt-1">{{ __('wizard.step_when_help') }}</p>
+            </div>
+        </fieldset>
+
+        {{-- Paso 4 — cómo se mide --}}
+        <fieldset class="space-y-3 border-t border-slate-100 pt-5">
+            <legend class="text-sm font-semibold text-slate-900">{{ __('wizard.step_measure') }}</legend>
+
+            <div>
+                <label for="criteria-field" class="field-label">{{ __('initiation.field_success_criteria') }}</label>
+                <textarea id="criteria-field" name="success_criteria" rows="2" class="field">{{ old('success_criteria') }}</textarea>
+                <p class="field-help mt-1">{{ __('initiation.help_success_criteria') }}</p>
+            </div>
+
+            <div>
+                <label for="deliverables-field" class="field-label">{{ __('initiation.field_deliverables') }}</label>
+                <textarea id="deliverables-field" name="deliverables" rows="4" class="field"
+                          placeholder="{{ __('wizard.deliverables_placeholder') }}">{{ old('deliverables') }}</textarea>
+                {{-- Se dice antes de escribir, no después: cada renglón se
+                     convierte en una tarea del plan. --}}
+                <p class="field-help mt-1 font-medium text-brand-800">{{ __('wizard.deliverables_become_tasks') }}</p>
+            </div>
+        </fieldset>
+
         <div class="flex gap-3 border-t border-slate-100 pt-5">
-            <button type="submit"
-                    class="rounded-md bg-blue-700 px-4 py-2 text-sm font-medium text-white hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">
-                {{ __('initiation.start') }}
-            </button>
-            <a href="{{ route('projects.index') }}"
-               class="rounded-md px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100 focus:outline-none focus:ring-2 focus:ring-blue-600">
-                {{ __('common.cancel') }}
-            </a>
+            <button type="submit" class="btn btn-primary">{{ __('initiation.start') }}</button>
+            <a href="{{ route('projects.index') }}" class="btn btn-ghost">{{ __('common.cancel') }}</a>
         </div>
     </form>
 @endsection

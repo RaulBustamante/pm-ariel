@@ -22,4 +22,13 @@ return [
 
     'baseline_bar' => 'Baseline: :from to :to',
 
+    'row_summary' => 'from :from to :to. :state',
+    'keyboard_help' => 'Tab moves through the tasks; Enter opens the detail. Each bar dates are readable in the list on the left.',
+    'move_dates' => 'Move dates',
+
+    'moved' => ':task was pinned to start no earlier than :date, and the plan was recalculated.',
+    'cannot_move_summary' => 'A package cannot be moved: its dates come from the tasks inside it.',
+    'drag_confirm' => 'Move this task by :days days? The whole project gets recalculated.',
+    'drag_help' => 'You can also drag a bar to move it. Dropping asks before saving.',
+
 ];

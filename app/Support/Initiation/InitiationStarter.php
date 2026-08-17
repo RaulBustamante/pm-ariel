@@ -10,6 +10,7 @@ use App\Models\ProjectCharter;
 use App\Models\ProjectTemplate;
 use App\Models\Risk;
 use App\Models\Stakeholder;
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -59,6 +60,40 @@ final class InitiationStarter
             }
 
             return $project->refresh();
+        });
+    }
+
+    /**
+     * Convierte los entregables del asistente en tareas de primer nivel.
+     *
+     * Es lo que hace que el asistente termine en un plan y no en una pantalla
+     * vacía. Duración cero: son hitos hasta que alguien les ponga trabajo, y
+     * ponerles una duración inventada sería peor — el plan diría fechas que
+     * nadie decidió.
+     *
+     * @param  list<string>  $deliverables
+     */
+    public function seedDeliverables(Project $project, array $deliverables): int
+    {
+        if ($deliverables === []) {
+            return 0;
+        }
+
+        return DB::transaction(function () use ($project, $deliverables): int {
+            $base = (int) Task::query()->where('project_id', $project->id)->max('sort_order');
+
+            foreach ($deliverables as $index => $name) {
+                $task = new Task;
+                $task->fill([
+                    'project_id' => $project->id,
+                    'name' => $name,
+                    'duration_minutes' => 0,
+                    'sort_order' => $base + $index + 1,
+                ]);
+                $task->save();
+            }
+
+            return count($deliverables);
         });
     }
 

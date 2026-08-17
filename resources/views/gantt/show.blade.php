@@ -6,6 +6,8 @@
 @section('content')
     @include('tasks._tabs', ['active' => 'gantt'])
 
+    @include('tasks._filters', ['filterRoute' => 'projects.gantt'])
+
     <div class="mb-4 flex flex-wrap items-center gap-2">
         <span class="text-sm text-slate-600">{{ __('gantt.zoom') }}:</span>
         @foreach ([
@@ -32,20 +34,33 @@
                 {{-- Los nombres van en una tabla aparte y no dentro del SVG: así
                      se pueden leer, copiar y buscar con Ctrl+F, que dentro de un
                      dibujo no se puede. --}}
+                {{-- Cada renglón es un enlace enfocable con Tab. Un Gantt que solo
+                     se puede leer con el ratón deja fuera a quien navega por
+                     teclado y a quien usa lector de pantalla — y el dibujo, por
+                     definición, no se puede tabular. --}}
                 <div class="w-64 shrink-0 border-r border-slate-200">
                     <div class="h-[42px] border-b border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
                         {{ __('tasks.name') }}
                     </div>
                     @foreach ($tasks as $task)
-                        <div class="flex h-[26px] items-center gap-1 truncate border-b border-slate-50 px-3 text-xs
-                                    {{ $task->is_summary ? 'font-semibold text-slate-900' : 'text-slate-700' }}"
-                             style="padding-left: {{ 0.75 + ($task->outline_depth ?? 0) * 0.75 }}rem"
-                             title="{{ $task->name }}">
+                        <a href="{{ route('projects.tasks.show', [$project, $task]) }}"
+                           class="flex h-[26px] items-center gap-1 truncate border-b border-slate-50 px-3 text-xs transition-colors hover:bg-brand-50
+                                  {{ $task->is_summary ? 'font-semibold text-slate-900' : 'text-slate-700' }}"
+                           style="padding-left: {{ 0.75 + ($task->outline_depth ?? 0) * 0.75 }}rem"
+                           title="{{ $task->name }} · {{ $task->early_start?->format('d/m/y') }} → {{ $task->early_finish?->format('d/m/y') }}">
                             @if ($task->is_critical && ! $task->is_summary)
                                 <span aria-hidden="true" class="text-red-600">●</span>
                             @endif
-                            {{ $task->name }}
-                        </div>
+                            <span class="truncate">{{ $task->name }}</span>
+                            {{-- Lo que el dibujo no puede decir, se dice aquí. --}}
+                            <span class="sr-only">
+                                {{ __('gantt.row_summary', [
+                                    'from' => $task->early_start?->format('d/m/Y') ?? '',
+                                    'to' => $task->early_finish?->format('d/m/Y') ?? '',
+                                    'state' => $task->is_critical ? __('tasks.critical') : '',
+                                ]) }}
+                            </span>
+                        </a>
                     @endforeach
                 </div>
 
@@ -84,6 +99,23 @@
             @endif
         </div>
 
+        @can('update', $project)
+            {{-- Formulario normal: al soltar una barra se envia como cualquier
+                 otro, sin peticiones a mano ni estado paralelo en el navegador. --}}
+            <form method="POST" action="{{ route('projects.gantt.move', $project) }}" class="hidden"
+                  data-gantt-move-form data-confirm="{{ __('gantt.drag_confirm', ['days' => ':days']) }}">
+                @csrf
+                <input type="hidden" name="task" value="">
+                <input type="hidden" name="days" value="">
+            </form>
+
+            <p role="status" aria-live="polite" class="sr-only" data-gantt-live></p>
+        @endcan
+
         <p class="mt-2 max-w-3xl text-xs text-slate-500">{{ __('gantt.reading_help') }}</p>
+        <p class="mt-1 max-w-3xl text-xs text-slate-500">{{ __('gantt.keyboard_help') }}</p>
+        @can('update', $project)
+            <p class="mt-1 max-w-3xl text-xs text-slate-500">{{ __('gantt.drag_help') }}</p>
+        @endcan
     @endif
 @endsection

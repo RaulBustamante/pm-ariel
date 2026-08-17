@@ -8,6 +8,7 @@ use App\Models\Calendar;
 use App\Models\Project;
 use App\Models\Task;
 use App\Services\Scheduling\TaskOutliner;
+use App\Support\Scheduling\TaskFilter;
 use App\Support\Scheduling\WorkingCalendar;
 use DateTimeImmutable;
 use Illuminate\Http\Request;
@@ -47,6 +48,9 @@ final class CalendarViewController extends Controller
             ->filter(fn (Task $task): bool => $task->early_start !== null && $task->early_finish !== null)
             ->values();
 
+        $filter = TaskFilter::fromRequest($request);
+        $tasks = $filter->apply($tasks, auth()->id());
+
         return view('calendar.show', [
             'project' => $project,
             'month' => $first,
@@ -54,6 +58,8 @@ final class CalendarViewController extends Controller
             'nextMonth' => $first->modify('+1 month')->format('Y-m'),
             'weeks' => $this->weeks($gridStart, $first, $tasks, $calendar),
             'tasks' => $tasks,
+            'filter' => $filter,
+            'visibleCount' => $tasks->count(),
         ]);
     }
 

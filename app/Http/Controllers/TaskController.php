@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTaskRequest;
+use App\Models\Attachment;
 use App\Models\AuditLog;
 use App\Models\Project;
 use App\Models\Resource;
@@ -16,7 +17,9 @@ use App\Services\Scheduling\TaskOutliner;
 use App\Support\Scheduling\DependencyExpression;
 use App\Support\Scheduling\DurationParser;
 use App\Support\Scheduling\ProjectDurations;
+use App\Support\Scheduling\TaskFilter;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -31,21 +34,37 @@ use InvalidArgumentException;
  */
 final class TaskController extends Controller
 {
+    /** Renglones que se dibujan de una vez en la vista Lista. */
+    private const MAX_ROWS = 300;
+
     public function __construct(
         private readonly TaskOutliner $outliner,
         private readonly ProjectScheduler $scheduler,
     ) {}
 
-    public function index(Project $project): View
+    public function index(Request $request, Project $project): View
     {
         $this->authorize('view', $project);
 
         $outline = $this->outliner->outline($project);
         $durations = ProjectDurations::for($project);
 
+        $filter = TaskFilter::fromRequest($request);
+        $visible = $filter->apply($outline, auth()->id());
+
+        // Tope de renglones dibujados. Mil renglones de formulario en una sola
+        // pagina son varios megabytes de HTML y un navegador que se arrastra;
+        // el motor aguanta 2,000 tareas en 220 ms, pero el DOM no.
+        $capped = $visible->count() > self::MAX_ROWS;
+
         return view('tasks.index', [
             'project' => $project,
-            'tasks' => $outline,
+            'tasks' => $capped ? $visible->take(self::MAX_ROWS) : $visible,
+            'filter' => $filter,
+            'visibleCount' => $visible->count(),
+            'totalCount' => $outline->count(),
+            'capped' => $capped,
+            'maxRows' => self::MAX_ROWS,
             'durations' => $durations,
             'predecessorText' => $this->predecessorTextFor($project, $outline, $durations),
             'members' => $project->members()->orderBy('name')->get(),
@@ -74,6 +93,7 @@ final class TaskController extends Controller
             'members' => $project->members()->orderBy('name')->get(),
             'resources' => Resource::query()->where('project_id', $project->id)->orderBy('name')->get(),
             'assignments' => TaskAssignment::query()->with('resource')->where('task_id', $task->id)->get(),
+            'attachments' => Attachment::query()->where('task_id', $task->id)->with('uploader')->latest('id')->get(),
             'predecessors' => $task->predecessorLinks()->with('predecessor')->get(),
             'successors' => $task->successorLinks()->with('successor')->get(),
             'history' => AuditLog::query()

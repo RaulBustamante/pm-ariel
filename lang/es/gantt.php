@@ -22,4 +22,13 @@ return [
 
     'baseline_bar' => 'Linea base: :from a :to',
 
+    'row_summary' => 'del :from al :to. :state',
+    'keyboard_help' => 'Con Tab recorres las tareas; Enter abre el detalle. Las fechas de cada barra se leen en la lista de la izquierda.',
+    'move_dates' => 'Mover fechas',
+
+    'moved' => ':task se fijo para no empezar antes del :date, y el plan se recalculo.',
+    'cannot_move_summary' => 'Un paquete no se mueve: sus fechas salen de las tareas que tiene dentro.',
+    'drag_confirm' => 'Mover esta tarea :days dias? Se recalcula el proyecto completo.',
+    'drag_help' => 'Tambien puedes arrastrar una barra para moverla. Al soltar se te pregunta antes de guardar.',
+
 ];

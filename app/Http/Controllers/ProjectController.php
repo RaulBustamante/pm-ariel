@@ -59,10 +59,13 @@ final class ProjectController extends Controller
     {
         $this->authorize('create', Project::class);
 
-        return view('projects.create', $this->formOptions());
+        return view('projects.create', [
+            ...$this->formOptions(),
+            'candidates' => User::query()->where('is_active', true)->orderBy('name')->get(),
+        ]);
     }
 
-    public function store(StoreProjectRequest $request, InitiationStarter $starter): RedirectResponse
+    public function store(StoreProjectRequest $request, InitiationStarter $starter, ProjectScheduler $scheduler): RedirectResponse
     {
         /** @var User $owner */
         $owner = $request->user();
@@ -77,10 +80,37 @@ final class ProjectController extends Controller
                 'name' => $request->string('name')->value(),
                 'description' => $request->input('description'),
                 'org_unit_id' => $request->input('org_unit_id'),
+                'planned_start' => $request->input('planned_start'),
             ],
             $owner,
             $template,
         );
+
+        // Paso 2 — quien. El dueño ya quedo como gerente al arrancar.
+        foreach ((array) $request->input('members', []) as $memberId) {
+            if ((int) $memberId !== $owner->id) {
+                $project->members()->syncWithoutDetaching([
+                    (int) $memberId => ['project_role' => Project::ROLE_MEMBER],
+                ]);
+            }
+        }
+
+        // Paso 4 — como se mide. Alimenta el acta y siembra la WBS.
+        $criteria = $request->input('success_criteria');
+        $deliverables = $request->deliverableList();
+
+        if (filled($criteria) || $deliverables !== []) {
+            $project->charter?->update(array_filter([
+                'success_criteria' => $criteria,
+                'deliverables' => $deliverables === []
+                    ? null
+                    : implode("\n", array_map(fn (string $item): string => "- {$item}", $deliverables)),
+            ]));
+        }
+
+        if ($starter->seedDeliverables($project, $deliverables) > 0) {
+            $scheduler->reschedule($project->refresh());
+        }
 
         return redirect()
             ->route('projects.initiation.justification', $project)

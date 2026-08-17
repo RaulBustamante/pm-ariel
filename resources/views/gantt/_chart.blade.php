@@ -5,7 +5,8 @@
     $rowHeight = \App\Support\Scheduling\GanttLayout::ROW_HEIGHT;
 @endphp
 
-<svg width="{{ max(320, $layout->width) }}" height="{{ $layout->height }}"
+<svg data-gantt data-pixels-per-day="{{ $layout->pixelsPerDay }}"
+     width="{{ max(320, $layout->width) }}" height="{{ $layout->height }}"
      viewBox="0 0 {{ max(320, $layout->width) }} {{ $layout->height }}"
      role="img"
      aria-label="{{ __('gantt.chart_label', ['project' => $project->name, 'count' => $tasks->count()]) }}"
@@ -123,7 +124,8 @@
                 <title>{{ $label }}</title>
             </path>
         @else
-            <rect x="{{ $x }}" y="{{ $y }}" width="{{ $width }}" height="{{ $barHeight }}" rx="2"
+            <rect @can('update', $project) data-task-bar data-task-id="{{ $task->id }}" data-task-name="{{ $task->name }}" class="cursor-ew-resize" @endcan
+                  x="{{ $x }}" y="{{ $y }}" width="{{ $width }}" height="{{ $barHeight }}" rx="2"
                   fill="{{ $task->is_critical ? '#dc2626' : '#2563eb' }}">
                 <title>{{ $label }}</title>
             </rect>
