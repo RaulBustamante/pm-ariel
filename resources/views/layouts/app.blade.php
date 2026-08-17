@@ -59,6 +59,10 @@
                         {{ __('common.users') }}
                     </x-nav-link>
 
+                    <x-nav-link :href="route('admin.positions.index')" :active="request()->routeIs('admin.positions.*')" icon="users">
+                        {{ __('positions.title') }}
+                    </x-nav-link>
+
                     <x-nav-link :href="route('admin.hierarchy.index')" :active="request()->routeIs('admin.hierarchy.*')" icon="sitemap">
                         {{ __('hierarchy.title') }}
                     </x-nav-link>

@@ -30,6 +30,70 @@
             </div>
         </div>
     @else
+    @if (($week ?? null) && array_sum($week['counts']) > 0)
+        {{-- Mi semana, cruzando todos los proyectos.
+             El corte semanal contesta «cómo va este proyecto»; esto contesta la
+             otra pregunta, la de la mañana: «¿qué me toca?». Nadie trabaja en un
+             proyecto a la vez, y armar la lista entrando a cinco es justo el
+             trabajo que el sistema debería estar haciendo. --}}
+        <section class="mb-5">
+            <div class="mb-2 flex flex-wrap items-baseline justify-between gap-2">
+                <h2 class="text-sm font-semibold text-slate-900">{{ __('dashboard.my_week') }}</h2>
+                <p class="text-xs text-slate-500">
+                    {{ __('reports.week_of', ['from' => $week['from']->format('d/m'), 'to' => $week['to']->format('d/m')]) }}
+                </p>
+            </div>
+
+            <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                @foreach ([
+                    ['late', 'badge-danger', 'meter-fill-danger'],
+                    ['due', 'badge-warn', 'meter-fill-warn'],
+                    ['next', 'badge-neutral', 'meter-fill'],
+                    ['closed', 'badge-ok', 'meter-fill'],
+                ] as $index => [$key, $badge, $fill])
+                    <div class="card hud-in hud-in-{{ min(4, $index + 1) }} p-3">
+                        <div class="flex items-baseline justify-between gap-2">
+                            <p class="stat-label">{{ __("dashboard.week_{$key}") }}</p>
+                            <span class="badge {{ $badge }}">{{ $week['counts'][$key] }}</span>
+                        </div>
+
+                        @if ($week[$key]->isEmpty())
+                            <p class="mt-2 text-xs italic text-slate-500">{{ __("dashboard.week_no_{$key}") }}</p>
+                        @else
+                            <ul class="mt-2 space-y-1.5">
+                                @foreach ($week[$key] as $task)
+                                    <li class="min-w-0">
+                                        <a href="{{ route('projects.tasks.show', [$task->project, $task]) }}"
+                                           class="block truncate text-xs text-slate-800 hover:text-hud-400">
+                                            {{ $task->name }}
+                                        </a>
+                                        {{-- La clave del proyecto en cada renglón: sin
+                                             ella, una lista que mezcla cinco proyectos
+                                             obliga a adivinar de cuál es cada tarea. --}}
+                                        <span class="font-mono text-[10px] text-slate-500">
+                                            {{ $task->project?->code }}
+                                            @if ($key === 'late' && $task->owner_id === null)
+                                                · {{ __('reports.unassigned') }}
+                                            @elseif ($task->early_finish)
+                                                · {{ $task->early_finish->format('d/m') }}
+                                            @endif
+                                        </span>
+                                    </li>
+                                @endforeach
+                            </ul>
+
+                            @if ($week['counts'][$key] > $week[$key]->count())
+                                <p class="mt-2 text-[10px] text-slate-500">
+                                    {{ __('reports.and_more', ['count' => $week['counts'][$key] - $week[$key]->count()]) }}
+                                </p>
+                            @endif
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </section>
+    @endif
+
         <p class="mb-4 max-w-3xl text-sm text-slate-600">{{ __('dashboard.intro') }}</p>
 
         <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">

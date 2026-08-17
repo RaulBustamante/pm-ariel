@@ -197,6 +197,43 @@ final class ProjectController extends Controller
     /**
      * @return array{orgUnits: Collection<int, OrgUnit>, templates: Collection<int, ProjectTemplate>}
      */
+    /**
+     * Borrar un proyecto, escribiendo su clave para confirmarlo.
+     *
+     * Se pide escribir la clave y no un «¿estás seguro?» porque no son
+     * comparables: a un cuadro de confirmación se le da aceptar sin leerlo —es
+     * lo que uno hace veinte veces al día—, mientras que escribir `DEMO-01`
+     * obliga a mirar **cuál** se está borrando. Es la diferencia entre borrar el
+     * que se quería y el que estaba abierto en la otra pestaña.
+     *
+     * El borrado es **suave**: el proyecto sale de todas las pantallas pero la
+     * fila sigue ahí, y con ella su bitácora de auditoría. Un borrado definitivo
+     * se llevaría el rastro de quién hizo qué, que es justo lo que hay que
+     * conservar cuando alguien pregunta a dónde se fue un proyecto.
+     */
+    public function destroy(Request $request, Project $project): RedirectResponse
+    {
+        $this->authorize('delete', $project);
+
+        $request->validate([
+            'confirmation' => ['required', 'string'],
+        ]);
+
+        if (trim((string) $request->input('confirmation')) !== $project->code) {
+            return back()->with('error', __('projects.delete_confirmation_failed', ['code' => $project->code]));
+        }
+
+        $name = $project->name;
+        $project->delete();
+
+        return redirect()
+            ->route('projects.index')
+            ->with('status', __('projects.deleted', ['name' => $name]));
+    }
+
+    /**
+     * @return array{orgUnits: Collection<int, OrgUnit>, templates: Collection<int, ProjectTemplate>}
+     */
     private function formOptions(): array
     {
         return [

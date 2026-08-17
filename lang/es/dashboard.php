@@ -43,4 +43,13 @@ return [
 
     'intro' => 'Como va cada proyecto que alcanzas a ver. Entra a uno para el detalle.',
 
+    'my_week' => 'Mi semana',
+    'week_late' => 'Atrasado',
+    'week_due' => 'Vence esta semana',
+    'week_next' => 'Arranca la que entra',
+    'week_closed' => 'Cerrado por mi',
+    'week_no_late' => 'Nada atrasado. Vas al dia.',
+    'week_no_due' => 'Nada te vence esta semana.',
+    'week_no_next' => 'No te arranca nada la semana que entra.',
+    'week_no_closed' => 'Todavia no cierras nada esta semana.',
 ];

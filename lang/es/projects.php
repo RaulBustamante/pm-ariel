@@ -52,4 +52,10 @@ return [
     'removed_help' => 'Estaban comprometidas y ya no están en el plan.',
     'removed_warning' => 'Estas tareas se comprometieron en la línea base y ya no están en el plan:',
 
+    'danger_zone' => 'Borrar este proyecto',
+    'delete' => 'Borrar proyecto',
+    'delete_help' => 'Se va a borrar :code con sus tareas, riesgos, interesados y lineas base. Deja de aparecer en todas las pantallas. La bitacora de auditoria se conserva, asi que queda registrado quien lo borro y cuando.',
+    'delete_type_code' => 'Escribe :code para confirmar',
+    'delete_confirmation_failed' => 'No se borro nada: lo que escribiste no coincide con :code.',
+    'deleted' => 'Se borro el proyecto :name.',
 ];

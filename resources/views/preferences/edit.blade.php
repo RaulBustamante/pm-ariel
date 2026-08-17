@@ -81,11 +81,47 @@
                 @enderror
             </fieldset>
 
-            <x-form-field name="timezone"
-                          :label="__('common.timezone')"
-                          :value="$me->timezone ?? config('app.timezone')"
-                          :help="__('preferences.timezone_help')"
-                          required />
+            {{-- Desplegable y no campo libre.
+                 Antes había que escribir `America/Mexico_City` de memoria, con
+                 el guion bajo y la mayúscula correctos, o la validación lo
+                 rechazaba sin decir cómo se escribe bien. Cada opción muestra su
+                 desfase actual, que es lo que la gente reconoce —«GMT-6»— mucho
+                 antes que el nombre técnico. --}}
+            <div class="space-y-1">
+                <label for="timezone-field" class="block text-sm font-medium text-slate-700">
+                    {{ __('common.timezone') }}
+                </label>
+
+                @php
+                    $current = old('timezone', $me->timezone ?? config('app.timezone'));
+                    $offered = collect(config('timezones.offered', []));
+
+                    // Si alguien ya tenía guardada una que no está en la lista,
+                    // se agrega en vez de perderla al guardar sin tocar el campo.
+                    if (filled($current) && ! $offered->contains($current)) {
+                        $offered = $offered->prepend($current);
+                    }
+                @endphp
+
+                <select id="timezone-field" name="timezone" class="field"
+                        @if ($errors->has('timezone')) aria-invalid="true" aria-describedby="timezone-field-error" @endif>
+                    @foreach ($offered as $zone)
+                        @php
+                            $offset = (new DateTimeImmutable('now', new DateTimeZone($zone)))->format('P');
+                            $city = str_replace('_', ' ', \Illuminate\Support\Str::afterLast($zone, '/'));
+                        @endphp
+                        <option value="{{ $zone }}" @selected($current === $zone)>
+                            {{ $city }} · GMT{{ $offset }}
+                        </option>
+                    @endforeach
+                </select>
+
+                <p class="field-help">{{ __('preferences.timezone_help') }}</p>
+
+                @error('timezone')
+                    <p id="timezone-field-error" role="alert" class="text-sm text-red-700">{{ $message }}</p>
+                @enderror
+            </div>
         </fieldset>
 
         <fieldset class="space-y-3">

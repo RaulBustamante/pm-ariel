@@ -43,4 +43,13 @@ return [
 
     'intro' => 'How each project you can see is going. Open one for the detail.',
 
+    'my_week' => 'My week',
+    'week_late' => 'Late',
+    'week_due' => 'Due this week',
+    'week_next' => 'Starts next week',
+    'week_closed' => 'Closed by me',
+    'week_no_late' => 'Nothing late. You are on time.',
+    'week_no_due' => 'Nothing of yours is due this week.',
+    'week_no_next' => 'Nothing of yours starts next week.',
+    'week_no_closed' => 'You have not closed anything this week yet.',
 ];

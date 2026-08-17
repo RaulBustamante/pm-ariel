@@ -52,4 +52,10 @@ return [
     'removed_help' => 'They were committed and are no longer in the plan.',
     'removed_warning' => 'These tasks were committed in the baseline and are no longer in the plan:',
 
+    'danger_zone' => 'Delete this project',
+    'delete' => 'Delete project',
+    'delete_help' => 'This deletes :code along with its tasks, risks, stakeholders and baselines. It disappears from every screen. The audit log is kept, so who deleted it and when stays on record.',
+    'delete_type_code' => 'Type :code to confirm',
+    'delete_confirmation_failed' => 'Nothing was deleted: what you typed does not match :code.',
+    'deleted' => 'Project :name was deleted.',
 ];

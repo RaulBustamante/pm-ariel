@@ -176,4 +176,35 @@
             </section>
         </aside>
     </div>
+
+    @can('delete', $project)
+        {{-- Zona de peligro, al final y separada.
+             No va junto a «guardar»: la mano que viene de guardar cambios no
+             debe encontrarse el borrado a dos centímetros. --}}
+        <section class="card mt-6 border-red-800/50 p-5">
+            <h2 class="text-sm font-semibold text-red-400">{{ __('projects.danger_zone') }}</h2>
+            <p class="mt-1 max-w-2xl text-xs leading-relaxed text-slate-600">
+                {{ __('projects.delete_help', ['code' => $project->code]) }}
+            </p>
+
+            <form method="POST" action="{{ route('projects.destroy', $project) }}"
+                  class="mt-4 flex flex-wrap items-end gap-3">
+                @csrf
+                @method('DELETE')
+
+                <div class="min-w-[16rem]">
+                    <label for="delete-confirmation" class="field-label">
+                        {{ __('projects.delete_type_code', ['code' => $project->code]) }}
+                    </label>
+                    {{-- Escribir la clave y no un «¿estás seguro?»: a un cuadro
+                         de confirmación se le da aceptar sin leerlo, y escribir
+                         la clave obliga a mirar **cuál** se está borrando. --}}
+                    <input id="delete-confirmation" type="text" name="confirmation" class="field"
+                           autocomplete="off" placeholder="{{ $project->code }}" required>
+                </div>
+
+                <button type="submit" class="btn btn-danger">{{ __('projects.delete') }}</button>
+            </form>
+        </section>
+    @endcan
 @endsection

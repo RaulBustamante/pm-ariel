@@ -9,6 +9,7 @@ use App\Models\ProjectFinding;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\Advisor\ProjectAdvisor;
+use App\Support\Reporting\MyWeek;
 use App\Support\Reporting\ProjectDashboard;
 use App\Support\Visibility\VisibilityScope;
 use Illuminate\View\View;
@@ -24,6 +25,7 @@ final class HomeController extends Controller
     public function __construct(
         private readonly ProjectDashboard $dashboard,
         private readonly ProjectAdvisor $advisor,
+        private readonly MyWeek $week,
     ) {}
 
     public function index(VisibilityScope $visibility): View
@@ -32,7 +34,7 @@ final class HomeController extends Controller
         $viewer = auth()->user();
 
         if ($viewer === null || ! $viewer->can('viewAny', Project::class)) {
-            return view('dashboard', ['projects' => collect()]);
+            return view('dashboard', ['projects' => collect(), 'week' => null]);
         }
 
         // Las tareas se traen de una sola vez y ya filtradas. Los indicadores de
@@ -59,6 +61,10 @@ final class HomeController extends Controller
             ->groupBy('project_id');
 
         return view('dashboard', [
+            // Lo mío de esta semana, cruzando todos los proyectos. Es la
+            // pregunta con la que se abre el sistema en la mañana, y antes
+            // obligaba a entrar proyecto por proyecto a armarla de memoria.
+            'week' => $this->week->for($viewer, $projects),
             'projects' => $projects->map(function (Project $project) use ($findings): array {
                 $kpis = $this->dashboard->kpis($project);
 

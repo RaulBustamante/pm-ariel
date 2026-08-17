@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\HierarchyController;
 use App\Http\Controllers\Admin\OrgUnitController;
+use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AdvisorController;
 use App\Http\Controllers\AttachmentController;
@@ -70,6 +71,7 @@ Route::middleware('auth')->group(function (): void {
     Route::prefix('projects/{project}')->group(function (): void {
         Route::get('edit', [ProjectController::class, 'edit'])->name('projects.edit');
         Route::put('/', [ProjectController::class, 'update'])->name('projects.update');
+        Route::delete('/', [ProjectController::class, 'destroy'])->name('projects.destroy');
         Route::post('members', [ProjectController::class, 'addMember'])->name('projects.members.store');
         Route::delete('members/{user}', [ProjectController::class, 'removeMember'])->name('projects.members.destroy');
 
@@ -181,6 +183,13 @@ Route::middleware('auth')->group(function (): void {
         Route::get('org-units/{orgUnit}/edit', [OrgUnitController::class, 'edit'])->name('org-units.edit');
         Route::put('org-units/{orgUnit}', [OrgUnitController::class, 'update'])->name('org-units.update');
         Route::delete('org-units/{orgUnit}', [OrgUnitController::class, 'destroy'])->name('org-units.destroy');
+
+        Route::get('positions', [PositionController::class, 'index'])->name('positions.index');
+        Route::get('positions/create', [PositionController::class, 'create'])->name('positions.create');
+        Route::post('positions', [PositionController::class, 'store'])->name('positions.store');
+        Route::get('positions/{position}/edit', [PositionController::class, 'edit'])->name('positions.edit');
+        Route::put('positions/{position}', [PositionController::class, 'update'])->name('positions.update');
+        Route::delete('positions/{position}', [PositionController::class, 'destroy'])->name('positions.destroy');
 
         Route::get('hierarchy', [HierarchyController::class, 'index'])->name('hierarchy.index');
         Route::get('hierarchy/{user}', [HierarchyController::class, 'edit'])->name('hierarchy.edit');
