@@ -17,6 +17,7 @@ use App\Http\Controllers\BaselineController;
 use App\Http\Controllers\CalendarSettingsController;
 use App\Http\Controllers\CalendarViewController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentIssueController;
 use App\Http\Controllers\GanttController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Initiation\InitiationController;
@@ -155,6 +156,11 @@ Route::middleware('auth')->group(function (): void {
         Route::get('reports/complete', [ReportController::class, 'complete'])->name('projects.reports.complete');
         Route::get('reports/weekly', [ReportController::class, 'weekly'])->name('projects.reports.weekly');
         Route::get('documents', [ReportController::class, 'documents'])->name('projects.documents');
+        Route::post('documents/issue/{code}', [DocumentIssueController::class, 'store'])
+            ->whereIn('code', ['weekly', 'complete', 'sheet'])
+            ->name('projects.documents.issue');
+        Route::get('documents/issues/{issue}', [DocumentIssueController::class, 'download'])
+            ->name('projects.documents.download');
         Route::get('reports/gantt', [ReportController::class, 'ganttPrint'])->name('projects.reports.gantt');
         Route::get('reports/csv', [ReportController::class, 'csv'])->name('projects.reports.csv');
 

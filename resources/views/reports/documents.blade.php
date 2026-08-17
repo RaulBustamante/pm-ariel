@@ -107,4 +107,81 @@
             </section>
         @endforeach
     </div>
+
+    {{-- ------------------------------------------------------------------
+         Emitir y archivar
+         ------------------------------------------------------------------ --}}
+    @can('update', $project)
+        <section class="card hud-in mt-4 p-4">
+            <h2 class="card-title">{{ __('documents.issue') }}</h2>
+            <p class="mt-1 max-w-3xl text-xs leading-relaxed text-slate-600">{{ __('documents.issue_help') }}</p>
+
+            <div class="mt-3 flex flex-wrap gap-2">
+                @foreach (['weekly', 'complete', 'sheet'] as $what)
+                    <form method="POST" action="{{ route('projects.documents.issue', [$project, $what]) }}">
+                        @csrf
+                        <button type="submit" class="btn btn-secondary btn-sm">{{ __("documents.issue_{$what}") }}</button>
+                    </form>
+                @endforeach
+            </div>
+        </section>
+    @endcan
+
+    <section class="card hud-in mt-4">
+        <div class="card-header">
+            <h2 class="card-title">{{ __('documents.issued_versions') }}</h2>
+            <span class="text-xs text-slate-500">{{ $issues->count() }}</span>
+        </div>
+
+        @if ($issues->isEmpty())
+            <p class="p-5 text-sm leading-relaxed text-slate-500">{{ __('documents.issued_empty') }}</p>
+        @else
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <caption class="sr-only">{{ __('documents.issued_versions') }}</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">{{ __('documents.title') }}</th>
+                            <th scope="col" class="w-20">{{ __('documents.version') }}</th>
+                            <th scope="col" class="w-32">{{ __('documents.issued_on') }}</th>
+                            <th scope="col" class="w-40">{{ __('documents.issued_by') }}</th>
+                            <th scope="col" class="w-28"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($issues as $issue)
+                            <tr>
+                                <td>
+                                    <span class="font-medium text-slate-900">{{ $issue->label() }}</span>
+                                    {{-- Las cifras de portada, congeladas: dejan
+                                         encontrar la version correcta sin abrir
+                                         siete PDF, y sobreviven al archivo. --}}
+                                    @if ($issue->summary)
+                                        <span class="block text-[11px] tabular text-slate-500">
+                                            @isset($issue->summary['progress'])
+                                                {{ __('dashboard.progress') }} {{ $issue->summary['progress'] }} %
+                                            @endisset
+                                            @isset($issue->summary['late'])
+                                                &middot; {{ __('reports.late') }} {{ $issue->summary['late'] }}
+                                            @endisset
+                                            @if (($issue->summary['slip_days'] ?? null) !== null)
+                                                &middot; {{ __('reports.slip') }} {{ $issue->summary['slip_days'] }} d
+                                            @endif
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="tabular font-mono text-xs text-slate-600">v{{ $issue->version }}</td>
+                                <td class="text-xs text-slate-600">{{ $issue->issued_at?->format('d/m/Y H:i') }}</td>
+                                <td class="text-xs text-slate-600">{{ $issue->issuedBy?->name ?? '\u2014' }}</td>
+                                <td>
+                                    <a href="{{ route('projects.documents.download', [$project, $issue]) }}"
+                                       class="btn btn-secondary btn-sm">{{ __('documents.download') }}</a>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
+    </section>
 @endsection

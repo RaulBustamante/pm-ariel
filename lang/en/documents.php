@@ -113,4 +113,17 @@ return [
     'doc_archived_project_documents' => 'Archived project documents',
     'doc_benefits_transition' => 'Benefits transition information',
 
+    'issue' => 'Issue',
+    'issue_help' => 'Keeps a frozen copy of this document with its date and who issued it. Downloading does not archive it: pulling the PDF to review is a draft; issuing it is committing to what it says.',
+    'issued' => ':document issued as version :version.',
+    'issued_versions' => 'Issued versions',
+    'issued_empty' => 'No version has been issued yet. Until one is, the document sent by email is recorded nowhere.',
+    'version' => 'Version',
+    'issued_on' => 'Issued',
+    'issued_by' => 'By',
+    'size' => 'Size',
+    'download' => 'Download',
+    'issue_weekly' => 'Issue the weekly status',
+    'issue_complete' => 'Issue the complete file',
+    'issue_sheet' => 'Issue the project sheet',
 ];

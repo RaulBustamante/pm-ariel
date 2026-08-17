@@ -113,4 +113,17 @@ return [
     'doc_archived_project_documents' => 'Documentos archivados del proyecto',
     'doc_benefits_transition' => 'Transicion de beneficios',
 
+    'issue' => 'Emitir',
+    'issue_help' => 'Guarda una copia congelada de este documento, con su fecha y quien lo emitio. Descargarlo no lo archiva: bajar el PDF para revisarlo es un borrador; emitirlo es comprometerse con lo que dice.',
+    'issued' => ':document emitido como version :version.',
+    'issued_versions' => 'Versiones emitidas',
+    'issued_empty' => 'Todavia no se ha emitido ninguna version. Hasta que se emita una, el documento que se mande por correo no queda registrado en ningun lado.',
+    'version' => 'Version',
+    'issued_on' => 'Emitida',
+    'issued_by' => 'Por',
+    'size' => 'Tamano',
+    'download' => 'Descargar',
+    'issue_weekly' => 'Emitir el corte semanal',
+    'issue_complete' => 'Emitir el expediente completo',
+    'issue_sheet' => 'Emitir la ficha del proyecto',
 ];

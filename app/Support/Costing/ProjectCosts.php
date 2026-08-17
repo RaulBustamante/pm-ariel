@@ -6,7 +6,7 @@ namespace App\Support\Costing;
 
 use App\Models\Project;
 use App\Models\Resource;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 /**
  * El costo del proyecto, agrupado por las tres preguntas que la gente hace.
@@ -273,9 +273,13 @@ final class ProjectCosts
      * Los recursos del proyecto, con lo que ya se les asignó. Alimenta la
      * pantalla de recursos.
      *
-     * @return Collection<int, resource>
+     * El tipo lleva la ruta completa porque `resource` es un tipo reservado de
+     * PHP y Pint lo pasa a minúsculas si se escribe suelto, con lo que deja de
+     * apuntar al modelo.
+     *
+     * @return EloquentCollection<int, \App\Models\Resource>
      */
-    public function resourcesOf(Project $project): Collection
+    public function resourcesOf(Project $project): EloquentCollection
     {
         return $project->resources()
             ->withCount('assignments')

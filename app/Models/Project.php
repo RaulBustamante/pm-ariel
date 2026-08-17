@@ -123,6 +123,25 @@ class Project extends Model
     /**
      * @return HasMany<\App\Models\Resource, $this>
      */
+    /**
+     * Las versiones emitidas de los documentos de este proyecto.
+     *
+     * @return HasMany<DocumentIssue, $this>
+     */
+    public function documentIssues(): HasMany
+    {
+        return $this->hasMany(DocumentIssue::class);
+    }
+
+    /**
+     * Los recursos del proyecto: quien trabaja y que se consume.
+     *
+     * El generico va explicito porque `Resource` es un tipo reservado de PHP y
+     * hay que escribirlo con la ruta completa; sin el, el analisis estatico
+     * pierde el tipo en cuanto la consulta pasa por `withCount()`.
+     *
+     * @return HasMany<\App\Models\Resource, $this>
+     */
     public function resources(): HasMany
     {
         return $this->hasMany(Resource::class)->orderBy('name');

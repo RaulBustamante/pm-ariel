@@ -96,6 +96,14 @@ final class ReportController extends Controller
             'project' => $project,
             'groups' => $catalogue->forProject($project),
             'coverage' => $catalogue->coverage(),
+            // El historial de lo emitido. Es lo que contesta <<que le mande a
+            // Jorge hace tres semanas>>, que el sistema no podia responder:
+            // volvia a generar el documento con los datos de hoy.
+            'issues' => $project->documentIssues()
+                ->with('issuedBy')
+                ->orderByDesc('issued_at')
+                ->limit(20)
+                ->get(),
         ]);
     }
 
