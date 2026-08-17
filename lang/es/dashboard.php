@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 return [
 
+    // --- Pantalla de inicio ------------------------------------------
+    // Estas tres claves existen desde la Etapa 1. Se documentan aqui porque
+    // ya se perdieron una vez al agregar las del tablero de proyecto.
+    'empty_title' => 'Todavia no hay proyectos',
+    'empty_body' => 'Aqui vas a ver como va cada proyecto: tus tareas del dia, lo que se esta desviando y el semaforo de cada uno. Empieza creando el primero, o carga el proyecto de ejemplo desde Primeros pasos.',
+    'empty_action' => 'Crear el primer proyecto',
+
     'title' => 'Tablero',
 
     'progress' => 'Avance',
@@ -33,5 +40,7 @@ return [
 
     'distribution' => 'Distribución de tareas',
     'no_data' => 'No hay tareas con fechas todavía.',
+
+    'intro' => 'Como va cada proyecto que alcanzas a ver. Entra a uno para el detalle.',
 
 ];

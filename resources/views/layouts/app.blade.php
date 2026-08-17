@@ -66,6 +66,11 @@
             </nav>
 
             <div class="border-t border-slate-800 p-2">
+                <a href="{{ route('onboarding') }}" class="nav-item" @if (request()->routeIs('onboarding*')) aria-current="page" @endif>
+                    <x-icon name="clipboard" />
+                    {{ __('onboarding.title') }}
+                </a>
+
                 <a href="{{ route('preferences.edit') }}" class="nav-item" @if (request()->routeIs('preferences.*')) aria-current="page" @endif>
                     <x-icon name="cog" />
                     {{ __('common.preferences') }}

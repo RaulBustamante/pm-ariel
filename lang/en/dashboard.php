@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 return [
 
+    // --- Home screen -------------------------------------------------
+    // These three keys date from Etapa 1. They are documented here because
+    // they were already lost once when the project dashboard keys were added.
+    'empty_title' => 'No projects yet',
+    'empty_body' => 'This is where you will see how each project is going: your tasks for the day, what is slipping and each project traffic light. Start by creating the first one, or load the example project from First steps.',
+    'empty_action' => 'Create the first project',
+
     'title' => 'Dashboard',
 
     'progress' => 'Progress',
@@ -33,5 +40,7 @@ return [
 
     'distribution' => 'Task distribution',
     'no_data' => 'No tasks with dates yet.',
+
+    'intro' => 'How each project you can see is going. Open one for the detail.',
 
 ];

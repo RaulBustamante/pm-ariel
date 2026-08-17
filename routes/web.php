@@ -16,11 +16,13 @@ use App\Http\Controllers\CalendarSettingsController;
 use App\Http\Controllers\CalendarViewController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GanttController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Initiation\InitiationController;
 use App\Http\Controllers\Initiation\InitiationPackageController;
 use App\Http\Controllers\Initiation\RiskController;
 use App\Http\Controllers\Initiation\StakeholderController;
 use App\Http\Controllers\KanbanController;
+use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ReportController;
@@ -52,7 +54,11 @@ Route::middleware('auth')->group(function (): void {
     Route::get('change-password', [PasswordChangeController::class, 'edit'])->name('password.change');
     Route::put('change-password', [PasswordChangeController::class, 'update'])->name('password.change.update');
 
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', [HomeController::class, 'index'])->name('dashboard');
+
+    Route::get('onboarding', [OnboardingController::class, 'show'])->name('onboarding');
+    Route::post('onboarding/demo', [OnboardingController::class, 'loadDemo'])->name('onboarding.demo.store');
+    Route::delete('onboarding/demo', [OnboardingController::class, 'removeDemo'])->name('onboarding.demo.destroy');
 
     Route::get('preferences', [PreferencesController::class, 'edit'])->name('preferences.edit');
     Route::put('preferences', [PreferencesController::class, 'update'])->name('preferences.update');

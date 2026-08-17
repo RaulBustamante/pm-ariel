@@ -19,9 +19,10 @@
 @endphp
 
 <div class="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200">
-    <nav class="flex gap-1 overflow-x-auto" aria-label="{{ __('tasks.title') }}">
+    <nav data-shortcut-nav class="flex gap-1 overflow-x-auto" aria-label="{{ __('tasks.title') }}">
         @foreach ($tabs as $key => $tab)
             <a href="{{ route($tab['route'], ['project' => $project, ...$carry]) }}"
+               data-shortcut-to="{{ $key }}"
                @if ($active === $key) aria-current="page" @endif
                class="-mb-px shrink-0 border-b-2 px-3 py-2 text-sm font-medium transition-colors
                       {{ $active === $key
@@ -32,8 +33,12 @@
         @endforeach
     </nav>
 
-    <a href="{{ route('projects.initiation.overview', $project) }}"
-       class="mb-1 rounded text-sm text-slate-600 underline hover:text-slate-900">
-        {{ __('initiation.title') }}
-    </a>
+    <div class="mb-1 flex items-center gap-3">
+        <a href="{{ route('projects.initiation.overview', $project) }}"
+           class="rounded text-sm text-slate-600 underline hover:text-slate-900">
+            {{ __('initiation.title') }}
+        </a>
+
+        @include('partials._shortcuts')
+    </div>
 </div>
