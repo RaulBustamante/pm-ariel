@@ -29,4 +29,5 @@ return [
     'kpi_finish' => 'Calculated finish',
     'schedule_chart' => 'Gantt chart',
     'affects' => 'Affects',
+    'turn_the_page' => 'The chart is rotated: turn the sheet to read it.',
 ];

@@ -347,12 +347,73 @@ final class ReportsAndDashboardTest extends TestCase
 
         if (preg_match_all('/stream(.*?)endstream/s', $pdf, $matches)) {
             foreach ($matches[1] as $chunk) {
-                $raw = @gzuncompress(ltrim($chunk, '
+                $raw = @gzuncompress(ltrim($chunk, '
+
 ')) ?: $chunk;
                 $total += substr_count($raw, ' re');
             }
         }
 
         return $total;
+    }
+
+    /**
+     * dompdf fija la orientación **una sola vez para todo el documento**, así
+     * que no existe la hoja apaisada intercalada. El diagrama va girado 90°
+     * sobre la hoja vertical y se lee volteando el papel.
+     *
+     * Lo que se comprueba es que quepa: girado, el alto natural del dibujo pasa
+     * a ser el ancho que ocupa en la hoja, y si alguien sube los renglones por
+     * página el diagrama se sale por el canto sin que nada falle.
+     */
+    #[Test]
+    public function the_gantt_sheet_is_rotated_and_fits_the_page(): void
+    {
+        foreach (range(1, 30) as $index) {
+            $this->task("Tarea {$index}");
+        }
+
+        $data = app(ProjectReportData::class)->for($this->project, complete: true);
+
+        $svg = base64_decode(substr(
+            (string) $data['ganttImages'][0],
+            strlen('data:image/svg+xml;base64,'),
+        ), true);
+
+        $this->assertIsString($svg);
+        $this->assertStringContainsString('rotate(90)', $svg, 'El diagrama del PDF dejó de ir girado.');
+
+        preg_match('/<svg[^>]*width="([\d.]+)"[^>]*height="([\d.]+)"/', $svg, $size);
+
+        $width = (float) $size[1];
+        $height = (float) $size[2];
+
+        $this->assertLessThan($height, $width, 'Girado, el dibujo tiene que quedar más alto que ancho.');
+
+        // Carta vertical menos los márgenes de la plantilla (16 mm y 22/20 mm),
+        // en píxeles a 96 ppp, que es como dompdf los convierte.
+        $this->assertLessThanOrEqual(695, $width, 'El diagrama girado se sale por el canto de la hoja.');
+        $this->assertLessThanOrEqual(897, $height, 'El diagrama girado no cabe a lo alto de la hoja.');
+    }
+
+    /**
+     * Girado el dibujo, una columna de nombres en HTML al lado dejaría de
+     * alinearse con sus barras: tienen que ir dentro del SVG.
+     */
+    #[Test]
+    public function the_rotated_sheet_carries_the_task_names_inside_the_drawing(): void
+    {
+        // Corto a propósito: los nombres se recortan a lo que cabe en la
+        // columna, y la prueba no debe depender de dónde queda ese corte.
+        $this->task('Levantamiento');
+
+        $data = app(ProjectReportData::class)->for($this->project, complete: true);
+
+        $svg = base64_decode(substr(
+            (string) $data['ganttImages'][0],
+            strlen('data:image/svg+xml;base64,'),
+        ), true);
+
+        $this->assertStringContainsString('Levantamiento', (string) $svg);
     }
 }

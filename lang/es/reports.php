@@ -29,4 +29,5 @@ return [
     'kpi_finish' => 'Fin calculado',
     'schedule_chart' => 'Diagrama de Gantt',
     'affects' => 'Afecta a',
+    'turn_the_page' => 'El diagrama va girado: voltea la hoja para leerlo.',
 ];

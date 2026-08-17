@@ -85,9 +85,7 @@
         .barra div { height: 7px; background: #1d4ed8; }
 
         .hoja-nueva { page-break-before: always; }
-        .gantt-hoja { page-break-inside: avoid; margin-bottom: 10px; }
-        .gantt-hoja .nombres { font-size: 7pt; }
-        .gantt-hoja .nombres td { border: none; padding: 0 4px 0 0; height: 26px; vertical-align: middle; }
+        .pie-nota { font-size: 7.5pt; color: #64748b; margin: 0 0 6px; }
     </style>
 </head>
 <body>
@@ -216,49 +214,26 @@
     @endif
 
     @if (($ganttPages ?? null) && $ganttPages->isNotEmpty())
-        {{-- El diagrama, dentro del mismo archivo.
-             Va en hoja aparte y con el ancho ajustado a la página: en pantalla
-             el Gantt se desplaza a lo ancho, pero una hoja no se desplaza. Se
-             recalculan los píxeles por día para que el proyecto entero quepa en
-             vez de recortarlo por la derecha. --}}
-        <div class="hoja-nueva">
-            <h2>{{ __('reports.schedule_chart') }}</h2>
+        {{-- El diagrama, dentro del mismo archivo y **girado**.
+             dompdf fija la orientación una sola vez para todo el documento, así
+             que no existe la hoja apaisada suelta. Girado 90° sobre la hoja
+             vertical, el eje del tiempo usa el lado largo del papel —un 70 %
+             más— y se lee volteando la hoja, como cualquier plano.
+             Los nombres van dentro del dibujo: girado, una columna de HTML al
+             lado dejaría de alinearse con sus barras. --}}
+        @foreach ($ganttImages as $pageIndex => $image)
+            <div class="hoja-nueva">
+                @if ($pageIndex === 0)
+                    <h2>{{ __('reports.schedule_chart') }}</h2>
+                    <p class="pie-nota">{{ __('reports.turn_the_page') }}</p>
+                @endif
 
-            @foreach ($ganttPages as $pageIndex => $pageTasks)
-                <div class="gantt-hoja">
-                    <table style="width:100%">
-                        <tr>
-                            <td style="width:26%; border:none; padding:0; vertical-align:top">
-                                <table class="nombres">
-                                    {{-- Un renglón vacío a la altura del encabezado de
-                                         tiempo, para que los nombres queden a la altura
-                                         de su barra y no un renglón arriba. --}}
-                                    <tr><td style="height: {{ \App\Support\Scheduling\GanttLayout::HEADER_HEIGHT }}px"></td></tr>
-                                    @foreach ($pageTasks as $task)
-                                        <tr>
-                                            <td style="padding-left: {{ ($task->outline_depth ?? 0) * 6 }}px">
-                                                @if ($task->is_critical && ! $task->is_summary)
-                                                    <span class="critica">·</span>
-                                                @endif
-                                                {{ \Illuminate\Support\Str::limit($task->name, 34) }}
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </table>
-                            </td>
-                            <td style="border:none; padding:0; vertical-align:top">
-                                {{-- Imagen y no `<svg>` en línea: dompdf ignora el
-                                     SVG escrito dentro del HTML, sin avisar. La
-                                     hoja salía en blanco y el archivo se generaba
-                                     sin un solo error. --}}
-                                <img src="{{ $ganttImages[$pageIndex] }}"
-                                     style="width: {{ $ganttLayout->width }}px" alt="">
-                            </td>
-                        </tr>
-                    </table>
-                </div>
-            @endforeach
-        </div>
+                {{-- Imagen y no `<svg>` en línea: dompdf ignora el SVG escrito
+                     dentro del HTML, sin avisar. La hoja salía en blanco y el
+                     archivo se generaba sin un solo error. --}}
+                <img src="{{ $image }}" alt="" style="width: {{ $ganttSheet['width'] }}px">
+            </div>
+        @endforeach
     @endif
 
 </body>

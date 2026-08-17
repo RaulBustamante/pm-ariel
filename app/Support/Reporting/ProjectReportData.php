@@ -25,11 +25,27 @@ use Illuminate\Support\Collection;
  */
 final class ProjectReportData
 {
-    /** Ancho útil para el diagrama en carta vertical, después de los nombres. */
-    private const GANTT_WIDTH = 390;
+    /*
+    | Las medidas de la hoja del diagrama.
+    |
+    | El diagrama va **girado** en el PDF: dompdf fija la orientación una sola vez
+    | para todo el documento, así que no hay forma de intercalar una hoja
+    | apaisada. Girado 90° sobre la hoja vertical, el eje del tiempo pasa a usar
+    | el lado largo del papel —de 390 a 660 puntos, un 70 % más— y el diagrama
+    | deja de verse apretado.
+    |
+    | Una carta vertical con los márgenes de la plantilla deja 694 × 853 px de
+    | área útil. Girado, el alto del dibujo ocupa el ancho de la hoja:
+    |   alto  = 42 + 22 × 26 + 4 = 618 px  ≤ 694 ✓
+    |   ancho = 165 + 660        = 825 px  ≤ 853 ✓
+    | Cambiar cualquiera de estos tres números obliga a rehacer esa cuenta.
+    */
+    private const GANTT_WIDTH = 660;
+
+    private const NAME_WIDTH = 165;
 
     /** Renglones por hoja: ninguna barra queda partida entre dos páginas. */
-    private const ROWS_PER_PAGE = 24;
+    private const ROWS_PER_PAGE = 22;
 
     public function __construct(
         private readonly TaskOutliner $outliner,
@@ -61,6 +77,8 @@ final class ProjectReportData
             'generatedAt' => now(),
             'ganttPages' => null,
             'ganttLayout' => null,
+            'ganttImages' => null,
+            'ganttSheet' => null,
         ];
 
         if (! $complete) {
@@ -88,6 +106,12 @@ final class ProjectReportData
             'ganttImages' => $chunks->map(
                 fn ($pageTasks): string => $this->svgAsImage($layout, $pageTasks, $project),
             ),
+            // Girado, el ancho que ocupa en la hoja es el **alto** natural del
+            // dibujo. Se calcula aquí y no en la plantilla porque depende de las
+            // mismas constantes que fijan la paginación.
+            'ganttSheet' => [
+                'width' => GanttLayout::HEADER_HEIGHT + (self::ROWS_PER_PAGE * GanttLayout::ROW_HEIGHT) + 4,
+            ],
         ];
     }
 
@@ -112,6 +136,8 @@ final class ProjectReportData
             'layout' => $layout,
             'pageTasks' => $pageTasks,
             'project' => $project,
+            'nameWidth' => self::NAME_WIDTH,
+            'rotate' => true,
         ])->render();
 
         // El espacio de nombres es obligatorio cuando el SVG viaja solo. Dentro
