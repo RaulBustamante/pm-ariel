@@ -16,6 +16,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * está al 180 % es aritmética que se puede auditar; decir "muévelo al martes"
  * es un juicio que hoy no tiene con qué respaldarse, porque no hay historial de
  * proyectos de Ariel del cual aprender qué funcionó.
+ *
+ * Las dos referencias son opcionales y por eso van anotadas: un aviso de recurso
+ * sobreasignado no apunta a ninguna tarea, y uno de tarea crítica sin
+ * responsable no apunta a ningún recurso. Las dos llaves son anulables en la
+ * migración, pero el genérico de `BelongsTo` no lo expresa y el análisis
+ * estático las daría por presentes.
+ *
+ * El de recurso va con la ruta completa porque `resource` es un tipo reservado
+ * de PHP y Pint lo pasa a minúsculas si se escribe suelto, con lo que deja de
+ * apuntar al modelo.
+ *
+ * @property-read Task|null $task
+ * @property-read \App\Models\Resource|null $resource
  */
 #[Fillable([
     'project_id', 'rule', 'severity', 'message', 'why',

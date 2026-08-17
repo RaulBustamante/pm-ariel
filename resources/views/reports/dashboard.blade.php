@@ -171,7 +171,15 @@
             <section class="card">
                 <div class="card-header"><h2 class="card-title">{{ __('reports.title') }}</h2></div>
                 <div class="space-y-2 p-4">
-                    <a href="{{ route('projects.reports.pdf', $project) }}" class="btn btn-primary w-full">
+                    {{-- El completo va primero y es el botón fuerte: es el que
+                         se manda a dirección. Los otros dos siguen ahí para
+                         quien solo quiere la ficha o solo el diagrama. --}}
+                    <a href="{{ route('projects.reports.complete', $project) }}" class="btn btn-primary w-full">
+                        {{ __('reports.complete') }}
+                    </a>
+                    <p class="field-help -mt-1 mb-1">{{ __('reports.complete_help') }}</p>
+
+                    <a href="{{ route('projects.reports.pdf', $project) }}" class="btn btn-secondary w-full">
                         {{ __('reports.download_pdf') }}
                     </a>
                     <a href="{{ route('projects.reports.gantt', $project) }}" class="btn btn-secondary w-full">

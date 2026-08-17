@@ -145,6 +145,7 @@
     --color-g-grid-major: #cbd5e1;
     --color-g-axis: #64748b;
     --color-g-label: #334155;
+    --color-g-bracket: #475569;
     --color-g-link: #94a3b8;
     --color-g-summary: #94a3b8;
     --color-g-bar: #1d4ed8;
@@ -257,6 +258,7 @@
         --color-g-grid-major: #253451;
         --color-g-axis: #8f9fbd;
         --color-g-label: #dde5f2;
+        --color-g-bracket: #64748b;
         --color-g-link: #64748b;
         --color-g-summary: #7c8ba6;
         --color-g-bar: #38bdf8;
@@ -356,6 +358,7 @@
             --color-g-grid-major: #253451;
             --color-g-axis: #8f9fbd;
             --color-g-label: #dde5f2;
+            --color-g-bracket: #64748b;
             --color-g-link: #64748b;
             --color-g-summary: #7c8ba6;
             --color-g-bar: #38bdf8;
@@ -911,9 +914,22 @@
     .g-grid-major   { stroke: var(--color-g-grid-major); }
     .g-axis         { fill: var(--color-g-axis); }
     .g-label        { fill: var(--color-g-label); }
-    .g-link         { stroke: var(--color-g-link); fill: var(--color-g-link); }
-    .g-summary      { fill: var(--color-g-summary); }
+    .g-bracket      { fill: var(--color-g-bracket); }
     .g-progress     { fill: var(--color-ink); fill-opacity: 0.45; }
+
+    /*
+    | El trazo de dependencia **no se rellena**, y hay que decirlo aquí.
+    |
+    | El elemento trae `fill="none"` como atributo, pero un atributo de
+    | presentación pierde contra cualquier regla de CSS. Cuando esta clase traía
+    | `fill`, cada flecha en L se cerraba y se pintaba como un triángulo sólido:
+    | el diagrama quedaba cubierto de manchas grises enormes. La punta de flecha
+    | sí se rellena, y por eso es una clase aparte.
+    */
+    .g-link  { stroke: var(--color-g-link); fill: none; }
+    .g-arrow { fill: var(--color-g-link); stroke: none; }
+
+    .g-summary { fill: var(--color-g-summary); }
 
     /* La barra normal y la crítica se separan en **tono y luminosidad**: quien
        no distingue rojo de azul todavía ve cuál de las dos es más clara. */
@@ -923,14 +939,16 @@
     .g-today-label  { fill: var(--color-g-today); }
 
     /* Las barras responden al cursor: en un diagrama de doscientos renglones,
-       saber cuál se está señalando es la diferencia entre leerlo y adivinarlo. */
+       saber cuál se está señalando es la diferencia entre leerlo y adivinarlo.
+       Solo aclara: el resplandor difuminaba el borde de la barra y se perdía
+       justo lo que hay que leer, que es dónde empieza y dónde acaba. */
     .g-bar,
     .g-bar-critical {
         transition: filter 150ms ease;
     }
 
-    .g-bar:hover          { filter: brightness(1.2) drop-shadow(0 0 5px color-mix(in srgb, var(--color-g-bar) 80%, transparent)); }
-    .g-bar-critical:hover { filter: brightness(1.2) drop-shadow(0 0 5px color-mix(in srgb, var(--color-g-bar-critical) 80%, transparent)); }
+    .g-bar:hover,
+    .g-bar-critical:hover { filter: brightness(1.15); }
 }
 
 /*
@@ -977,6 +995,7 @@
     --color-g-grid-major: #cbd5e1;
     --color-g-axis: #64748b;
     --color-g-label: #334155;
+    --color-g-bracket: #475569;
     --color-g-link: #94a3b8;
     --color-g-summary: #94a3b8;
     --color-g-bar: #1d4ed8;
@@ -1008,6 +1027,7 @@
     .g-grid-major   { stroke: #cbd5e1; }
     .g-axis         { fill: #64748b; }
     .g-label        { fill: #334155; }
+    .g-bracket      { fill: #475569; }
     .g-link         { stroke: #94a3b8; fill: #94a3b8; }
     .g-summary      { fill: #94a3b8; }
     .g-progress     { fill: #0f172a; fill-opacity: 0.45; }

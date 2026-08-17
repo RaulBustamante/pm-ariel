@@ -54,6 +54,7 @@ final class GanttLayout
     public function __construct(
         private readonly Collection $tasks,
         string $zoom = self::ZOOM_WEEK,
+        ?float $fitWidth = null,
     ) {
         $this->zoom = array_key_exists($zoom, self::PIXELS_PER_DAY) ? $zoom : self::ZOOM_WEEK;
         $this->pixelsPerDay = self::PIXELS_PER_DAY[$this->zoom];
@@ -77,6 +78,14 @@ final class GanttLayout
         $this->totalDays = max(1, (int) $this->start->diff($this->finish)->days);
         $this->width = $this->totalDays * $this->pixelsPerDay;
         $this->height = self::HEADER_HEIGHT + ($tasks->count() * self::ROW_HEIGHT) + 8;
+
+        // En pantalla el diagrama se desplaza a lo ancho; una hoja no. Cuando se
+        // pide un ancho fijo —el PDF— se recalculan los píxeles por día para que
+        // el proyecto entero quepa, en vez de recortarlo por la derecha.
+        if ($fitWidth !== null && $fitWidth > 0) {
+            $this->pixelsPerDay = $fitWidth / $this->totalDays;
+            $this->width = $fitWidth;
+        }
     }
 
     public function x(mixed $date): float

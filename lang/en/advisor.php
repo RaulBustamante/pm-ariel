@@ -48,4 +48,11 @@ return [
     'milestone_orphan' => 'Milestone :task depends on nothing.',
     'milestone_orphan_why' => 'A milestone marks that something finished. If nothing feeds it, it stays pinned to the project start and claims delivery happens on day one — which is exactly what nobody notices in a long Gantt.',
 
+    'rule_resource_overallocated' => 'overallocated resources',
+    'rule_resource_duplicated' => 'people entered twice',
+    'rule_resource_duplicated_email' => 'email addresses shared between resources',
+    'rule_task_critical_without_owner' => 'critical path tasks with nobody on them',
+    'rule_task_negative_float' => 'tasks with negative float',
+    'rule_task_overdue_without_progress' => 'overdue tasks with no progress recorded',
+    'rule_milestone_without_predecessors' => 'milestones with nothing producing them',
 ];

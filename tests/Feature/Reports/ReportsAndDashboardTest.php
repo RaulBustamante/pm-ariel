@@ -7,15 +7,16 @@ namespace Tests\Feature\Reports;
 use App\Models\Calendar;
 use App\Models\Project;
 use App\Models\ProjectCharter;
+use App\Models\ProjectFinding;
 use App\Models\Role;
 use App\Models\Task;
 use App\Models\User;
 use App\Services\Advisor\ProjectAdvisor;
 use App\Services\Scheduling\ProjectScheduler;
-use App\Services\Scheduling\TaskOutliner;
 use App\Support\Initiation\InitiationStep;
+use App\Support\Reporting\FindingDigest;
 use App\Support\Reporting\ProjectDashboard;
-use App\Support\Scheduling\DurationParser;
+use App\Support\Reporting\ProjectReportData;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -111,22 +112,21 @@ final class ReportsAndDashboardTest extends TestCase
     {
         $this->task('Levantamiento de requerimientos');
 
-        $html = view('reports.project-pdf', [
-            'project' => $this->project,
-            'charter' => $this->project->charter,
-            'tasks' => app(TaskOutliner::class)->outline($this->project),
-            'durations' => new DurationParser,
-            'findings' => collect(),
-            'light' => 'green',
-            'lastRun' => $this->project->scheduleRuns()->first(),
-            'generatedAt' => now(),
-        ])->render();
+        // Los datos los arma la misma clase que usa el controlador. Copiarlos
+        // aquí a mano hacía que la prueba se rompiera por llaves faltantes cada
+        // vez que el reporte crecía, y —peor— que revisara una versión que ya no
+        // era la que se manda a dirección.
+        $html = view(
+            'reports.project-pdf',
+            app(ProjectReportData::class)->for($this->project),
+        )->render();
 
         $this->assertStringContainsString('Levantamiento de requerimientos', $html);
         $this->assertStringContainsString('REP-1', $html);
         $this->assertStringContainsString('Duele el cierre mensual.', $html);
-        // Numeración de página: un reporte largo sin números no se puede citar.
-        $this->assertStringContainsString('counter(page)', $html);
+        // El resumen de arriba: quien recibe esto mira los números y decide si
+        // le preocupa antes de leer nada.
+        $this->assertStringContainsString(__('reports.kpi_progress'), $html);
     }
 
     #[Test]
@@ -269,5 +269,90 @@ final class ReportsAndDashboardTest extends TestCase
         foreach (['projects.reports.pdf', 'projects.reports.csv', 'projects.dashboard'] as $route) {
             $this->actingAs($outsider)->get(route($route, $this->project))->assertForbidden();
         }
+    }
+
+    /**
+     * dompdf **ignora en silencio** un `<svg>` escrito dentro del HTML: la hoja
+     * sale en blanco y el archivo se genera sin un solo error. Por eso el
+     * diagrama se incrusta como imagen `data:`, y por eso esto se comprueba
+     * contando lo que de verdad quedó dibujado en el PDF en vez de buscar la
+     * etiqueta en el HTML —que estaba ahí incluso cuando no se dibujaba nada.
+     */
+    #[Test]
+    public function the_complete_pdf_really_draws_the_gantt(): void
+    {
+        $this->task('Levantamiento de requerimientos');
+        $this->task('Construccion');
+
+        $simple = $this->actingAs($this->manager)
+            ->get(route('projects.reports.pdf', $this->project))->getContent() ?: '';
+
+        $completo = $this->actingAs($this->manager)
+            ->get(route('projects.reports.complete', $this->project))->getContent() ?: '';
+
+        $this->assertStringStartsWith('%PDF-', $completo);
+        $this->assertGreaterThan(
+            $this->rectanglesDrawnIn($simple),
+            $this->rectanglesDrawnIn($completo),
+            'El PDF completo no dibujó ni un rectángulo más que el simple: el diagrama no salió.',
+        );
+    }
+
+    #[Test]
+    public function the_complete_pdf_is_reachable_from_the_dashboard(): void
+    {
+        $this->actingAs($this->manager)
+            ->get(route('projects.dashboard', $this->project))
+            ->assertOk()
+            ->assertSee(route('projects.reports.complete', $this->project), escape: false);
+    }
+
+    /**
+     * Veinticinco avisos de la misma regla salían como veinticinco párrafos
+     * idénticos, cada uno con su explicación completa repetida: tres páginas
+     * para un solo hecho. Un director no lee eso, lo cierra.
+     */
+    #[Test]
+    public function repeated_findings_collapse_into_one_line(): void
+    {
+        $digest = (new FindingDigest)->group(collect([
+            new ProjectFinding(['rule' => 'task.critical_without_owner', 'severity' => 'warning', 'message' => 'a', 'why' => 'porque']),
+            new ProjectFinding(['rule' => 'task.critical_without_owner', 'severity' => 'warning', 'message' => 'b', 'why' => 'porque']),
+            new ProjectFinding(['rule' => 'task.critical_without_owner', 'severity' => 'warning', 'message' => 'c', 'why' => 'porque']),
+        ]));
+
+        $this->assertCount(1, $digest);
+        $this->assertSame(3, $digest[0]['count']);
+    }
+
+    /**
+     * Lo que amenaza la entrega va primero. Un documento que empieza por lo
+     * menor entrena a quien lo recibe a hojearlo.
+     */
+    #[Test]
+    public function the_gravest_finding_leads_the_report(): void
+    {
+        $digest = (new FindingDigest)->group(collect([
+            new ProjectFinding(['rule' => 'task.critical_without_owner', 'severity' => ProjectFinding::SEVERITY_WARNING, 'message' => 'a', 'why' => 'x']),
+            new ProjectFinding(['rule' => 'resource.overallocated', 'severity' => ProjectFinding::SEVERITY_CRITICAL, 'message' => 'b', 'why' => 'y']),
+        ]));
+
+        $this->assertSame(ProjectFinding::SEVERITY_CRITICAL, $digest[0]['severity']);
+    }
+
+    /** Cuenta los rellenos de rectángulo dentro de los flujos del PDF. */
+    private function rectanglesDrawnIn(string $pdf): int
+    {
+        $total = 0;
+
+        if (preg_match_all('/stream(.*?)endstream/s', $pdf, $matches)) {
+            foreach ($matches[1] as $chunk) {
+                $raw = @gzuncompress(ltrim($chunk, '
+')) ?: $chunk;
+                $total += substr_count($raw, ' re');
+            }
+        }
+
+        return $total;
     }
 }

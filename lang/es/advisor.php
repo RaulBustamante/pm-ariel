@@ -48,4 +48,14 @@ return [
     'milestone_orphan' => 'El hito :task no depende de nada.',
     'milestone_orphan_why' => 'Un hito marca que algo termino. Si nada lo alimenta, se queda pegado al arranque del proyecto y dice que la entrega ocurre el primer dia — que es justo lo que nadie nota en un Gantt largo.',
 
+    // Nombres cortos de cada regla, para cuando se agrupan en un reporte:
+    // «18 tareas criticas sin responsable». En plural, porque agrupar de uno
+    // no se agrupa: ese caso usa el mensaje completo del aviso.
+    'rule_resource_overallocated' => 'recursos sobreasignados',
+    'rule_resource_duplicated' => 'personas dadas de alta dos veces',
+    'rule_resource_duplicated_email' => 'correos repetidos entre recursos',
+    'rule_task_critical_without_owner' => 'tareas de la ruta crítica sin responsable',
+    'rule_task_negative_float' => 'tareas con holgura negativa',
+    'rule_task_overdue_without_progress' => 'tareas vencidas sin avance capturado',
+    'rule_milestone_without_predecessors' => 'hitos sin nada que los produzca',
 ];

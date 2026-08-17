@@ -18,7 +18,7 @@
 
     <defs>
         <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 1 L 7 4 L 0 7 z" class="g-link" />
+            <path d="M 0 1 L 7 4 L 0 7 z" class="g-arrow" />
         </marker>
     </defs>
 
@@ -114,7 +114,7 @@
             <path d="M {{ $x }} {{ $y + 4 }} L {{ $x }} {{ $y }} L {{ $x + $width }} {{ $y }} L {{ $x + $width }} {{ $y + 4 }}
                      L {{ $x + $width - 3 }} {{ $y + 8 }} L {{ $x + $width - 3 }} {{ $y + 3 }}
                      L {{ $x + 3 }} {{ $y + 3 }} L {{ $x + 3 }} {{ $y + 8 }} Z"
-                  class="g-label">
+                  class="g-bracket">
                 <title>{{ $label }}</title>
             </path>
         @elseif ($task->isMilestone())

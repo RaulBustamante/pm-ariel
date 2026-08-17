@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Project;
-use App\Services\Advisor\ProjectAdvisor;
 use App\Services\Scheduling\TaskOutliner;
+use App\Support\Reporting\ProjectReportData;
 use App\Support\Scheduling\ProjectDurations;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
@@ -27,21 +27,68 @@ final class ReportController extends Controller
 {
     public function __construct(
         private readonly TaskOutliner $outliner,
-        private readonly ProjectAdvisor $advisor,
+        private readonly ProjectReportData $report,
     ) {}
 
     /** Ficha del proyecto y lista de tareas, con portada y numeración. */
     public function pdf(Project $project): Response
     {
+        return $this->render($project, complete: false);
+    }
+
+    /**
+     * Lo mismo, más el diagrama, en un solo archivo.
+     *
+     * Existe porque mandar dos adjuntos y pedirle a quien los recibe que los
+     * junte no es entregar un reporte. Sigue siendo dompdf y no un navegador
+     * headless (D-020): el Gantt se ajusta al ancho de la hoja en vez de
+     * recortarse, que es lo que obligaba a imprimirlo aparte.
+     */
+    public function complete(Project $project): Response
+    {
+        return $this->render($project, complete: true);
+    }
+
+    private function render(Project $project, bool $complete): Response
+    {
         $this->authorize('view', $project);
 
         $project->loadMissing(['charter.sponsor', 'owner', 'orgUnit']);
 
-        $pdf = Pdf::loadView('reports.project-pdf', $this->data($project))
+        $pdf = Pdf::loadView('reports.project-pdf', $this->report->for($project, $complete))
             ->setPaper('letter')
             ->setOption('isRemoteEnabled', false);
 
-        return $pdf->download($this->filename($project, 'pdf'));
+        $this->stampPageNumbers($pdf);
+
+        return $pdf->download($this->filename($project, $complete ? 'completo.pdf' : 'pdf'));
+    }
+
+    /**
+     * El «página N de M», escrito sobre el lienzo y no con CSS.
+     *
+     * `counter(pages)` de CSS sale en cero en dompdf —el pie decía «Página 1/0»
+     * en cada hoja— porque el total no existe hasta que terminó de maquetar. La
+     * API del lienzo sí corre después, y es la única que conoce el número.
+     *
+     * La otra salida documentada es habilitar la ejecución de PHP dentro de las
+     * plantillas de dompdf. No se hace: el reporte incluye texto que capturó un
+     * usuario, y abrir un intérprete de PHP en el mismo lugar por un número de
+     * página es un precio desproporcionado.
+     */
+    private function stampPageNumbers(\Barryvdh\DomPDF\PDF $pdf): void
+    {
+        $dompdf = $pdf->getDomPDF();
+        $dompdf->render();
+
+        $dompdf->getCanvas()->page_text(
+            x: 470,
+            y: 762,
+            text: __('reports.page').' {PAGE_NUM} / {PAGE_COUNT}',
+            font: $dompdf->getFontMetrics()->getFont('DejaVu Sans'),
+            size: 7.5,
+            color: [0.39, 0.45, 0.55],
+        );
     }
 
     /** El Gantt, en una hoja pensada para imprimir. */
@@ -110,26 +157,6 @@ final class ReportController extends Controller
 
             fclose($handle);
         }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    private function data(Project $project): array
-    {
-        $tasks = $this->outliner->outline($project);
-        $findings = $project->findings()->with(['task', 'resource'])->get();
-
-        return [
-            'project' => $project,
-            'charter' => $project->charter,
-            'tasks' => $tasks,
-            'durations' => ProjectDurations::for($project),
-            'findings' => $findings,
-            'light' => $this->advisor->light($findings),
-            'lastRun' => $project->scheduleRuns()->first(),
-            'generatedAt' => now(),
-        ];
     }
 
     private function filename(Project $project, string $extension): string
