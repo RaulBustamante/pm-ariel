@@ -7,7 +7,7 @@ namespace App\Http\Requests;
 use App\Models\Project;
 use App\Support\Scheduling\ConstraintType;
 use App\Support\Scheduling\DurationParser;
-use DateTimeImmutable;
+use App\Support\Scheduling\ProjectDurations;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -91,29 +91,13 @@ final class StoreTaskRequest extends FormRequest
     }
 
     /**
-     * El traductor tiene que usar la jornada **de este proyecto**. Con la
-     * jornada por omisión, "3d" en un proyecto de 9 horas diarias se guardaría
-     * como 3 jornadas de 8 — y la tarea terminaría un día antes de lo que el
-     * usuario pidió, sin que nada avisara.
+     * La jornada de este proyecto. Sin proyecto en la ruta —que no debería
+     * pasar, porque `authorize()` ya lo exige— se usa la jornada por omisión.
      */
     private function durations(): DurationParser
     {
         $project = $this->route('project');
 
-        if (! $project instanceof Project) {
-            return new DurationParser;
-        }
-
-        $calendar = $project->calendars()->where('is_default', true)->first()
-            ?? $project->calendars()->first();
-
-        if ($calendar === null) {
-            return new DurationParser;
-        }
-
-        return DurationParser::forCalendar(
-            $calendar->toWorkingCalendar(),
-            new DateTimeImmutable('today', $calendar->toWorkingCalendar()->timezone()),
-        );
+        return $project instanceof Project ? ProjectDurations::for($project) : new DurationParser;
     }
 }

@@ -22,6 +22,7 @@ use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskImportController;
 use App\Support\Initiation\InitiationStep;
 use Illuminate\Support\Facades\Route;
 
@@ -116,6 +117,10 @@ Route::middleware('auth')->group(function (): void {
             ->whereIn('action', ['indent', 'outdent', 'up', 'down'])
             ->name('projects.tasks.outline');
         Route::post('tasks/recalculate', [TaskController::class, 'recalculate'])->name('projects.tasks.recalculate');
+
+        Route::get('import', [TaskImportController::class, 'show'])->name('projects.tasks.import');
+        Route::post('import/preview', [TaskImportController::class, 'preview'])->name('projects.tasks.import.preview');
+        Route::post('import', [TaskImportController::class, 'store'])->name('projects.tasks.import.store');
 
         Route::get('gantt', [GanttController::class, 'show'])->name('projects.gantt');
 

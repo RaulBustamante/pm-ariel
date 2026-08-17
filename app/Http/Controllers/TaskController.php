@@ -15,6 +15,7 @@ use App\Services\Scheduling\ProjectScheduler;
 use App\Services\Scheduling\TaskOutliner;
 use App\Support\Scheduling\DependencyExpression;
 use App\Support\Scheduling\DurationParser;
+use App\Support\Scheduling\ProjectDurations;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -40,7 +41,7 @@ final class TaskController extends Controller
         $this->authorize('view', $project);
 
         $outline = $this->outliner->outline($project);
-        $durations = $this->durationsFor($project);
+        $durations = ProjectDurations::for($project);
 
         return view('tasks.index', [
             'project' => $project,
@@ -69,7 +70,7 @@ final class TaskController extends Controller
         return view('tasks.show', [
             'project' => $project,
             'task' => $task,
-            'durations' => $this->durationsFor($project),
+            'durations' => ProjectDurations::for($project),
             'members' => $project->members()->orderBy('name')->get(),
             'resources' => Resource::query()->where('project_id', $project->id)->orderBy('name')->get(),
             'assignments' => TaskAssignment::query()->with('resource')->where('task_id', $task->id)->get(),
@@ -183,7 +184,7 @@ final class TaskController extends Controller
         $outline = $this->outliner->outline($project);
         $index = $this->outliner->referenceIndex($outline);
 
-        $parsed = (new DependencyExpression($this->durationsFor($project)))->parse($expression, $index);
+        $parsed = (new DependencyExpression(ProjectDurations::for($project)))->parse($expression, $index);
 
         foreach ($parsed as $link) {
             if ($link['predecessor_id'] === $task->id) {
@@ -236,26 +237,6 @@ final class TaskController extends Controller
             fn (array $links): string => $expression->format($links),
             $byTask,
         );
-    }
-
-    /**
-     * El traductor de duraciones con la jornada de **este** proyecto. Escribir
-     * "3d" tiene que significar tres jornadas reales, no tres de ocho horas
-     * supuestas: con la jornada equivocada la tarea termina un día antes de lo
-     * que el usuario pidió y nada lo avisa.
-     */
-    private function durationsFor(Project $project): DurationParser
-    {
-        $calendar = $project->calendars()->where('is_default', true)->first()
-            ?? $project->calendars()->first();
-
-        if ($calendar === null) {
-            return new DurationParser;
-        }
-
-        $working = $calendar->toWorkingCalendar();
-
-        return DurationParser::forCalendar($working, new \DateTimeImmutable('today', $working->timezone()));
     }
 
     /**

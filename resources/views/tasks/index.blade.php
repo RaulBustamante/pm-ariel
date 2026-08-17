@@ -6,7 +6,15 @@
 @section('content')
     @include('tasks._tabs', ['active' => 'list'])
 
-    <p class="mb-4 max-w-3xl text-sm text-slate-600">{{ __('tasks.intro') }}</p>
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <p class="max-w-2xl text-sm text-slate-600">{{ __('tasks.intro') }}</p>
+
+        @can('update', $project)
+            <a href="{{ route('projects.tasks.import', $project) }}" class="btn btn-secondary btn-sm">
+                {{ __('import.title') }}
+            </a>
+        @endcan
+    </div>
 
     @if ($tasks->isEmpty())
         <div class="mb-6 rounded-lg border border-dashed border-slate-300 bg-white p-6 text-center text-sm text-slate-600">
