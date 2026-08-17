@@ -11,7 +11,7 @@
         'kanban' => ['route' => 'projects.kanban', 'label' => __('kanban.title')],
         'calendar' => ['route' => 'projects.calendar', 'label' => __('calendar.title')],
         'advisor' => ['route' => 'projects.advisor', 'label' => __('advisor.title')],
-        'documents' => ['route' => 'projects.documents', 'label' => __('reports.documents')],
+        'documents' => ['route' => 'projects.documents', 'label' => __('documents.title')],
     ];
 
     if (auth()->user()?->can('update', $project)) {

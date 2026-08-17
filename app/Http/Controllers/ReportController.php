@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Services\Scheduling\TaskOutliner;
+use App\Support\Documents\DocumentCatalogue;
 use App\Support\Reporting\FindingDigest;
 use App\Support\Reporting\ProjectReportData;
 use App\Support\Reporting\WeeklyReport;
@@ -80,12 +81,22 @@ final class ReportController extends Controller
         return $pdf->download($this->filename($project, 'semana-'.$data['from']->format('Y-m-d').'.pdf'));
     }
 
-    /** El juego completo de documentos del proyecto. */
-    public function documents(Project $project): View
+    /**
+     * El juego completo de documentos del PMI, con su estado.
+     *
+     * Se pinta el catálogo entero —los setenta— y no solo lo que existe. Un
+     * sistema que enseña cuatro documentos y calla los otros sesenta y seis se
+     * ve completo hasta que alguien pide el que falta a media junta.
+     */
+    public function documents(Project $project, DocumentCatalogue $catalogue): View
     {
         $this->authorize('view', $project);
 
-        return view('reports.documents', ['project' => $project]);
+        return view('reports.documents', [
+            'project' => $project,
+            'groups' => $catalogue->forProject($project),
+            'coverage' => $catalogue->coverage(),
+        ]);
     }
 
     private function render(Project $project, bool $complete): Response

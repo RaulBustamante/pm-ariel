@@ -1,92 +1,110 @@
 @extends('layouts.app')
 
-@section('title', __('reports.documents'))
+@section('title', __('documents.title'))
 @section('heading', $project->name)
 
 @section('content')
     @include('tasks._tabs', ['active' => 'documents'])
 
-    <p class="mb-4 max-w-3xl text-sm text-slate-600">{{ __('reports.documents_intro') }}</p>
+    {{-- La cobertura, arriba de todo.
+         Es el número que contesta «¿qué tan documentado está este proyecto según
+         el PMI?», y es la razón de ser de esta pantalla: sin él, la lista de
+         setenta renglones es un catálogo; con él, es un estado. --}}
+    <section class="card card-hud hud-in mb-4 p-4">
+        <div class="flex flex-wrap items-end justify-between gap-4">
+            <div>
+                <p class="stat-label">{{ __('documents.coverage') }}</p>
+                <p class="stat-value">
+                    {{ $coverage['ready'] }}<span class="stat-unit"> / {{ $coverage['total'] }}</span>
+                </p>
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+                <span class="badge badge-ok">{{ $coverage['ready'] }} · {{ __('documents.state_ready') }}</span>
+                <span class="badge badge-warn">{{ $coverage['partial'] }} · {{ __('documents.state_partial') }}</span>
+                <span class="badge badge-neutral">{{ $coverage['planned'] }} · {{ __('documents.state_planned') }}</span>
+            </div>
+        </div>
+
+        <div class="meter mt-3 h-2">
+            <div class="meter-fill" style="width: {{ $coverage['percent'] }}%"></div>
+        </div>
+
+        <p class="field-help mt-2 max-w-3xl">
+            {{ __('documents.coverage_help', ['ready' => $coverage['ready'], 'total' => $coverage['total']]) }}
+        </p>
+    </section>
+
+    <p class="mb-4 max-w-3xl text-sm text-slate-600">{{ __('documents.intro') }}</p>
 
     @php
-        /*
-        | El juego de documentos, y **cuándo se emite cada uno**.
-        |
-        | La columna que importa aquí no es el formato sino el momento: un acta
-        | constitutiva se firma una vez al arrancar y no se vuelve a tocar; un
-        | corte semanal se emite cada lunes y el de la semana pasada ya no sirve.
-        | Poner los dos en una lista de «descargas» sin decir eso invita a mandar
-        | el equivocado.
-        */
-        $documents = [
-            [
-                'title' => __('initiation.package'),
-                'when' => __('reports.when_charter'),
-                'answers' => __('reports.answers_charter'),
-                'route' => route('projects.initiation.package', $project),
-                'icon' => 'clipboard',
-                'primary' => false,
-            ],
-            [
-                'title' => __('reports.weekly'),
-                'when' => __('reports.when_weekly'),
-                'answers' => __('reports.answers_weekly'),
-                'route' => route('projects.reports.weekly', $project),
-                'icon' => 'chart',
-                'primary' => true,
-            ],
-            [
-                'title' => __('reports.complete'),
-                'when' => __('reports.when_complete'),
-                'answers' => __('reports.answers_complete'),
-                'route' => route('projects.reports.complete', $project),
-                'icon' => 'folder',
-                'primary' => false,
-            ],
-            [
-                'title' => __('reports.download_csv'),
-                'when' => __('reports.when_csv'),
-                'answers' => __('reports.answers_csv'),
-                'route' => route('projects.reports.csv', $project),
-                'icon' => 'folder',
-                'primary' => false,
-            ],
+        $badges = [
+            'ready' => 'badge-ok',
+            'partial' => 'badge-warn',
+            'planned' => 'badge-neutral',
         ];
     @endphp
 
-    <div class="grid gap-3 md:grid-cols-2">
-        @foreach ($documents as $index => $document)
-            <a href="{{ $document['route'] }}"
-               class="card card-interactive hud-in hud-in-{{ min(4, $index + 1) }} block p-4">
-                <div class="flex items-start justify-between gap-3">
-                    <div class="min-w-0">
-                        <p class="text-sm font-semibold text-slate-900">{{ $document['title'] }}</p>
-                        <p class="mt-0.5 text-xs text-slate-500">{{ $document['when'] }}</p>
-                    </div>
+    <div class="space-y-4">
+        @foreach ($groups as $group => $documents)
+            @continue($documents === [])
 
-                    @if ($document['primary'])
-                        <span class="badge badge-brand shrink-0">{{ __('reports.weekly_badge') }}</span>
-                    @endif
+            <section class="card">
+                <div class="card-header">
+                    <h2 class="card-title">{{ __("documents.group_{$group}") }}</h2>
+                    <span class="text-xs text-slate-500">{{ count($documents) }}</span>
                 </div>
 
-                {{-- Qué pregunta responde. Es lo que evita mandar el documento
-                     equivocado, mucho más que el nombre del archivo. --}}
-                <p class="mt-2 text-xs leading-relaxed text-slate-600">{{ $document['answers'] }}</p>
-            </a>
+                <div class="overflow-x-auto">
+                    <table class="data-table">
+                        <caption class="sr-only">{{ __("documents.group_{$group}") }}</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">{{ __('documents.title') }}</th>
+                                <th scope="col" class="w-40">{{ __('common.status') }}</th>
+                                <th scope="col" class="w-44">{{ __('documents.blocked_by') }}</th>
+                                <th scope="col" class="w-24"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($documents as $document)
+                                <tr>
+                                    <td>
+                                        <span class="font-medium text-slate-900">{{ $document['name'] }}</span>
+                                        {{-- La especie explica **cómo** se produce, que es lo que
+                                             dice si hay que sentarse a escribirlo o si sale solo. --}}
+                                        <span class="ml-2 text-[11px] text-slate-500">
+                                            {{ __("documents.kind_{$document['kind']}") }}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <span class="badge {{ $badges[$document['state']] }}">
+                                            {{ __("documents.state_{$document['state']}") }}
+                                        </span>
+                                    </td>
+
+                                    <td class="text-xs text-slate-600">
+                                        @if ($document['source'])
+                                            {{ __("documents.source_{$document['source']}") }}
+                                        @else
+                                            <span class="text-slate-400">—</span>
+                                        @endif
+                                    </td>
+
+                                    <td>
+                                        @if ($document['url'])
+                                            <a href="{{ $document['url'] }}" class="btn btn-secondary btn-sm">
+                                                {{ __('documents.open') }}
+                                            </a>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         @endforeach
     </div>
-
-    <section class="card mt-4 p-4">
-        <h2 class="card-title">{{ __('reports.coming_documents') }}</h2>
-        <p class="mt-1 max-w-3xl text-xs leading-relaxed text-slate-600">{{ __('reports.coming_documents_help') }}</p>
-
-        <ul class="mt-3 space-y-1.5 text-xs text-slate-600">
-            @foreach ([__('reports.doc_closure'), __('reports.doc_archive'), __('reports.doc_costs')] as $pending)
-                <li class="flex items-start gap-2">
-                    <span aria-hidden="true" class="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-slate-400"></span>
-                    {{ $pending }}
-                </li>
-            @endforeach
-        </ul>
-    </section>
 @endsection
