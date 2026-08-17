@@ -238,4 +238,5 @@ return [
     'approved' => 'Charter approved.',
     'cannot_approve_incomplete' => 'It cannot be approved while something required is missing. Check the list of pending items.',
 
+    'suggestion_applied' => 'Draft applied. Review it before accepting it.',
 ];

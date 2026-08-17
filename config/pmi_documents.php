@@ -60,15 +60,17 @@ return [
         'business_case' => [
             'group' => 'initiating',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => 'charter',
+            'sections' => 'business_case',
         ],
 
         'benefits_management_plan' => [
             'group' => 'initiating',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'benefits_plan',
         ],
 
         'stakeholder_register' => [
@@ -88,71 +90,81 @@ return [
         'project_management_plan' => [
             'group' => 'planning',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'management_plan',
         ],
 
         'scope_management_plan' => [
             'group' => 'planning',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'management_plan',
         ],
 
         'requirements_management_plan' => [
             'group' => 'planning',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'management_plan',
         ],
 
         'schedule_management_plan' => [
             'group' => 'planning',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'management_plan',
         ],
 
         'cost_management_plan' => [
             'group' => 'planning',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'management_plan',
         ],
 
         'quality_management_plan' => [
             'group' => 'planning',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'management_plan',
         ],
 
         'resource_management_plan' => [
             'group' => 'planning',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'management_plan',
         ],
 
         'communications_management_plan' => [
             'group' => 'planning',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'management_plan',
         ],
 
         'risk_management_plan' => [
             'group' => 'planning',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'management_plan',
         ],
 
         'procurement_management_plan' => [
             'group' => 'planning',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'management_plan',
         ],
 
         'stakeholder_engagement_plan' => [
@@ -165,22 +177,25 @@ return [
         'change_management_plan' => [
             'group' => 'planning',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'management_plan',
         ],
 
         'configuration_management_plan' => [
             'group' => 'planning',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'management_plan',
         ],
 
         'requirements_documentation' => [
             'group' => 'planning',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'requirements',
         ],
 
         'requirements_traceability_matrix' => [
@@ -193,8 +208,9 @@ return [
         'project_scope_statement' => [
             'group' => 'planning',
             'kind' => 'narrative',
-            'state' => 'partial',
+            'state' => 'ready',
             'source' => 'charter',
+            'sections' => 'scope_statement',
         ],
 
         'wbs' => [
@@ -277,8 +293,9 @@ return [
         'team_charter' => [
             'group' => 'planning',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'team_charter',
         ],
 
         'risk_register' => [
@@ -298,8 +315,9 @@ return [
         'procurement_documentation' => [
             'group' => 'planning',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'procurement',
         ],
 
         'project_communications' => [
@@ -333,8 +351,9 @@ return [
         'quality_reports' => [
             'group' => 'executing',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'quality_report',
         ],
 
         'test_inspection_records' => [
@@ -347,8 +366,9 @@ return [
         'team_performance_assessments' => [
             'group' => 'executing',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'quality_report',
         ],
 
         'lessons_learned_register' => [
@@ -501,15 +521,17 @@ return [
         'project_closure_report' => [
             'group' => 'closing',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'closure',
         ],
 
         'transition_handover' => [
             'group' => 'closing',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'closure',
         ],
 
         'acceptance_signoff' => [
@@ -522,8 +544,9 @@ return [
         'procurement_closure' => [
             'group' => 'closing',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'procurement',
         ],
 
         'archived_project_documents' => [
@@ -536,8 +559,9 @@ return [
         'benefits_transition' => [
             'group' => 'closing',
             'kind' => 'narrative',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
+            'sections' => 'benefits_plan',
         ],
 
     ],

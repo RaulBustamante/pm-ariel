@@ -238,4 +238,5 @@ return [
     'approved' => 'Acta aprobada.',
     'cannot_approve_incomplete' => 'No se puede aprobar mientras falte algo obligatorio. Revisa la lista de pendientes.',
 
+    'suggestion_applied' => 'Borrador aplicado. Revisalo antes de darlo por bueno.',
 ];

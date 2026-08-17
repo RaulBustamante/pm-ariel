@@ -116,6 +116,13 @@ final class DocumentCatalogue
             return null;
         }
 
+        // Los que se redactan van todos a la misma pantalla, con su codigo. Por
+        // eso no hace falta una entrada por documento en `ROUTES`: veinticinco
+        // renglones repetidos que decir lo mismo.
+        if ((string) config("pmi_documents.catalogue.{$code}.kind") === 'narrative') {
+            return route('projects.documents.narrative', [$project, $code]);
+        }
+
         $route = self::ROUTES[$code] ?? null;
 
         return $route === null ? null : route($route, $project);

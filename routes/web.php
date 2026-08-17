@@ -25,6 +25,7 @@ use App\Http\Controllers\Initiation\InitiationPackageController;
 use App\Http\Controllers\Initiation\RiskController;
 use App\Http\Controllers\Initiation\StakeholderController;
 use App\Http\Controllers\KanbanController;
+use App\Http\Controllers\NarrativeDocumentController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\ProjectController;
@@ -161,6 +162,18 @@ Route::middleware('auth')->group(function (): void {
             ->name('projects.documents.issue');
         Route::get('documents/issues/{issue}', [DocumentIssueController::class, 'download'])
             ->name('projects.documents.download');
+
+        // Los veinticinco documentos que se redactan, sobre un solo controlador.
+        // El codigo va en la direccion y lo valida el motor contra el catalogo:
+        // uno inventado da 404 en vez de abrir un formulario vacio.
+        Route::get('documents/write/{code}', [NarrativeDocumentController::class, 'edit'])
+            ->name('projects.documents.narrative');
+        Route::put('documents/write/{code}', [NarrativeDocumentController::class, 'update'])
+            ->name('projects.documents.narrative.update');
+        Route::post('documents/write/{code}/suggest/{section}', [NarrativeDocumentController::class, 'suggest'])
+            ->name('projects.documents.narrative.suggest');
+        Route::get('documents/write/{code}/pdf', [NarrativeDocumentController::class, 'pdf'])
+            ->name('projects.documents.narrative.pdf');
         Route::get('reports/gantt', [ReportController::class, 'ganttPrint'])->name('projects.reports.gantt');
         Route::get('reports/csv', [ReportController::class, 'csv'])->name('projects.reports.csv');
 
