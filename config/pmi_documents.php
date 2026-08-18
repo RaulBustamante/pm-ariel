@@ -83,8 +83,8 @@ return [
         'assumption_log' => [
             'group' => 'initiating',
             'kind' => 'log',
-            'state' => 'partial',
-            'source' => 'charter',
+            'state' => 'ready',
+            'source' => null,
         ],
 
         'project_management_plan' => [
@@ -323,28 +323,28 @@ return [
         'project_communications' => [
             'group' => 'executing',
             'kind' => 'log',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 
         'issue_log' => [
             'group' => 'executing',
             'kind' => 'log',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 
         'change_requests' => [
             'group' => 'executing',
             'kind' => 'log',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 
         'decision_log' => [
             'group' => 'executing',
             'kind' => 'log',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 
@@ -359,7 +359,7 @@ return [
         'test_inspection_records' => [
             'group' => 'executing',
             'kind' => 'log',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 
@@ -374,21 +374,21 @@ return [
         'lessons_learned_register' => [
             'group' => 'executing',
             'kind' => 'log',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 
         'meeting_minutes' => [
             'group' => 'executing',
             'kind' => 'log',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 
         'action_item_log' => [
             'group' => 'executing',
             'kind' => 'log',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 
@@ -465,35 +465,35 @@ return [
         'change_log' => [
             'group' => 'monitoring',
             'kind' => 'log',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 
         'approved_change_requests' => [
             'group' => 'monitoring',
             'kind' => 'log',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 
         'risk_updates' => [
             'group' => 'monitoring',
             'kind' => 'log',
-            'state' => 'partial',
-            'source' => 'risks',
+            'state' => 'ready',
+            'source' => null,
         ],
 
         'issue_updates' => [
             'group' => 'monitoring',
             'kind' => 'log',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 
         'quality_control_measurements' => [
             'group' => 'monitoring',
             'kind' => 'log',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 

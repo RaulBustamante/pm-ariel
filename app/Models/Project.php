@@ -148,6 +148,17 @@ class Project extends Model
     }
 
     /**
+     * Los renglones de los catorce registros del PMI, en una sola relación
+     * porque están en una sola tabla. El tipo lo dice `document_code`.
+     *
+     * @return HasMany<ProjectLogEntry, $this>
+     */
+    public function logEntries(): HasMany
+    {
+        return $this->hasMany(ProjectLogEntry::class);
+    }
+
+    /**
      * @return HasMany<ProjectFinding, $this>
      */
     public function findings(): HasMany

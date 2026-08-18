@@ -29,6 +29,7 @@ use App\Http\Controllers\NarrativeDocumentController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PreferencesController;
 use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\ProjectLogController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\TaskController;
@@ -174,6 +175,26 @@ Route::middleware('auth')->group(function (): void {
             ->name('projects.documents.narrative.suggest');
         Route::get('documents/write/{code}/pdf', [NarrativeDocumentController::class, 'pdf'])
             ->name('projects.documents.narrative.pdf');
+
+        // Los catorce registros que crecen durante el proyecto, sobre un solo
+        // controlador. Igual que los narrativos: el codigo va en la direccion y
+        // lo valida el motor contra el catalogo.
+        //
+        // El PDF va declarado **antes** que las rutas de un renglon, para que
+        // ninguna que se agregue despues con la forma `{code}/{algo}` se coma la
+        // palabra «pdf» y deje la descarga en 404.
+        Route::get('documents/log/{code}/pdf', [ProjectLogController::class, 'pdf'])
+            ->name('projects.documents.log.pdf');
+        Route::get('documents/log/{code}', [ProjectLogController::class, 'index'])
+            ->name('projects.documents.log');
+        Route::post('documents/log/{code}', [ProjectLogController::class, 'store'])
+            ->name('projects.documents.log.store');
+        Route::get('documents/log/{code}/{entry}/edit', [ProjectLogController::class, 'edit'])
+            ->name('projects.documents.log.edit');
+        Route::put('documents/log/{code}/{entry}', [ProjectLogController::class, 'update'])
+            ->name('projects.documents.log.update');
+        Route::delete('documents/log/{code}/{entry}', [ProjectLogController::class, 'destroy'])
+            ->name('projects.documents.log.destroy');
         Route::get('reports/gantt', [ReportController::class, 'ganttPrint'])->name('projects.reports.gantt');
         Route::get('reports/csv', [ReportController::class, 'csv'])->name('projects.reports.csv');
 

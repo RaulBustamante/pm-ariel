@@ -123,6 +123,12 @@ final class DocumentCatalogue
             return route('projects.documents.narrative', [$project, $code]);
         }
 
+        // Lo mismo con los catorce registros que crecen durante el proyecto:
+        // una sola pantalla, y el codigo dice cual.
+        if ((string) config("pmi_documents.catalogue.{$code}.kind") === 'log') {
+            return route('projects.documents.log', [$project, $code]);
+        }
+
         $route = self::ROUTES[$code] ?? null;
 
         return $route === null ? null : route($route, $project);

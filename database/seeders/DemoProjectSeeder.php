@@ -16,6 +16,7 @@ use App\Models\User;
 use App\Services\Advisor\ProjectAdvisor;
 use App\Services\Scheduling\BaselineManager;
 use App\Services\Scheduling\ProjectScheduler;
+use App\Support\Documents\ProjectLog;
 use App\Support\Initiation\InitiationStep;
 use Illuminate\Database\Seeder;
 
@@ -92,6 +93,7 @@ final class DemoProjectSeeder extends Seeder
 
         $this->baselineWithSlip($project, $tasks);
         $this->stampActualDates($project);
+        $this->logs($project, $owner);
 
         app(ProjectAdvisor::class)->analyze($project->refresh());
 
@@ -322,6 +324,76 @@ final class DemoProjectSeeder extends Seeder
                         ? $task->early_finish?->copy()->addDays(2)
                         : $task->early_finish),
             ])->save();
+        }
+    }
+
+    /**
+     * Renglones en cuatro de los catorce registros del PMI.
+     *
+     * Un registro vacío no demuestra el registro: demuestra la pantalla. Lo que
+     * hay que poder enseñar es un pendiente vencido en rojo, una incidencia
+     * cerrada con su desenlace y una decisión con su porqué, que es lo único que
+     * explica para qué sirve anotar.
+     *
+     * Las fechas van relativas al arranque del ejemplo —tres semanas atrás— para
+     * que el vencido siga vencido sin importar qué día se siembre.
+     */
+    private function logs(Project $project, User $owner): void
+    {
+        $log = app(ProjectLog::class);
+        $start = now()->startOfWeek()->subWeeks(3);
+
+        $entries = [
+            ['issue_log', [
+                'occurred_on' => $start->copy()->addDays(4)->toDateString(),
+                'title' => 'El servidor de pruebas no llegó en la fecha comprometida',
+                'detail' => "TI lo comprometió para el jueves.\nSe retrasa el ambiente de QA y con él las pruebas de integración.",
+                'status' => 'resolved',
+                'owner_id' => $owner->id,
+                'due_on' => $start->copy()->addDays(9)->toDateString(),
+                'priority' => 'high',
+                'outcome' => 'Se habilitó una máquina prestada del área de sistemas mientras llega la definitiva.',
+            ]],
+            ['issue_log', [
+                'occurred_on' => $start->copy()->addDays(11)->toDateString(),
+                'title' => 'El catálogo histórico trae claves duplicadas',
+                'detail' => 'Aparecen 340 refacciones con dos claves distintas. Hay que decidir cuál se conserva antes de migrar.',
+                'status' => 'in_progress',
+                'owner_id' => $owner->id,
+                'due_on' => $start->copy()->addDays(15)->toDateString(),
+                'priority' => 'critical',
+            ]],
+            ['decision_log', [
+                'occurred_on' => $start->copy()->addDays(6)->toDateString(),
+                'title' => 'Se arranca con lectura de código de barras y no con RFID',
+                'detail' => 'El RFID cuesta cuatro veces más y el almacén ya tiene lectores de código de barras.',
+                'status' => 'decided',
+                'owner_id' => $owner->id,
+                'outcome' => 'Se revisa el punto al cierre del proyecto, con el consumo real medido.',
+            ]],
+            ['action_item_log', [
+                'occurred_on' => $start->copy()->addDays(8)->toDateString(),
+                'title' => 'Conseguir el conteo físico del almacén para conciliar',
+                'detail' => 'Sin el conteo no se puede cerrar la conciliación de datos.',
+                'status' => 'open',
+                'owner_id' => $owner->id,
+                // Vencido a propósito: un registro de pendientes donde nada se
+                // vence no enseña lo único que de verdad hace falta ver.
+                'due_on' => $start->copy()->addDays(12)->toDateString(),
+                'priority' => 'high',
+            ]],
+            ['lessons_learned_register', [
+                'occurred_on' => $start->copy()->addDays(10)->toDateString(),
+                'title' => 'Pedir la infraestructura a TI antes de arrancar, no durante',
+                'detail' => 'Los cinco días de la solicitud del servidor se descubrieron cuando ya estorbaban.',
+                'status' => 'captured',
+                'owner_id' => $owner->id,
+                'outcome' => 'En el siguiente proyecto la solicitud entra como primera tarea del plan.',
+            ]],
+        ];
+
+        foreach ($entries as [$code, $data]) {
+            $log->record($project, $code, $data);
         }
     }
 
