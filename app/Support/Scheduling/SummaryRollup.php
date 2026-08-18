@@ -121,12 +121,31 @@ final class SummaryRollup
         return round($weightedSum / $weightTotal, 2);
     }
 
+    /**
+     * El peso de un paquete: la duración de **todo el trabajo que cuelga de él**,
+     * por hondo que esté.
+     *
+     * Contar solo las hijas directas daba peso cero a un paquete cuyas hijas son
+     * todas paquetes —que es exactamente lo que pasa en un plan de tres
+     * niveles—, y entonces esa rama entera desaparecía del promedio del nivel de
+     * arriba sin que nada fallara: el avance simplemente salía calculado sobre
+     * las otras ramas.
+     */
     private function spanOf(ScheduleNetwork $network, ScheduledTask $task): int
     {
+        return $this->spanOfId($network, $task->id);
+    }
+
+    private function spanOfId(ScheduleNetwork $network, string $id): int
+    {
+        if (! $network->isSummary($id)) {
+            return $network->has($id) ? $network->task($id)->durationMinutes : 0;
+        }
+
         $total = 0;
 
-        foreach ($network->childrenOf($task->id) as $childId) {
-            $total += $network->isSummary($childId) ? 0 : $network->task($childId)->durationMinutes;
+        foreach ($network->childrenOf($id) as $childId) {
+            $total += $this->spanOfId($network, $childId);
         }
 
         return $total;

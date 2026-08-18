@@ -103,4 +103,44 @@ return [
     'detail_hint' => 'Doble clic en la tarjeta para abrir el detalle.',
     'mark_done' => 'Marcar terminada',
 
+    // --- Depende de, en español (Etapa 9) ---------------------------------
+    'depends_on' => 'Depende de',
+    'depends_on_help' => 'Qué tiene que pasar antes de que esta tarea pueda avanzar. Escoge la tarea de la lista; no hace falta saber ningún código.',
+    'depends_on_none' => 'Esta tarea no espera a ninguna otra.',
+    'add_dependency' => 'Agregar',
+    'which_task' => 'Cuál tarea',
+    'relationship' => 'Cuándo puede empezar esta',
+    'lag_days' => 'Días de espera',
+    'lag_days_help' => 'Cuántos días hay que dejar pasar después. Cero si arranca de inmediato; un número negativo si puede traslaparse.',
+    'dependency_added' => 'Dependencia agregada y plan recalculado.',
+    'dependency_removed' => 'Dependencia quitada y plan recalculado.',
+    'dependency_would_loop' => 'Esa dependencia haria un circulo: la tarea acabaria esperandose a si misma. No se agrego, y el plan quedo como estaba.',
+    'blocks' => 'Esto detiene a',
+    'blocks_none' => 'Ninguna otra tarea espera a esta.',
+
+    // Las cuatro relaciones dichas como se dirian en voz alta.
+    'rel_FS' => 'Después de que termine',
+    'rel_SS' => 'Cuando aquella empiece',
+    'rel_FF' => 'Terminan al mismo tiempo',
+    'rel_SF' => 'Termina cuando aquella empiece',
+    'rel_FS_short' => 'después de',
+    'rel_SS_short' => 'a la par de',
+    'rel_FF_short' => 'cierra con',
+    'rel_SF_short' => 'cierra al empezar',
+    'lag_after' => 'con :days día(s) de espera',
+    'lag_before' => 'traslapada :days día(s)',
+    'expression_help' => 'Atajo para quien viene de MS Project: «12», «12FS+2d», «15SS». Si prefieres no aprenderlo, usa «Depende de» en el detalle de la tarea — hace lo mismo escogiendo de una lista.',
+
+    // --- Comentarios ------------------------------------------------------
+    'comments' => 'Qué ha pasado aquí',
+    'comments_help' => 'Lo que se fue diciendo mientras se trabajaba, junto con lo que el sistema registró. La nota de arriba dice cómo está la tarea hoy; esto dice cómo llegó ahí.',
+    'comment_placeholder' => 'Escribe qué pasó...',
+    'comment_add' => 'Comentar',
+    'comment_added' => 'Comentario guardado.',
+    'comment_deleted' => 'Comentario eliminado.',
+    'comment_delete_confirm' => '¿Eliminar este comentario?',
+    'timeline_empty' => 'Todavía no hay nada. El primer comentario es el que hace útil al resto.',
+    'changed' => 'cambió',
+    'parent' => 'Paquete',
+
 ];

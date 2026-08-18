@@ -10,6 +10,7 @@ use App\Models\Role;
 use App\Models\User;
 use App\Services\Advisor\ProjectAdvisor;
 use App\Support\Reporting\MyWeek;
+use App\Support\Reporting\Portfolio;
 use App\Support\Reporting\ProjectDashboard;
 use App\Support\Visibility\VisibilityScope;
 use Illuminate\View\View;
@@ -26,6 +27,7 @@ final class HomeController extends Controller
         private readonly ProjectDashboard $dashboard,
         private readonly ProjectAdvisor $advisor,
         private readonly MyWeek $week,
+        private readonly Portfolio $portfolio,
     ) {}
 
     public function index(VisibilityScope $visibility): View
@@ -34,7 +36,7 @@ final class HomeController extends Controller
         $viewer = auth()->user();
 
         if ($viewer === null || ! $viewer->can('viewAny', Project::class)) {
-            return view('dashboard', ['projects' => collect(), 'week' => null]);
+            return view('dashboard', ['projects' => collect(), 'week' => null, 'portfolio' => null]);
         }
 
         // Las tareas se traen de una sola vez y ya filtradas. Los indicadores de
@@ -43,6 +45,7 @@ final class HomeController extends Controller
         // porque su duración ya está contada en sus hijas.
         $query = Project::query()->with([
             'charter',
+            'owner',
             'tasks' => fn ($tasks) => $tasks->where('is_summary', false),
         ]);
 
@@ -60,7 +63,21 @@ final class HomeController extends Controller
             ->get()
             ->groupBy('project_id');
 
+        // ¿Puede ver costos en **todos** los que alcanza a ver? El permiso es
+        // por proyecto, y una columna de dinero que trae seis proyectos y
+        // esconde otros seis suma mal sin decirlo. O están todos o no está la
+        // columna.
+        $withCosts = $projects->isNotEmpty()
+            && $projects->every(fn (Project $project): bool => $viewer->can('viewCosts', $project));
+
         return view('dashboard', [
+            // Todos los proyectos en un renglón cada uno. Las tarjetas
+            // contestaban «¿cómo va este?» doce veces; esto contesta «¿cómo
+            // vamos?», que es la pregunta de quien abre el inicio por la mañana
+            // y tiene más de un proyecto encima.
+            'portfolio' => $this->portfolio->for($projects, $withCosts),
+            'withCosts' => $withCosts,
+
             // Lo mío de esta semana, cruzando todos los proyectos. Es la
             // pregunta con la que se abre el sistema en la mañana, y antes
             // obligaba a entrar proyecto por proyecto a armarla de memoria.

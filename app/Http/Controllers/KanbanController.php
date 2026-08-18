@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\Task;
 use App\Services\Scheduling\TaskOutliner;
+use App\Support\Costing\TaskCost;
 use App\Support\Scheduling\TaskFilter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -55,6 +56,11 @@ final class KanbanController extends Controller
         return view('kanban.show', [
             'project' => $project,
             'columns' => $this->group($tasks),
+            // Horas y costo de cada tarjeta, en una sola pasada. Pedirlos por
+            // tarjeta costaria una consulta por tarea, y un tablero de sesenta
+            // tarjetas hace sesenta consultas sin que nada se vea lento hasta
+            // que el proyecto crece.
+            'costs' => $this->costOf($tasks),
             'lanes' => $swimlane === 'package' ? $this->byPackage($project, $tasks) : null,
             'swimlane' => $swimlane,
             'total' => $tasks->count(),
@@ -88,6 +94,30 @@ final class KanbanController extends Controller
         $task->update(['percent_complete' => $target]);
 
         return back()->with('status', __('kanban.moved', ['task' => $task->name]));
+    }
+
+    /**
+     * Lo que cuesta cada tarea, por su identificador.
+     *
+     * Se calcula con el mismo motor que la pantalla de recursos y el valor
+     * ganado: si el tablero hiciera su propia cuenta, tarde o temprano diria un
+     * numero distinto del que dice el reporte de costos.
+     *
+     * @param  Collection<int, Task>  $tasks
+     * @return Collection<int, array{cost: float, hours: float}>
+     */
+    private function costOf(Collection $tasks): Collection
+    {
+        $loaded = Task::query()
+            ->with('assignments.resource')
+            ->whereIn('id', $tasks->pluck('id')->all())
+            ->get();
+
+        return $loaded->mapWithKeys(function (Task $task): array {
+            $cost = TaskCost::of($task);
+
+            return [(int) $task->id => ['cost' => $cost['total'], 'hours' => $cost['hours']]];
+        });
     }
 
     /**

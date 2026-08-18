@@ -11,6 +11,10 @@
     $wipLimit = 5;
 
     $canUpdate = auth()->user()?->can('update', $project) ?? false;
+
+    // El costo es un permiso aparte del de ver el proyecto (regla 3 de
+    // ProjectPolicy), así que se pregunta una vez aquí y no en cada tarjeta.
+    $canSeeCosts = auth()->user()?->can('viewCosts', $project) ?? false;
 @endphp
 
 <div class="grid gap-3 md:grid-cols-3">
@@ -98,6 +102,20 @@
                                 <span title="{{ __('tasks.has_notes') }}">
                                     <span aria-hidden="true">✎</span>
                                     <span class="sr-only">{{ __('tasks.has_notes') }}</span>
+                                </span>
+                            @endif
+
+                            {{-- Cuántas horas cuesta la tarjeta y cuánto dinero.
+                                 Una columna «en curso» sin eso enseña seis
+                                 tarjetas que parecen equivalentes cuando una se
+                                 lleva la mitad del presupuesto. --}}
+                            @if ($canSeeCosts && $costs->has($task->id))
+                                @php $line = $costs->get($task->id); @endphp
+                                <span class="tabular" title="{{ __('resources.cost') }}">
+                                    {{ number_format($line['hours'], 0) }} h
+                                    @if ($line['cost'] > 0)
+                                        · {{ number_format($line['cost'], 0) }}
+                                    @endif
                                 </span>
                             @endif
                         </div>

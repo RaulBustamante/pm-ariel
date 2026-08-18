@@ -90,6 +90,18 @@ final class ProjectScheduler
                     'free_float_minutes' => $scheduled->freeFloatMinutes,
                     'is_critical' => $scheduled->isCritical,
                     'is_summary' => $scheduled->isSummary,
+
+                    // El avance de un paquete **es el de sus hijas**, ponderado
+                    // por duracion. Se calculaba desde la Etapa 3 y no se
+                    // guardaba: el numero vivia un instante en memoria y se
+                    // tiraba en cada recalculo, asi que la lista pintaba lo que
+                    // hubiera en la base --cero-- y un paquete terminado se veia
+                    // igual que uno sin empezar.
+                    //
+                    // Solo para resumenes. El de una hoja lo captura quien la
+                    // trabaja, y escribirlo aqui seria devolverle el mismo
+                    // numero que acaba de teclear.
+                    ...($scheduled->isSummary ? ['percent_complete' => $scheduled->percentComplete] : []),
                 ]);
             }
 

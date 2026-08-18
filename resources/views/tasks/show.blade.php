@@ -254,35 +254,81 @@
                 </div>
             </section>
 
-            {{-- Historial: la bitácora de auditoría, mostrada donde se pregunta --}}
+            {{-- Qué ha pasado aquí: lo que la gente dijo y lo que el sistema
+                 registró, en **un solo hilo**.
+
+                 Separados en dos listas obligan a leer las dos y a cruzarlas
+                 mentalmente por fecha, y ahí se pierde justo lo que se busca:
+                 que el comentario «el proveedor pidió dos días» está al lado
+                 del cambio de duración que alguien hizo esa misma tarde. --}}
             <section class="card">
                 <div class="card-header">
-                    <h2 class="card-title">{{ __('tasks.history') }}</h2>
+                    <h2 class="card-title">{{ __('tasks.comments') }}</h2>
                 </div>
 
                 <div class="p-4">
-                    @forelse ($history as $entry)
-                        <div class="flex gap-3 border-b border-slate-100 py-2 text-xs last:border-0">
-                            <span class="w-28 shrink-0 text-slate-500">
-                                {{ $entry->created_at?->format('d/m/y H:i') }}
-                            </span>
-                            <div class="min-w-0">
+                    <p class="mb-3 max-w-2xl text-xs leading-relaxed text-slate-600">{{ __('tasks.comments_help') }}</p>
+
+                    @can('update', $project)
+                        <form method="POST" action="{{ route('projects.tasks.comments.store', [$project, $task]) }}"
+                              class="mb-4 space-y-2">
+                            @csrf
+                            <label for="comment-body" class="sr-only">{{ __('tasks.comment_add') }}</label>
+                            <textarea id="comment-body" name="body" rows="2" class="field"
+                                      placeholder="{{ __('tasks.comment_placeholder') }}" required></textarea>
+                            @error('body')
+                                <p role="alert" class="text-sm text-[var(--color-badge-danger-fg)]">{{ $message }}</p>
+                            @enderror
+                            <button type="submit" class="btn btn-secondary btn-sm">{{ __('tasks.comment_add') }}</button>
+                        </form>
+                    @endcan
+
+                    @forelse ($timeline as $entry)
+                        <div class="flex gap-3 border-b border-slate-100 py-2.5 text-xs last:border-0">
+                            {{-- El punto distingue de un vistazo lo que alguien
+                                 escribió de lo que el sistema anotó, sin tener
+                                 que leer el renglón entero. --}}
+                            <span class="mt-1.5 h-2 w-2 shrink-0 rounded-full
+                                         {{ $entry['kind'] === 'comment' ? 'bg-brand-600' : 'bg-slate-300' }}"
+                                  aria-hidden="true"></span>
+
+                            <span class="w-24 shrink-0 text-slate-500">{{ $entry['at']->format('d/m/y H:i') }}</span>
+
+                            <div class="min-w-0 flex-1">
                                 <p class="text-slate-800">
-                                    <span class="font-medium">{{ $entry->user?->name ?? __('audit.system') }}</span>
-                                    · {{ __("audit.events.{$entry->event}") }}
+                                    <span class="font-medium">{{ $entry['who'] }}</span>
+                                    @if ($entry['kind'] === 'change')
+                                        · {{ __("audit.events.{$entry['event']}") }}
+                                        @if ($entry['fields'] !== [])
+                                            <span class="text-slate-500">· {{ implode(', ', $entry['fields']) }}</span>
+                                        @endif
+                                    @endif
                                 </p>
-                                @if ($entry->new_values)
-                                    <p class="mt-0.5 truncate text-slate-500">
-                                        {{ implode(', ', array_keys($entry->new_values)) }}
-                                    </p>
+
+                                @if ($entry['kind'] === 'comment')
+                                    <p class="mt-0.5 whitespace-pre-line leading-relaxed text-slate-700">{{ $entry['body'] }}</p>
                                 @endif
                             </div>
+
+                            @if ($entry['comment']?->canBeDeletedBy(auth()->user()))
+                                <form method="POST" class="shrink-0"
+                                      action="{{ route('projects.tasks.comments.destroy', [$project, $task, $entry['comment']]) }}"
+                                      onsubmit="return confirm('{{ __('tasks.comment_delete_confirm') }}')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="rounded px-1 text-slate-400 hover:text-[var(--color-badge-danger-fg)]">
+                                        <span aria-hidden="true">✕</span>
+                                        <span class="sr-only">{{ __('common.delete') }}</span>
+                                    </button>
+                                </form>
+                            @endif
                         </div>
                     @empty
-                        <p class="text-xs text-slate-500">{{ __('tasks.no_history') }}</p>
+                        <p class="text-xs text-slate-500">{{ __('tasks.timeline_empty') }}</p>
                     @endforelse
                 </div>
             </section>
+
         </div>
 
         <aside class="space-y-4">
@@ -366,30 +412,121 @@
                 </dl>
             </section>
 
+            {{-- «Depende de», sin códigos.
+                 La sintaxis `12FS+2d` de la vista Lista sigue existiendo y es la
+                 forma más rápida de capturar una red. Pero exigirla para poder
+                 ligar dos tareas deja fuera a casi todo el mundo, así que aquí
+                 se escoge de una lista y se lee como una frase. --}}
             <section class="card">
-                <div class="card-header"><h2 class="card-title">{{ __('tasks.predecessors') }}</h2></div>
-                <div class="p-4 text-sm">
+                <div class="card-header">
+                    <h2 class="card-title">{{ __('tasks.depends_on') }}</h2>
+                    <span class="text-xs text-slate-500">{{ count($predecessors) }}</span>
+                </div>
+
+                <div class="p-4">
                     @forelse ($predecessors as $link)
-                        <p class="truncate py-0.5 text-slate-700">
-                            <span class="font-mono text-xs text-slate-400">{{ $link->type }}</span>
-                            {{ $link->predecessor?->name }}
-                        </p>
+                        @php
+                            $type = $link->type;
+                            $lagDays = (int) round(((int) $link->lag_minutes) / max(1, $dayMinutes));
+                        @endphp
+                        <div class="flex items-start justify-between gap-2 border-b border-slate-100 py-2 last:border-0">
+                            <p class="min-w-0 text-sm leading-snug text-slate-700">
+                                <span class="text-slate-500">{{ __("tasks.rel_{$type}") }}</span>
+                                @if ($link->predecessor)
+                                    <a href="{{ route('projects.tasks.show', [$project, $link->predecessor]) }}"
+                                       class="font-medium text-slate-900 underline decoration-slate-300 hover:text-brand-700">{{ $link->predecessor->name }}</a>
+                                @else
+                                    <span class="font-medium text-slate-900">—</span>
+                                @endif
+
+                                @if ($lagDays !== 0)
+                                    <span class="block text-xs text-slate-500">
+                                        {{ $lagDays > 0
+                                            ? __('tasks.lag_after', ['days' => $lagDays])
+                                            : __('tasks.lag_before', ['days' => abs($lagDays)]) }}
+                                    </span>
+                                @endif
+                            </p>
+
+                            @can('update', $project)
+                                <form method="POST" class="shrink-0"
+                                      action="{{ route('projects.tasks.dependencies.destroy', [$project, $task, $link]) }}">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="rounded px-1 text-slate-400 hover:text-[var(--color-badge-danger-fg)]">
+                                        <span aria-hidden="true">✕</span>
+                                        <span class="sr-only">{{ __('common.delete') }}</span>
+                                    </button>
+                                </form>
+                            @endcan
+                        </div>
                     @empty
-                        <p class="text-xs text-slate-500">—</p>
+                        <p class="text-xs text-slate-500">{{ __('tasks.depends_on_none') }}</p>
                     @endforelse
+
+                    @can('update', $project)
+                        <form method="POST" action="{{ route('projects.tasks.dependencies.store', [$project, $task]) }}"
+                              class="mt-3 space-y-2 border-t border-slate-100 pt-3">
+                            @csrf
+
+                            <div>
+                                <label for="predecessor-field" class="field-label">{{ __('tasks.which_task') }}</label>
+                                <select id="predecessor-field" name="predecessor_id" class="field" required>
+                                    <option value="">—</option>
+                                    @foreach ($candidateTasks as $candidate)
+                                        <option value="{{ $candidate->id }}">{{ $candidate->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            {{-- En Modo Simple no hay relación que escoger: casi
+                                 todas las dependencias reales son «esta empieza
+                                 cuando aquella termina», y ofrecer las cuatro es
+                                 justo la clase de complejidad que hace que la
+                                 gente odie estas herramientas. --}}
+                            @expert
+                                <div>
+                                    <label for="type-field" class="field-label">{{ __('tasks.relationship') }}</label>
+                                    <select id="type-field" name="type" class="field">
+                                        @foreach (\App\Support\Scheduling\DependencyType::cases() as $type)
+                                            <option value="{{ $type->value }}" @selected($type->value === 'FS')>
+                                                {{ __("tasks.rel_{$type->value}") }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label for="lag-field" class="field-label">{{ __('tasks.lag_days') }}</label>
+                                    <input id="lag-field" type="number" step="0.5" name="lag_days" value="0" class="field">
+                                    <p class="field-help">{{ __('tasks.lag_days_help') }}</p>
+                                </div>
+                            @endexpert
+
+                            @simple
+                                <input type="hidden" name="type" value="FS">
+                            @endsimple
+
+                            <button type="submit" class="btn btn-secondary btn-sm">{{ __('tasks.add_dependency') }}</button>
+                            <p class="field-help">{{ __('tasks.depends_on_help') }}</p>
+                        </form>
+                    @endcan
                 </div>
             </section>
 
             <section class="card">
-                <div class="card-header"><h2 class="card-title">{{ __('tasks.successors') }}</h2></div>
+                <div class="card-header"><h2 class="card-title">{{ __('tasks.blocks') }}</h2></div>
                 <div class="p-4 text-sm">
                     @forelse ($successors as $link)
-                        <p class="truncate py-0.5 text-slate-700">
-                            <span class="font-mono text-xs text-slate-400">{{ $link->type }}</span>
-                            {{ $link->successor?->name }}
+                        <p class="truncate py-0.5">
+                            <span class="text-xs text-slate-500">{{ __("tasks.rel_{$link->type}_short") }}</span>
+                            @if ($link->successor)
+                                <a href="{{ route('projects.tasks.show', [$project, $link->successor]) }}"
+                                   class="text-slate-800 underline decoration-slate-300 hover:text-brand-700">{{ $link->successor->name }}</a>
+                            @endif
                         </p>
                     @empty
-                        <p class="text-xs text-slate-500">—</p>
+                        <p class="text-xs text-slate-500">{{ __('tasks.blocks_none') }}</p>
                     @endforelse
                 </div>
             </section>

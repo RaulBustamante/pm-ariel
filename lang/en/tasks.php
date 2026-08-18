@@ -103,4 +103,44 @@ return [
     'detail_hint' => 'Double-click a card to open its detail.',
     'mark_done' => 'Mark as done',
 
+    // --- Depends on, in plain words (stage 9) ------------------------------
+    'depends_on' => 'Depends on',
+    'depends_on_help' => 'What has to happen before this task can move. Pick the task from the list; no code to learn.',
+    'depends_on_none' => 'This task waits for nothing.',
+    'add_dependency' => 'Add',
+    'which_task' => 'Which task',
+    'relationship' => 'When this one can start',
+    'lag_days' => 'Days of wait',
+    'lag_days_help' => 'How many days to let pass afterwards. Zero if it starts right away; a negative number if it can overlap.',
+    'dependency_added' => 'Dependency added and plan recalculated.',
+    'dependency_removed' => 'Dependency removed and plan recalculated.',
+    'dependency_would_loop' => 'That dependency would make a loop: the task would end up waiting for itself. It was not added, and the plan is unchanged.',
+    'blocks' => 'This holds up',
+    'blocks_none' => 'No other task waits for this one.',
+
+    // The four relationships, said the way you would say them out loud.
+    'rel_FS' => 'After that one finishes',
+    'rel_SS' => 'When that one starts',
+    'rel_FF' => 'They finish together',
+    'rel_SF' => 'Finishes when that one starts',
+    'rel_FS_short' => 'after',
+    'rel_SS_short' => 'alongside',
+    'rel_FF_short' => 'closes with',
+    'rel_SF_short' => 'closes when that starts',
+    'lag_after' => 'with :days day(s) of wait',
+    'lag_before' => 'overlapping by :days day(s)',
+    'expression_help' => 'A shortcut for anyone coming from MS Project: "12", "12FS+2d", "15SS". If you would rather not learn it, use "Depends on" in the task detail — it does the same thing from a list.',
+
+    // --- Comments -----------------------------------------------------------
+    'comments' => 'What happened here',
+    'comments_help' => 'What people said while the work was going on, alongside what the system recorded. The note above says how the task stands today; this says how it got there.',
+    'comment_placeholder' => 'Write what happened...',
+    'comment_add' => 'Comment',
+    'comment_added' => 'Comment saved.',
+    'comment_deleted' => 'Comment deleted.',
+    'comment_delete_confirm' => 'Delete this comment?',
+    'timeline_empty' => 'Nothing here yet. The first comment is what makes the rest useful.',
+    'changed' => 'changed',
+    'parent' => 'Package',
+
 ];

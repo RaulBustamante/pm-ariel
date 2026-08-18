@@ -165,12 +165,19 @@ final class CalendarAndDetailTest extends TestCase
             ->assertOk()
             ->assertSee('Segunda')
             ->assertSee('Primera')
-            ->assertSee(__('tasks.predecessors'));
+            // Desde la Etapa 9 se lee como una frase y no como un código: la
+            // relación va en español y el nombre de la tarea al lado.
+            ->assertSee(__('tasks.depends_on'))
+            ->assertSee(__('tasks.rel_FS'));
     }
 
     /**
      * La bitácora existía desde la Etapa 1 y nunca se mostraba donde se
      * pregunta: frente a la tarea.
+     *
+     * Desde la Etapa 9 va mezclada con los comentarios en un solo hilo, así que
+     * lo que se comprueba es que el cambio siga apareciendo ahí — y con el
+     * nombre del campo en español, no con el de la columna.
      */
     #[Test]
     public function the_task_detail_shows_who_changed_what(): void
@@ -185,7 +192,8 @@ final class CalendarAndDetailTest extends TestCase
         $this->actingAs($this->manager)
             ->get(route('projects.tasks.show', [$this->project, $task]))
             ->assertOk()
-            ->assertSee(__('tasks.history'))
+            ->assertSee(__('tasks.comments'))
+            ->assertSee(__('tasks.duration'))
             ->assertSee($this->manager->name);
     }
 

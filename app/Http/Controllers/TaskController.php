@@ -6,7 +6,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTaskRequest;
 use App\Models\Attachment;
-use App\Models\AuditLog;
 use App\Models\Project;
 use App\Models\Resource;
 use App\Models\Task;
@@ -14,6 +13,7 @@ use App\Models\TaskAssignment;
 use App\Models\TaskDependency;
 use App\Services\Scheduling\ProjectScheduler;
 use App\Services\Scheduling\TaskOutliner;
+use App\Support\Reporting\TaskTimeline;
 use App\Support\Scheduling\DependencyExpression;
 use App\Support\Scheduling\DurationParser;
 use App\Support\Scheduling\ProjectDurations;
@@ -77,7 +77,9 @@ final class TaskController extends Controller
      *
      * La bitácora de auditoría ya existía desde la Etapa 1 y nunca se había
      * mostrado donde importa. «¿Quién cambió esta fecha y cuándo?» es la
-     * pregunta que se hace frente a la tarea, no en una pantalla de sistema.
+     * pregunta que se hace frente a la tarea, no en una pantalla de sistema — y
+     * desde la Etapa 9 va mezclada con los comentarios, porque «¿qué pasó aquí?»
+     * se contesta con las dos cosas juntas y con ninguna de las dos sola.
      */
     public function show(Project $project, Task $task): View
     {
@@ -96,13 +98,21 @@ final class TaskController extends Controller
             'attachments' => Attachment::query()->where('task_id', $task->id)->with('uploader')->latest('id')->get(),
             'predecessors' => $task->predecessorLinks()->with('predecessor')->get(),
             'successors' => $task->successorLinks()->with('successor')->get(),
-            'history' => AuditLog::query()
-                ->where('auditable_type', Task::class)
-                ->where('auditable_id', $task->id)
-                ->with('user')
-                ->latest('id')
-                ->limit(25)
+            // Lo que la gente dijo y lo que el sistema registró, en un hilo.
+            'timeline' => app(TaskTimeline::class)->for($task),
+
+            // Con quién se puede ligar: cualquier tarea del proyecto menos ella
+            // misma. Los resúmenes sí entran — un paquete puede depender de
+            // otro, y es de las formas más limpias de ordenar un plan grande.
+            'candidateTasks' => Task::query()
+                ->where('project_id', $project->id)
+                ->whereKeyNot($task->id)
+                ->orderBy('sort_order')
                 ->get(),
+
+            // La jornada de este proyecto, para poder decir la espera en días en
+            // vez de en minutos de trabajo.
+            'dayMinutes' => ProjectDurations::for($project)->toMinutes('1d'),
         ]);
     }
 

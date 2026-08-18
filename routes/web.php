@@ -34,7 +34,9 @@ use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectLogController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ResourceController;
+use App\Http\Controllers\TaskCommentController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TaskDependencyController;
 use App\Http\Controllers\TaskImportController;
 use App\Support\Initiation\InitiationStep;
 use Illuminate\Support\Facades\Route;
@@ -141,6 +143,19 @@ Route::middleware('auth')->group(function (): void {
             ->whereIn('action', ['indent', 'outdent', 'up', 'down'])
             ->name('projects.tasks.outline');
         Route::post('tasks/recalculate', [TaskController::class, 'recalculate'])->name('projects.tasks.recalculate');
+
+        // Comentarios y dependencias de una tarea. Van aparte del controlador de
+        // tareas porque no recalculan lo mismo: comentar no toca el plan, y
+        // ligar dos tareas lo recalcula y puede tener que deshacerse.
+        Route::post('tasks/{task}/comments', [TaskCommentController::class, 'store'])
+            ->name('projects.tasks.comments.store');
+        Route::delete('tasks/{task}/comments/{comment}', [TaskCommentController::class, 'destroy'])
+            ->name('projects.tasks.comments.destroy');
+
+        Route::post('tasks/{task}/dependencies', [TaskDependencyController::class, 'store'])
+            ->name('projects.tasks.dependencies.store');
+        Route::delete('tasks/{task}/dependencies/{dependency}', [TaskDependencyController::class, 'destroy'])
+            ->name('projects.tasks.dependencies.destroy');
 
         Route::get('import', [TaskImportController::class, 'show'])->name('projects.tasks.import');
         Route::post('import/preview', [TaskImportController::class, 'preview'])->name('projects.tasks.import.preview');
