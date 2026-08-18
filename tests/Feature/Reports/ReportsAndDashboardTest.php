@@ -214,6 +214,13 @@ final class ReportsAndDashboardTest extends TestCase
     /**
      * El semáforo dice por qué está en ese color. Uno que solo se pinta obliga a
      * preguntarle a alguien.
+     *
+     * La razón que toca depende del día en que se corra la prueba —el proyecto
+     * arranca el lunes de esta semana, así que el lunes todavía no va tarde y el
+     * jueves sí—, y por eso **no se busca una frase**: se comprueba que salga
+     * alguna de las que el tablero sabe dar. Enumerar solo dos de las cuatro es
+     * lo que hacía que esta prueba pasara en fin de semana y fallara a media
+     * semana, sin que el semáforo hubiera dejado de explicarse ni un día.
      */
     #[Test]
     public function the_light_explains_itself(): void
@@ -221,17 +228,31 @@ final class ReportsAndDashboardTest extends TestCase
         $this->task('Sin responsable');
         app(ProjectAdvisor::class)->analyze($this->project->refresh());
 
+        $kpis = app(ProjectDashboard::class)->kpis($this->project->refresh());
+
         $response = $this->actingAs($this->manager)
             ->get(route('projects.dashboard', $this->project))
             ->assertOk();
 
         $content = $response->getContent() ?: '';
 
+        // Las cuatro razones que el tablero sabe dar, con sus cifras reales:
+        // así se comprueba la frase completa y no un pedazo que podría venir de
+        // cualquier otra parte de la pantalla.
+        $reasons = [
+            __('dashboard.why_green'),
+            __('dashboard.why_amber_generic'),
+            __('dashboard.why_overdue', ['count' => $kpis['overdue']]),
+            __('dashboard.why_behind', [
+                'progress' => $kpis['progress'],
+                'elapsed' => $kpis['elapsed_percent'],
+            ]),
+            'Sin responsable',
+        ];
+
         // Alguna razón concreta, no solo el color.
         $this->assertTrue(
-            str_contains($content, __('dashboard.why_green'))
-            || str_contains($content, 'Sin responsable')
-            || str_contains($content, __('dashboard.why_amber_generic')),
+            array_filter($reasons, fn (string $reason): bool => str_contains($content, e($reason))) !== [],
             'El semáforo debe decir por qué.',
         );
     }
