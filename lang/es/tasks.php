@@ -80,4 +80,27 @@ return [
 
     'showing_capped' => 'Se muestran :shown de :total tareas. Usa el filtro para acotar la lista.',
 
+    // --- Seguimiento del trabajo (Etapa 8) -------------------------------
+    'state' => 'Estado',
+    'state_todo' => 'Sin empezar',
+    'state_doing' => 'En curso',
+    'state_done' => 'Terminada',
+    'state_help' => 'Sale del avance capturado: 0 % sin empezar, 100 % terminada. No hay un estado aparte que mantener al día.',
+    'notes' => 'Notas',
+    'notes_help' => 'Lo que hay que saber para trabajar esta tarea, y lo que se acordó mientras se trabajaba. Se ve en el detalle y se anuncia en la lista y en el tablero.',
+    'has_notes' => 'Tiene notas',
+    'real_dates' => 'Fechas reales',
+    'actual_start' => 'Arrancó',
+    'actual_finish' => 'Terminó',
+    'not_started_yet' => 'Todavía no arranca.',
+    'in_progress_since' => 'En curso desde el :date.',
+    'finished_on' => 'Terminada el :date.',
+    'finished_late' => ':days día(s) después de lo planeado.',
+    'finished_early' => ':days día(s) antes de lo planeado.',
+    'finished_on_time' => 'En la fecha planeada.',
+    'real_dates_help' => 'Se anotan solas al capturar avance: la de arranque en cuanto pasa de cero, la de cierre al llegar a 100 %. Nadie las teclea.',
+    'open_detail' => 'Abrir el detalle',
+    'detail_hint' => 'Doble clic en la tarjeta para abrir el detalle.',
+    'mark_done' => 'Marcar terminada',
+
 ];

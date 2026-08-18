@@ -47,7 +47,7 @@
                            class="flex h-[26px] items-center gap-1 truncate border-b border-slate-50 px-3 text-xs transition-colors hover:bg-brand-50
                                   {{ $task->is_summary ? 'font-semibold text-slate-900' : 'text-slate-700' }}"
                            style="padding-left: {{ 0.75 + ($task->outline_depth ?? 0) * 0.75 }}rem"
-                           title="{{ $task->name }} · {{ $task->early_start?->format('d/m/y') }} → {{ $task->early_finish?->format('d/m/y') }}">
+                           title="{{ $task->name }} · {{ $task->early_start?->format('d/m/y') }} → {{ $task->early_finish?->format('d/m/y') }} · {{ __('tasks.state_'.$task->state()) }} {{ (int) $task->percent_complete }} %">
                             @if ($task->is_critical && ! $task->is_summary)
                                 <span aria-hidden="true" class="text-[var(--color-badge-danger-fg)]">●</span>
                             @endif
@@ -57,7 +57,8 @@
                                 {{ __('gantt.row_summary', [
                                     'from' => $task->early_start?->format('d/m/Y') ?? '',
                                     'to' => $task->early_finish?->format('d/m/Y') ?? '',
-                                    'state' => $task->is_critical ? __('tasks.critical') : '',
+                                    'state' => trim(__('tasks.state_'.$task->state())
+                                        .($task->is_critical ? ' · '.__('tasks.critical') : '')),
                                 ]) }}
                             </span>
                         </a>

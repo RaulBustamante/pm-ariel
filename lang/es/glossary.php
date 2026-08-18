@@ -83,4 +83,8 @@ return [
     'justification_label' => 'Justificación',
     'justification' => 'La razón por la que vale la pena hacer este proyecto y no otro.',
 
+    'progress_label' => 'Avance',
+    'progress' => 'Qué tanto de la tarea está hecho, capturado a mano por quien la trabaja.',
+    'progress_example' => 'De ahí sale el estado: 0 % sin empezar, 100 % terminada. No hay un estado aparte que mantener al día, así que la lista, el tablero y el Gantt no pueden discrepar.',
+
 ];

@@ -47,6 +47,14 @@
                             </th>
                         @endexpert
                         <th scope="col" class="px-3 py-2">{{ __('tasks.owner') }}</th>
+                        {{-- El avance va en la lista, no solo en el detalle.
+                             «¿Ya terminamos?» es la pregunta que más se le hace a
+                             esta pantalla, y hasta ahora había que abrir tarea por
+                             tarea para contestarla. --}}
+                        <th scope="col" class="px-2 py-2">
+                            {{ __('tasks.progress') }}
+                            <x-help-term term="progress" />
+                        </th>
                         <th scope="col" class="px-2 py-2"><span class="sr-only">{{ __('common.actions') }}</span></th>
                     </tr>
                 </thead>

@@ -83,4 +83,8 @@ return [
     'justification_label' => 'Justification',
     'justification' => 'The reason this project is worth doing rather than another one.',
 
+    'progress_label' => 'Progress',
+    'progress' => 'How much of the task is done, captured by hand by whoever is working it.',
+    'progress_example' => 'The state comes from it: 0 % not started, 100 % done. There is no separate state to keep in sync, so the list, the board and the Gantt cannot disagree.',
+
 ];

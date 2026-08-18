@@ -34,6 +34,11 @@ final class StoreTaskRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
+
+            // Las notas de la tarea. La columna existe desde la Etapa 3 y
+            // ninguna pantalla la escribia: una columna que nadie llena es
+            // lo mismo que una que no existe, y peor, porque parece que si.
+            'description' => ['nullable', 'string', 'max:20000'],
             'duration' => ['nullable', 'string', 'max:20'],
             'constraint_type' => ['nullable', Rule::in(array_column(ConstraintType::cases(), 'value'))],
             'constraint_date' => ['nullable', 'date'],

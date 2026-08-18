@@ -312,6 +312,18 @@ final class DemoProjectSeeder extends Seeder
             $tasks[$key]->update(['percent_complete' => $percent]);
         }
 
+        // Notas en unas cuantas. Sin ninguna, el indicador de «tiene notas» de
+        // la lista y del tablero no se ve nunca y el ejemplo no enseña que
+        // exista — que es medio motivo por el que la columna llevaba cinco
+        // etapas sin que nadie la llenara.
+        foreach ([
+            'servidor' => "TI pide el vale firmado antes de apartar la máquina.\nContacto: mesa de ayuda, extensión 214.",
+            'limpieza' => 'Hay 340 refacciones con dos claves distintas. Antes de migrar hay que decidir cuál se conserva — está abierto como INC-002.',
+            'capacitacion_2' => 'El segundo turno entra a las 20:00. La sesión tiene que ser a esa hora o no asiste nadie.',
+        ] as $key => $note) {
+            $tasks[$key]->update(['description' => $note]);
+        }
+
         return $tasks;
     }
 

@@ -92,8 +92,43 @@
         @endunless
     </td>
 
+    {{-- El avance, capturable aquí mismo.
+         Vivía solo en el detalle de la tarea, y el detalle no se alcanzaba desde
+         esta pantalla: quien quería decir «ya la terminé» no tenía dónde. --}}
+    <td class="px-2 py-1.5">
+        @unless ($task->is_summary)
+            <div class="flex items-center gap-1.5">
+                <input type="number" name="percent_complete" form="task-{{ $task->id }}" min="0" max="100" step="5"
+                       value="{{ (int) $task->percent_complete }}"
+                       aria-label="{{ __('tasks.progress') }} — {{ $task->name }}"
+                       class="w-14 rounded border-transparent bg-transparent px-1 py-0.5 text-right text-sm tabular hover:border-slate-300 focus:border-hud-500 focus:bg-surface focus:ring-1 focus:ring-hud-500">
+
+                <x-task-state :task="$task" :show-percent="false" />
+            </div>
+        @else
+            {{-- Un resumen no se captura: su avance es el de sus hijas. Poner el
+                 campo invitaría a teclear un número que el motor pisaría. --}}
+            <div class="flex items-center gap-1.5">
+                <span class="w-14 pr-1 text-right text-sm tabular text-slate-400">{{ (int) $task->percent_complete }} %</span>
+                <div class="meter h-1.5 w-12"><div class="meter-fill" style="width: {{ min(100, (int) $task->percent_complete) }}%"></div></div>
+            </div>
+        @endunless
+    </td>
+
     <td class="whitespace-nowrap px-2 py-1.5 text-right">
         <div class="flex items-center justify-end gap-0.5">
+            {{-- La puerta al detalle. Estaba solo en el Gantt, el calendario y el
+                 inicio; desde la lista —que es donde la gente vive— no había
+                 forma de llegar a las notas, los adjuntos ni el historial. --}}
+            <a href="{{ route('projects.tasks.show', [$project, $task]) }}"
+               title="{{ __('tasks.open_detail') }}"
+               class="rounded px-1 py-0.5 text-xs text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-hud-500">
+                <span aria-hidden="true">{{ $task->hasNotes() ? '✎' : '⋯' }}</span>
+                <span class="sr-only">
+                    {{ __('tasks.open_detail') }} — {{ $task->name }}@if ($task->hasNotes()) · {{ __('tasks.has_notes') }}@endif
+                </span>
+            </a>
+
             <button type="submit" form="task-{{ $task->id }}"
                     class="rounded px-1.5 py-0.5 text-xs font-medium text-brand-700 hover:bg-brand-50 focus:outline-none focus:ring-2 focus:ring-hud-500">
                 {{ __('common.save') }}<span class="sr-only"> — {{ $task->name }}</span>

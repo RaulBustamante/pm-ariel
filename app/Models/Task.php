@@ -188,6 +188,52 @@ class Task extends Model
         return $this->duration_minutes === 0 && ! $this->is_summary;
     }
 
+    /**
+     * En qué estado está la tarea: `todo`, `doing` o `done`.
+     *
+     * **Se deriva del avance; no es una columna.** Es la decisión CL-004 llevada
+     * hasta el final: un estado guardado aparte puede decir «terminada» sobre
+     * una tarea al 40 %, y en cuanto el tablero y la lista discrepan una vez, la
+     * gente deja de creerle a los dos.
+     *
+     * Vive aquí y no en cada pantalla para que la lista, el tablero y el detalle
+     * no puedan clasificar distinto la misma tarea — que es exactamente lo que
+     * pasaba cuando el tablero tenía su propio `group()` y la lista no tenía
+     * nada.
+     */
+    public function state(): string
+    {
+        $progress = (float) $this->percent_complete;
+
+        if ($progress >= 100) {
+            return 'done';
+        }
+
+        return $progress > 0 ? 'doing' : 'todo';
+    }
+
+    /** ¿Hay algo escrito en las notas? */
+    public function hasNotes(): bool
+    {
+        return is_string($this->description) && trim($this->description) !== '';
+    }
+
+    /**
+     * Días de diferencia entre el cierre real y el planeado. Positivo es tarde.
+     *
+     * `null` mientras no haya terminado o no haya plan contra el cual comparar:
+     * un cero ahí se leería como «cerró en la fecha», que es una afirmación
+     * distinta de «todavía no cierra».
+     */
+    public function finishDrift(): ?int
+    {
+        if ($this->actual_finish === null || $this->early_finish === null) {
+            return null;
+        }
+
+        return (int) $this->early_finish->startOfDay()->diffInDays($this->actual_finish->startOfDay(), false);
+    }
+
     /** El dato puro que consume el motor. */
     public function toNode(?string $calendarKey = null): TaskNode
     {

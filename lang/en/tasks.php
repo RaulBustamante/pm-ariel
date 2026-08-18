@@ -80,4 +80,27 @@ return [
 
     'showing_capped' => 'Showing :shown of :total tasks. Use the filter to narrow the list.',
 
+    // --- Work tracking (stage 8) -----------------------------------------
+    'state' => 'State',
+    'state_todo' => 'Not started',
+    'state_doing' => 'In progress',
+    'state_done' => 'Done',
+    'state_help' => 'Derived from captured progress: 0 % not started, 100 % done. There is no separate state to keep in sync.',
+    'notes' => 'Notes',
+    'notes_help' => 'What someone needs to know to work this task, and what was agreed while working it. Shown on the detail and flagged on the list and the board.',
+    'has_notes' => 'Has notes',
+    'real_dates' => 'Actual dates',
+    'actual_start' => 'Started',
+    'actual_finish' => 'Finished',
+    'not_started_yet' => 'Not started yet.',
+    'in_progress_since' => 'In progress since :date.',
+    'finished_on' => 'Finished on :date.',
+    'finished_late' => ':days day(s) later than planned.',
+    'finished_early' => ':days day(s) earlier than planned.',
+    'finished_on_time' => 'On the planned date.',
+    'real_dates_help' => 'Written automatically when progress is captured: the start as soon as it passes zero, the finish on reaching 100 %. Nobody types them.',
+    'open_detail' => 'Open the detail',
+    'detail_hint' => 'Double-click a card to open its detail.',
+    'mark_done' => 'Mark as done',
+
 ];

@@ -27,4 +27,7 @@ return [
     'empty' => 'No hay tareas todavía. Captúralas en la vista Lista y aparecen aquí.',
     'column_empty' => 'Nada aquí',
 
+    'drag_hint' => 'Puedes arrastrar una tarjeta de una columna a otra, o usar los botones. Las dos cosas capturan avance. Doble clic en una tarjeta abre su detalle.',
+    'moved_to' => ':task pasa a :column.',
+
 ];

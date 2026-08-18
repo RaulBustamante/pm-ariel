@@ -45,4 +45,24 @@
     @else
         @include('kanban._board', ['columns' => $columns, 'compact' => false])
     @endif
+
+    @can('update', $project)
+        {{-- El arrastre suelta aquí y envía un formulario normal, como el del
+             Gantt: sin peticiones a mano, sin estado paralelo en el navegador y
+             sin una pantalla que se quede diciendo algo distinto de lo guardado.
+
+             La dirección se arma en el JavaScript con el identificador de la
+             tarea, porque una sola ruta sirve para todas las tarjetas. --}}
+        <form method="POST" class="hidden" data-kanban-move-form
+              data-action-template="{{ route('projects.kanban.move', [$project, '__TASK__']) }}">
+            @csrf
+            <input type="hidden" name="column" value="">
+        </form>
+
+        {{-- Lo que el arrastre hace se anuncia, porque arrastrar no dice nada a
+             quien no ve la pantalla moverse. --}}
+        <p class="sr-only" role="status" data-kanban-live></p>
+
+        <p class="mt-3 text-[11px] text-slate-500">{{ __('kanban.drag_hint') }}</p>
+    @endcan
 @endsection

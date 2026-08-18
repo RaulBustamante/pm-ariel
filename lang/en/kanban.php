@@ -27,4 +27,7 @@ return [
     'empty' => 'No tasks yet. Capture them in the List view and they show up here.',
     'column_empty' => 'Nothing here',
 
+    'drag_hint' => 'You can drag a card between columns, or use the buttons. Both capture progress. Double-click a card to open its detail.',
+    'moved_to' => ':task moves to :column.',
+
 ];

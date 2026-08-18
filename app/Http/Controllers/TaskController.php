@@ -137,6 +137,13 @@ final class TaskController extends Controller
             'constraint_type' => $request->input('constraint_type'),
             'constraint_date' => $request->input('constraint_date'),
             'owner_id' => $request->input('owner_id'),
+            // Como el costo real: `has` y no `??`, para que vaciar las notas
+            // de verdad las vacie. La Lista no manda este campo, y con `??`
+            // cualquier guardado desde ahi las conservaria por accidente --
+            // que es lo correcto, y por eso se distingue una cosa de la otra.
+            'description' => $request->has('description')
+                ? $request->input('description')
+                : $task->description,
             'cost' => $request->input('cost') ?? $task->cost,
             // Se usa `has` y no `??`: sin eso, borrar el campo para decir
             // <<todavia no lo se>> no lo borraria nunca.

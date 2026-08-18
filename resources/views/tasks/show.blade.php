@@ -12,6 +12,9 @@
         @if ($task->wbs_code)
             <span class="font-mono text-slate-400">{{ $task->wbs_code }}</span>
         @endif
+        @unless ($task->is_summary)
+            <x-task-state :task="$task" />
+        @endunless
         @if ($task->is_critical)
             <span class="badge badge-danger">{{ __('tasks.critical') }}</span>
         @endif
@@ -94,6 +97,17 @@
                                 @endforeach
                             </select>
                         </div>
+                    </div>
+
+                    {{-- Las notas de la tarea.
+                         La columna existía desde la Etapa 3 y ninguna pantalla la
+                         escribía: era el mismo caso de las fechas reales, un dato
+                         que el modelo prometía y que nadie podía capturar. --}}
+                    <div>
+                        <label for="description-field" class="field-label">{{ __('tasks.notes') }}</label>
+                        <textarea id="description-field" name="description" rows="4" class="field"
+                                  @cannot('update', $project) readonly @endcannot>{{ old('description', $task->description) }}</textarea>
+                        <p class="field-help">{{ __('tasks.notes_help') }}</p>
                     </div>
 
                     <div>
@@ -272,6 +286,56 @@
         </div>
 
         <aside class="space-y-4">
+            {{-- ¿Ya arrancó? ¿Ya terminó? ¿Cuándo?
+                 Estas dos fechas se anotan solas desde el bloque 6.13 y no se
+                 veían en ninguna pantalla. Un dato que el sistema guarda y nunca
+                 enseña es, para quien lo usa, un dato que no existe. --}}
+            <section class="card">
+                <div class="card-header"><h2 class="card-title">{{ __('tasks.real_dates') }}</h2></div>
+
+                <div class="space-y-2 p-4 text-sm">
+                    @php $drift = $task->finishDrift(); @endphp
+
+                    @if ($task->actual_finish)
+                        <p class="font-medium text-slate-900">
+                            {{ __('tasks.finished_on', ['date' => $task->actual_finish->format('d/m/Y')]) }}
+                        </p>
+
+                        {{-- Terminar tarde no se esconde, y terminar antes tampoco:
+                             las dos cosas dicen algo de cómo se estimó. --}}
+                        @if ($drift !== null)
+                            <p class="text-xs {{ $drift > 0 ? 'text-[var(--color-badge-danger-fg)]' : 'text-slate-600' }}">
+                                {{ $drift > 0
+                                    ? __('tasks.finished_late', ['days' => $drift])
+                                    : ($drift < 0
+                                        ? __('tasks.finished_early', ['days' => abs($drift)])
+                                        : __('tasks.finished_on_time')) }}
+                            </p>
+                        @endif
+                    @elseif ($task->actual_start)
+                        <p class="font-medium text-slate-900">
+                            {{ __('tasks.in_progress_since', ['date' => $task->actual_start->format('d/m/Y')]) }}
+                        </p>
+                    @else
+                        <p class="text-slate-500">{{ __('tasks.not_started_yet') }}</p>
+                    @endif
+
+                    <dl class="space-y-2 border-t border-slate-100 pt-2">
+                        @foreach ([
+                            'tasks.actual_start' => $task->actual_start,
+                            'tasks.actual_finish' => $task->actual_finish,
+                        ] as $label => $value)
+                            <div class="flex justify-between gap-3">
+                                <dt class="text-slate-600">{{ __($label) }}</dt>
+                                <dd class="font-medium">{{ $value?->format('d/m/Y') ?? '—' }}</dd>
+                            </div>
+                        @endforeach
+                    </dl>
+
+                    <p class="field-help">{{ __('tasks.real_dates_help') }}</p>
+                </div>
+            </section>
+
             <section class="card">
                 <div class="card-header"><h2 class="card-title">{{ __('tasks.dates') }}</h2></div>
                 <dl class="space-y-2 p-4 text-sm">
