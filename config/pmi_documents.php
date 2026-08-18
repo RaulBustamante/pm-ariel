@@ -395,7 +395,7 @@ return [
         'deliverable_acceptance_records' => [
             'group' => 'executing',
             'kind' => 'record',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 
@@ -537,7 +537,7 @@ return [
         'acceptance_signoff' => [
             'group' => 'closing',
             'kind' => 'record',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\AcceptanceRecordController;
 use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\HierarchyController;
 use App\Http\Controllers\Admin\OrgUnitController;
@@ -196,6 +197,24 @@ Route::middleware('auth')->group(function (): void {
             ->name('projects.documents.log.update');
         Route::delete('documents/log/{code}/{entry}', [ProjectLogController::class, 'destroy'])
             ->name('projects.documents.log.destroy');
+
+        // Las actas de aceptacion: la cuarta y ultima especie del catalogo.
+        // Mismo patron que los registros; el PDF va declarado antes que las
+        // rutas de un renglon.
+        Route::get('documents/record/{code}', [AcceptanceRecordController::class, 'index'])
+            ->name('projects.documents.record');
+        Route::post('documents/record/{code}', [AcceptanceRecordController::class, 'store'])
+            ->name('projects.documents.record.store');
+        Route::get('documents/record/{code}/{record}/pdf', [AcceptanceRecordController::class, 'pdf'])
+            ->name('projects.documents.record.pdf');
+        Route::get('documents/record/{code}/{record}/edit', [AcceptanceRecordController::class, 'edit'])
+            ->name('projects.documents.record.edit');
+        Route::put('documents/record/{code}/{record}', [AcceptanceRecordController::class, 'update'])
+            ->name('projects.documents.record.update');
+        Route::post('documents/record/{code}/{record}/sign', [AcceptanceRecordController::class, 'sign'])
+            ->name('projects.documents.record.sign');
+        Route::delete('documents/record/{code}/{record}', [AcceptanceRecordController::class, 'destroy'])
+            ->name('projects.documents.record.destroy');
         Route::get('reports/gantt', [ReportController::class, 'ganttPrint'])->name('projects.reports.gantt');
         Route::get('reports/csv', [ReportController::class, 'csv'])->name('projects.reports.csv');
 

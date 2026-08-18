@@ -131,6 +131,11 @@ final class DocumentCatalogue
             return route('projects.documents.log', [$project, $code]);
         }
 
+        // Y las dos actas, que cierran la cuarta especie.
+        if ((string) config("pmi_documents.catalogue.{$code}.kind") === 'record') {
+            return route('projects.documents.record', [$project, $code]);
+        }
+
         $route = self::ROUTES[$code] ?? null;
 
         return $route === null ? null : route($route, $project);
