@@ -58,6 +58,19 @@
                         </div>
                     </div>
 
+                    {{-- El costo real va junto al avance porque es el mismo acto:
+                         quien reporta que una tarea va al 60 % es quien sabe qué
+                         se lleva gastado. Vacío significa «todavía no lo sé» y no
+                         «salió gratis» — de esa diferencia depende que el valor
+                         ganado pueda calcular el índice de costo o tenga que
+                         decir que le faltan datos. --}}
+                    <div class="sm:max-w-[16rem]">
+                        <label for="actual-cost-field" class="field-label">{{ __('evm.actual_cost') }}</label>
+                        <input id="actual-cost-field" type="number" step="0.01" min="0" name="actual_cost"
+                               value="{{ old('actual_cost', $task->actual_cost) }}" class="field">
+                        <p class="field-help">{{ __('evm.actual_cost_help') }}</p>
+                    </div>
+
                     <div class="grid gap-3 sm:grid-cols-2">
                         <div>
                             <label for="owner-field" class="field-label">{{ __('tasks.owner') }}</label>

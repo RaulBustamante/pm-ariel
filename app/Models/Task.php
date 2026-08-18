@@ -40,7 +40,7 @@ use Illuminate\Support\Carbon;
 #[Fillable([
     'project_id', 'parent_id', 'name', 'description', 'duration_minutes',
     'constraint_type', 'constraint_date', 'calendar_id', 'sort_order',
-    'cost', 'percent_complete', 'actual_start', 'actual_finish', 'owner_id',
+    'cost', 'actual_cost', 'percent_complete', 'actual_start', 'actual_finish', 'owner_id',
 ])]
 class Task extends Model
 {
@@ -64,6 +64,7 @@ class Task extends Model
             'is_critical' => 'boolean',
             'is_summary' => 'boolean',
             'cost' => 'decimal:2',
+            'actual_cost' => 'decimal:2',
             'percent_complete' => 'decimal:2',
             'actual_start' => 'datetime',
             'actual_finish' => 'datetime',

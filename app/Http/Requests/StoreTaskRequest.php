@@ -39,6 +39,11 @@ final class StoreTaskRequest extends FormRequest
             'constraint_date' => ['nullable', 'date'],
             'owner_id' => ['nullable', 'integer', Rule::exists('users', 'id')->withoutTrashed()],
             'cost' => ['nullable', 'numeric', 'min:0'],
+
+            // Nulo y cero **no** son lo mismo: nulo es <<no se ha
+            // capturado>> y cero es <<salio gratis>>. De esa diferencia
+            // depende que el valor ganado sepa si puede calcular el CPI.
+            'actual_cost' => ['nullable', 'numeric', 'min:0'],
             'percent_complete' => ['nullable', 'numeric', 'between:0,100'],
             'predecessors' => ['nullable', 'string', 'max:255'],
             'parent_id' => ['nullable', 'integer'],

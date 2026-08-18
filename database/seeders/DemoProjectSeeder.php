@@ -39,6 +39,32 @@ final class DemoProjectSeeder extends Seeder
 
     private const DAY = 540;
 
+    /**
+     * Avance capturado y **cuánto costó de verdad** lo avanzado.
+     *
+     * El segundo número es el factor contra el presupuesto: 1.0 salió como se
+     * estimó, 1.4 salió un 40 % más caro. Dos tareas salen caras a propósito —
+     * un ejemplo donde todo costó lo presupuestado da un índice de costo de
+     * 1.00, que es justo el número que no demuestra que el indicador sirva.
+     *
+     * Sin costo real capturado el valor ganado **se niega a calcular** el índice
+     * de costo en vez de deducirlo del avance, y el ejemplo enseñaría un informe
+     * con la mitad de las casillas vacías.
+     *
+     * @var array<string, array{int, float}>
+     */
+    private const PROGRESS = [
+        'entrevistas' => [100, 1.0],
+        'inventario' => [100, 1.4],
+        'procesos' => [100, 1.0],
+        'requerimientos' => [80, 1.25],
+        'revision_req' => [40, 1.0],
+        'servidor' => [100, 1.0],
+        'ambiente_dev' => [100, 0.9],
+        'ambiente_qa' => [30, 1.0],
+        'limpieza' => [25, 1.0],
+    ];
+
     public function run(): void
     {
         $owner = User::query()->where('email', 'admin@localhost')->first()
@@ -92,6 +118,9 @@ final class DemoProjectSeeder extends Seeder
         app(ProjectScheduler::class)->reschedule($project->refresh());
 
         $this->baselineWithSlip($project, $tasks);
+        // Después de la línea base: el costo real se siembra contra lo que se
+        // congeló, que es contra lo que el valor ganado lo compara.
+        $this->actualCosts($project, $tasks);
         $this->stampActualDates($project);
         $this->logs($project, $owner);
 
@@ -279,12 +308,7 @@ final class DemoProjectSeeder extends Seeder
         // para que el corte semanal tenga algo que contar. Las fechas reales de
         // cierre se ponen después de programar, en `stampActualDates()`: antes
         // de eso las tareas todavía no tienen fechas calculadas.
-        foreach ([
-            'entrevistas' => 100, 'inventario' => 100, 'procesos' => 100,
-            'requerimientos' => 80, 'revision_req' => 40,
-            'servidor' => 100, 'ambiente_dev' => 100, 'ambiente_qa' => 30,
-            'limpieza' => 25,
-        ] as $key => $percent) {
+        foreach (self::PROGRESS as $key => [$percent, $factor]) {
             $tasks[$key]->update(['percent_complete' => $percent]);
         }
 
@@ -324,6 +348,37 @@ final class DemoProjectSeeder extends Seeder
                         ? $task->early_finish?->copy()->addDays(2)
                         : $task->early_finish),
             ])->save();
+        }
+    }
+
+    /**
+     * Lo que de verdad costó cada tarea avanzada.
+     *
+     * Se calcula contra el **presupuesto congelado en la línea base**, que es
+     * contra lo que el valor ganado compara. Calcularlo contra el costo de hoy
+     * daría un índice torcido en las dos tareas que la línea base alargó
+     * después, y el ejemplo enseñaría un sobrecosto que en realidad es un
+     * cambio de plan.
+     *
+     * @param  array<string, Task>  $tasks
+     */
+    private function actualCosts(Project $project, array $tasks): void
+    {
+        $baseline = $project->baselines()->latest('captured_at')->first();
+
+        if ($baseline === null) {
+            return;
+        }
+
+        $frozen = $baseline->tasks()->get()->keyBy('task_id');
+
+        foreach (self::PROGRESS as $key => [$percent, $factor]) {
+            $line = $frozen[$tasks[$key]->id] ?? null;
+            $budget = (float) ($line === null ? $tasks[$key]->cost : $line->cost);
+
+            $tasks[$key]->update([
+                'actual_cost' => round($budget * $percent / 100 * $factor, 2),
+            ]);
         }
     }
 

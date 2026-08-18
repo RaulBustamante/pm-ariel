@@ -138,6 +138,11 @@ final class TaskController extends Controller
             'constraint_date' => $request->input('constraint_date'),
             'owner_id' => $request->input('owner_id'),
             'cost' => $request->input('cost') ?? $task->cost,
+            // Se usa `has` y no `??`: sin eso, borrar el campo para decir
+            // <<todavia no lo se>> no lo borraria nunca.
+            'actual_cost' => $request->has('actual_cost')
+                ? $request->input('actual_cost')
+                : $task->actual_cost,
             'percent_complete' => $request->input('percent_complete') ?? $task->percent_complete,
         ]);
 

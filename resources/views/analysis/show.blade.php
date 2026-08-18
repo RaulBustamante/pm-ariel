@@ -16,6 +16,15 @@
         $peak = collect($rows)->max('peak') ?: 1;
     @endphp
 
+    {{-- El valor ganado vive en su propia pantalla —tiene fecha de corte propia
+         y una tabla por tarea—, pero se llega desde aquí: quien viene a ver el
+         costo contra la línea base está a una pregunta de querer el CPI. --}}
+    <div class="mb-4 flex justify-end">
+        <a href="{{ route('projects.earned-value', $project) }}" class="btn btn-secondary btn-sm">
+            {{ __('evm.title') }}
+        </a>
+    </div>
+
     {{-- ------------------------------------------------------------------
          6.7 · Carga de recursos
          ------------------------------------------------------------------ --}}

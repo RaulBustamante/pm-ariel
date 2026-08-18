@@ -18,6 +18,7 @@ use App\Http\Controllers\CalendarSettingsController;
 use App\Http\Controllers\CalendarViewController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentIssueController;
+use App\Http\Controllers\EarnedValueController;
 use App\Http\Controllers\GanttController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Initiation\InitiationController;
@@ -199,6 +200,12 @@ Route::middleware('auth')->group(function (): void {
         Route::get('reports/csv', [ReportController::class, 'csv'])->name('projects.reports.csv');
 
         Route::get('analysis', [AnalysisController::class, 'show'])->name('projects.analysis');
+
+        // Valor ganado y pronostico de costos. Van juntos porque son el mismo
+        // calculo leido de dos maneras: los indices contestan como vamos, y los
+        // pronosticos, en cuanto acaba esto.
+        Route::get('earned-value', [EarnedValueController::class, 'show'])->name('projects.earned-value');
+        Route::get('earned-value/pdf', [EarnedValueController::class, 'pdf'])->name('projects.earned-value.pdf');
 
         Route::get('advisor', [AdvisorController::class, 'show'])->name('projects.advisor');
         Route::post('advisor', [AdvisorController::class, 'analyze'])->name('projects.advisor.analyze');

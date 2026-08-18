@@ -49,6 +49,8 @@ final class DocumentCatalogue
         'project_schedule' => 'projects.gantt',
         'schedule_baseline' => 'projects.edit',
         'cost_estimates' => 'projects.analysis',
+        'earned_value_report' => 'projects.earned-value',
+        'cost_forecasts' => 'projects.earned-value',
         'resource_requirements' => 'projects.resources.index',
         'variance_analysis' => 'projects.analysis',
         'work_performance_data' => 'projects.analysis',

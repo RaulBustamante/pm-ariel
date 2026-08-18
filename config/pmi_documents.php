@@ -444,8 +444,8 @@ return [
         'cost_forecasts' => [
             'group' => 'monitoring',
             'kind' => 'derived',
-            'state' => 'partial',
-            'source' => 'costs',
+            'state' => 'ready',
+            'source' => null,
         ],
 
         'variance_analysis' => [
@@ -458,8 +458,8 @@ return [
         'earned_value_report' => [
             'group' => 'monitoring',
             'kind' => 'derived',
-            'state' => 'partial',
-            'source' => 'costs',
+            'state' => 'ready',
+            'source' => null,
         ],
 
         'change_log' => [
