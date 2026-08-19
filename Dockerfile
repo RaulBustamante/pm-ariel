@@ -16,6 +16,7 @@ RUN apk add --no-cache \
         libpng \
         libzip \
         mariadb-client \
+        mariadb-connector-c \
         su-exec \
     && apk add --no-cache --virtual .build-deps \
         icu-dev \
