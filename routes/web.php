@@ -18,6 +18,7 @@ use App\Http\Controllers\BaselineController;
 use App\Http\Controllers\CalendarSettingsController;
 use App\Http\Controllers\CalendarViewController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DerivedDocumentController;
 use App\Http\Controllers\DocumentIssueController;
 use App\Http\Controllers\EarnedValueController;
 use App\Http\Controllers\GanttController;
@@ -30,9 +31,11 @@ use App\Http\Controllers\KanbanController;
 use App\Http\Controllers\NarrativeDocumentController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PreferencesController;
+use App\Http\Controllers\ProjectArchiveController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectLogController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\RequirementController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\TaskCommentController;
 use App\Http\Controllers\TaskController;
@@ -181,6 +184,10 @@ Route::middleware('auth')->group(function (): void {
         Route::get('documents/issues/{issue}', [DocumentIssueController::class, 'download'])
             ->name('projects.documents.download');
 
+        // El expediente: todas las versiones emitidas en un solo paquete.
+        Route::get('documents/archive', [ProjectArchiveController::class, 'download'])
+            ->name('projects.documents.archive');
+
         // Los veinticinco documentos que se redactan, sobre un solo controlador.
         // El codigo va en la direccion y lo valida el motor contra el catalogo:
         // uno inventado da 404 en vez de abrir un formulario vacio.
@@ -230,6 +237,24 @@ Route::middleware('auth')->group(function (): void {
             ->name('projects.documents.record.sign');
         Route::delete('documents/record/{code}/{record}', [AcceptanceRecordController::class, 'destroy'])
             ->name('projects.documents.record.destroy');
+
+        // Los documentos que se generan solos. La quinta maquinaria: una
+        // consulta que devuelve renglones y una tabla que los pinta.
+        Route::get('documents/derived/{code}/pdf', [DerivedDocumentController::class, 'pdf'])
+            ->name('projects.documents.derived.pdf');
+        Route::get('documents/derived/{code}', [DerivedDocumentController::class, 'show'])
+            ->name('projects.documents.derived');
+
+        // Requisitos: la unica pieza de la Etapa 7 que necesito datos nuevos.
+        // Un parrafo explica el alcance; una matriz contesta quien entrega que.
+        Route::get('requirements', [RequirementController::class, 'index'])
+            ->name('projects.requirements');
+        Route::post('requirements', [RequirementController::class, 'store'])
+            ->name('projects.requirements.store');
+        Route::put('requirements/{requirement}', [RequirementController::class, 'update'])
+            ->name('projects.requirements.update');
+        Route::delete('requirements/{requirement}', [RequirementController::class, 'destroy'])
+            ->name('projects.requirements.destroy');
         Route::get('reports/gantt', [ReportController::class, 'ganttPrint'])->name('projects.reports.gantt');
         Route::get('reports/csv', [ReportController::class, 'csv'])->name('projects.reports.csv');
 

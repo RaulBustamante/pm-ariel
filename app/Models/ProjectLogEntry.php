@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * Un renglón de cualquiera de los catorce registros del PMI.
@@ -23,6 +24,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * Lo que cambia por tipo vive en `config/pmi_logs.php` y lo resuelve
  * {@see ProjectLog}.
+ *
+ * @property Carbon|null $occurred_on
+ * @property Carbon|null $due_on
  */
 #[Fillable([
     'project_id', 'document_code', 'sequence', 'occurred_on', 'title',

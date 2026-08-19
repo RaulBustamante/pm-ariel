@@ -58,4 +58,9 @@ return [
     'delete_type_code' => 'Type :code to confirm',
     'delete_confirmation_failed' => 'Nothing was deleted: what you typed does not match :code.',
     'deleted' => 'Project :name was deleted.',
+    'planned_finish' => 'Committed date',
+    'planned_finish_help' => 'When it was promised to finish. That is a different thing from the date the plan calculates, and the gap between the two is the conversation worth having early.',
+    'committed_vs_calculated' => 'Committed :committed · the plan calculates :calculated',
+    'over_committed' => 'The plan finishes :days day(s) after what was committed.',
+
 ];

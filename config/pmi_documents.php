@@ -170,8 +170,8 @@ return [
         'stakeholder_engagement_plan' => [
             'group' => 'planning',
             'kind' => 'derived',
-            'state' => 'partial',
-            'source' => 'stakeholders',
+            'state' => 'ready',
+            'source' => null,
         ],
 
         'change_management_plan' => [
@@ -201,7 +201,7 @@ return [
         'requirements_traceability_matrix' => [
             'group' => 'planning',
             'kind' => 'derived',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 
@@ -223,8 +223,8 @@ return [
         'wbs_dictionary' => [
             'group' => 'planning',
             'kind' => 'derived',
-            'state' => 'planned',
-            'source' => 'tasks',
+            'state' => 'ready',
+            'source' => null,
         ],
 
         'activity_list' => [
@@ -237,8 +237,8 @@ return [
         'activity_attributes' => [
             'group' => 'planning',
             'kind' => 'derived',
-            'state' => 'planned',
-            'source' => 'tasks',
+            'state' => 'ready',
+            'source' => null,
         ],
 
         'milestone_list' => [
@@ -272,8 +272,8 @@ return [
         'cost_baseline' => [
             'group' => 'planning',
             'kind' => 'derived',
-            'state' => 'partial',
-            'source' => 'costs',
+            'state' => 'ready',
+            'source' => null,
         ],
 
         'resource_requirements' => [
@@ -286,8 +286,8 @@ return [
         'resource_breakdown_structure' => [
             'group' => 'planning',
             'kind' => 'derived',
-            'state' => 'partial',
-            'source' => 'resources',
+            'state' => 'ready',
+            'source' => null,
         ],
 
         'team_charter' => [
@@ -308,8 +308,8 @@ return [
         'risk_report' => [
             'group' => 'planning',
             'kind' => 'derived',
-            'state' => 'partial',
-            'source' => 'risks',
+            'state' => 'ready',
+            'source' => null,
         ],
 
         'procurement_documentation' => [
@@ -437,8 +437,8 @@ return [
         'schedule_forecasts' => [
             'group' => 'monitoring',
             'kind' => 'derived',
-            'state' => 'partial',
-            'source' => 'schedule',
+            'state' => 'ready',
+            'source' => null,
         ],
 
         'cost_forecasts' => [
@@ -500,21 +500,21 @@ return [
         'requirements_traceability_updates' => [
             'group' => 'monitoring',
             'kind' => 'derived',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 
         'final_project_report' => [
             'group' => 'closing',
             'kind' => 'derived',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 
         'lessons_learned_report' => [
             'group' => 'closing',
             'kind' => 'derived',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 
@@ -552,7 +552,7 @@ return [
         'archived_project_documents' => [
             'group' => 'closing',
             'kind' => 'derived',
-            'state' => 'planned',
+            'state' => 'ready',
             'source' => null,
         ],
 

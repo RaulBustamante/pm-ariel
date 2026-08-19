@@ -35,6 +35,7 @@ final class UpdateProjectRequest extends FormRequest
             'description' => ['nullable', 'string'],
             'org_unit_id' => ['nullable', 'integer', Rule::exists('org_units', 'id')->withoutTrashed()],
             'planned_start' => ['nullable', 'date'],
+            'planned_finish' => ['nullable', 'date'],
             'status' => ['required', Rule::in(['draft', 'active', 'on_hold', 'closed', 'cancelled'])],
             'currency' => ['required', 'string', 'size:3'],
         ];
@@ -46,6 +47,7 @@ final class UpdateProjectRequest extends FormRequest
             'code' => strtoupper(trim((string) $this->input('code'))),
             'org_unit_id' => $this->input('org_unit_id') ?: null,
             'planned_start' => $this->input('planned_start') ?: null,
+            'planned_finish' => $this->input('planned_finish') ?: null,
             'currency' => strtoupper((string) $this->input('currency', 'MXN')),
         ]);
     }

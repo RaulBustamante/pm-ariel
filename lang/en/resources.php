@@ -62,4 +62,6 @@ return [
     'quantity_required' => 'A material is assigned by quantity, not by percentage of a working day.',
     'units_required' => 'The percentage of the working day is required.',
     'updated' => 'Resource updated.',
+    'internal_origin' => 'in-house',
+
 ];

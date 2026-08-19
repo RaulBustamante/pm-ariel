@@ -42,6 +42,19 @@ final class StoreTaskRequest extends FormRequest
             'duration' => ['nullable', 'string', 'max:20'],
             'constraint_type' => ['nullable', Rule::in(array_column(ConstraintType::cases(), 'value'))],
             'constraint_date' => ['nullable', 'date'],
+
+            // Acotado al proyecto: sin eso, un identificador escrito a mano
+            // programaria esta tarea con la jornada de otro cliente.
+            'calendar_id' => [
+                'nullable', 'integer',
+                // Explicito y no `?->`: se distingue <<no hay proyecto en la
+                // ruta>> --que no deberia pasar-- de <<el proyecto no tiene
+                // id>>, y el analisis estatico tipa la ruta como no nula.
+                Rule::exists('calendars', 'id')->where(
+                    'project_id',
+                    $this->route('project') instanceof Project ? $this->route('project')->id : 0,
+                ),
+            ],
             'owner_id' => ['nullable', 'integer', Rule::exists('users', 'id')->withoutTrashed()],
             'cost' => ['nullable', 'numeric', 'min:0'],
 

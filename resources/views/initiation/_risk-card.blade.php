@@ -36,6 +36,14 @@
                 {{ __("initiation.level_{$risk->level()}") }} ({{ $risk->score() }})
             </span>
 
+            {{-- La categoría la escribe el asistente al sugerir riesgos y no se
+                 veía en ninguna pantalla. Un dato que el sistema clasifica y
+                 nunca enseña no existe para quien lo usa — y sirve justo para
+                 agrupar el informe de riesgos. --}}
+            @if ($risk->category)
+                <span class="badge badge-neutral">{{ $risk->category }}</span>
+            @endif
+
             <form method="POST" action="{{ route('projects.risks.destroy', [$project, $risk]) }}"
                   onsubmit="return confirm('{{ __('common.confirm_title') }}')">
                 @csrf

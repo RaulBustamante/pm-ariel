@@ -93,6 +93,11 @@ final class TaskController extends Controller
             'task' => $task,
             'durations' => ProjectDurations::for($project),
             'members' => $project->members()->orderBy('name')->get(),
+            // Los calendarios del proyecto. El motor programa cada tarea con el
+            // suyo desde la Etapa 3 --`calendarsFor()` lee `tasks.calendar_id`--
+            // y no habia forma de escogerlo: un turno de noche o un contratista
+            // con jornada distinta no se podian modelar.
+            'calendars' => $project->calendars()->orderByDesc('is_default')->orderBy('name')->get(),
             'resources' => Resource::query()->where('project_id', $project->id)->orderBy('name')->get(),
             'assignments' => TaskAssignment::query()->with('resource')->where('task_id', $task->id)->get(),
             'attachments' => Attachment::query()->where('task_id', $task->id)->with('uploader')->latest('id')->get(),
@@ -125,6 +130,7 @@ final class TaskController extends Controller
             'duration_minutes' => $request->durationMinutes(),
             'constraint_type' => $request->input('constraint_type'),
             'constraint_date' => $request->input('constraint_date'),
+            'calendar_id' => $request->input('calendar_id'),
             'owner_id' => $request->input('owner_id'),
             'parent_id' => $request->input('parent_id'),
             'sort_order' => (int) Task::query()

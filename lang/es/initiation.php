@@ -239,4 +239,10 @@ return [
     'cannot_approve_incomplete' => 'No se puede aprobar mientras falte algo obligatorio. Revisa la lista de pendientes.',
 
     'suggestion_applied' => 'Borrador aplicado. Revisalo antes de darlo por bueno.',
+    'stakeholder_phone' => 'Telefono',
+    'stakeholder_expectations' => 'Que espera del proyecto',
+    'stakeholder_expectations_help' => 'Sin saber que espera cada quien, la estrategia se decide a ciegas.',
+    'stakeholder_strategy' => 'Que vamos a hacer con esta persona',
+    'stakeholder_strategy_help' => 'Cada cuando informarle, en que decisiones entra, quien le habla. Sale en el paquete de inicio.',
+
 ];

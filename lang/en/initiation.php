@@ -239,4 +239,10 @@ return [
     'cannot_approve_incomplete' => 'It cannot be approved while something required is missing. Check the list of pending items.',
 
     'suggestion_applied' => 'Draft applied. Review it before accepting it.',
+    'stakeholder_phone' => 'Phone',
+    'stakeholder_expectations' => 'What they expect from the project',
+    'stakeholder_expectations_help' => 'Without knowing what each person expects, the strategy is decided blind.',
+    'stakeholder_strategy' => 'What we will do with this person',
+    'stakeholder_strategy_help' => 'How often to update them, which decisions they are in, who talks to them. It appears in the initiation package.',
+
 ];

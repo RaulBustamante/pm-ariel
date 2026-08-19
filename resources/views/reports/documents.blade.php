@@ -127,6 +127,33 @@
         </section>
     @endcan
 
+    {{-- ------------------------------------------------------------------
+         El expediente: todo lo emitido en un solo paquete
+         ------------------------------------------------------------------ --}}
+    <section class="card hud-in mt-4 p-4">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0">
+                <h2 class="card-title">{{ __('archive.title') }}</h2>
+                <p class="mt-1 max-w-3xl text-xs leading-relaxed text-slate-600">{{ __('archive.help') }}</p>
+            </div>
+
+            {{-- El botón solo aparece si hay algo que empacar. Ofrecerlo vacío
+                 hace que alguien descargue un ZIP, lo abra, y solo entonces
+                 descubra que no había nada emitido. --}}
+            @if ($issues->isNotEmpty())
+                <a href="{{ route('projects.documents.archive', $project) }}" class="btn btn-primary btn-sm shrink-0">
+                    {{ __('archive.download') }}
+                </a>
+            @endif
+        </div>
+
+        <p class="mt-2 text-xs text-slate-500">
+            {{ $issues->isEmpty()
+                ? __('archive.empty')
+                : __('archive.count', ['count' => $issues->count()]) }}
+        </p>
+    </section>
+
     <section class="card hud-in mt-4">
         <div class="card-header">
             <h2 class="card-title">{{ __('documents.issued_versions') }}</h2>

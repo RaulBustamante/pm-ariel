@@ -28,6 +28,7 @@
                     <x-form-field name="role_title" :label="__('initiation.stakeholder_role')" />
                     <x-form-field name="organization" :label="__('initiation.stakeholder_organization')" />
                     <x-form-field name="email" type="email" :label="__('initiation.stakeholder_email')" />
+                    <x-form-field name="phone" :label="__('initiation.stakeholder_phone')" />
                 </div>
 
                 <div class="grid gap-4 sm:grid-cols-2">
@@ -35,6 +36,26 @@
                                         :help="__('initiation.stakeholder_power_help')" term="power" />
                     <x-initiation.scale name="interest" :label="__('initiation.stakeholder_interest')"
                                         :help="__('initiation.stakeholder_interest_help')" term="interest" />
+                </div>
+
+                {{-- Qué espera y qué se va a hacer con esta persona.
+                     Las tres columnas —teléfono, expectativas y estrategia—
+                     existían desde la Etapa 2, estaban en las reglas de
+                     validación y **ninguna pantalla las capturaba**. La
+                     estrategia incluso se mostraba en el paquete de inicio, así
+                     que llevaba siete etapas saliendo siempre vacía. --}}
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="space-y-1">
+                        <label for="expectations" class="field-label">{{ __('initiation.stakeholder_expectations') }}</label>
+                        <textarea id="expectations" name="expectations" rows="2" class="field">{{ old('expectations') }}</textarea>
+                        <p class="field-help">{{ __('initiation.stakeholder_expectations_help') }}</p>
+                    </div>
+
+                    <div class="space-y-1">
+                        <label for="engagement_strategy" class="field-label">{{ __('initiation.stakeholder_strategy') }}</label>
+                        <textarea id="engagement_strategy" name="engagement_strategy" rows="2" class="field">{{ old('engagement_strategy') }}</textarea>
+                        <p class="field-help">{{ __('initiation.stakeholder_strategy_help') }}</p>
+                    </div>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-3">

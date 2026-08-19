@@ -62,4 +62,6 @@ return [
     'quantity_required' => 'Un material se asigna en cantidad, no en porcentaje de jornada.',
     'units_required' => 'Hace falta el porcentaje de jornada.',
     'updated' => 'Recurso actualizado.',
+    'internal_origin' => 'de casa',
+
 ];

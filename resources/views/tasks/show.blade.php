@@ -110,6 +110,25 @@
                         <p class="field-help">{{ __('tasks.notes_help') }}</p>
                     </div>
 
+                    {{-- Con qué jornada se programa esta tarea.
+                         El motor lo soporta desde la Etapa 3 y no había forma de
+                         escogerlo, así que un turno de noche o un contratista con
+                         jornada distinta no se podían modelar. --}}
+                    @if ($calendars->count() > 1)
+                        <div class="sm:max-w-[20rem]">
+                            <label for="calendar-field" class="field-label">{{ __('tasks.calendar') }}</label>
+                            <select id="calendar-field" name="calendar_id" class="field">
+                                <option value="">{{ __('tasks.calendar_default') }}</option>
+                                @foreach ($calendars as $calendar)
+                                    <option value="{{ $calendar->id }}" @selected((int) old('calendar_id', $task->calendar_id) === $calendar->id)>
+                                        {{ $calendar->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <p class="field-help">{{ __('tasks.calendar_help') }}</p>
+                        </div>
+                    @endif
+
                     <div>
                         <label for="constraint-date-field" class="field-label">{{ __('tasks.constraint_date') }}</label>
                         <input id="constraint-date-field" type="date" name="constraint_date"

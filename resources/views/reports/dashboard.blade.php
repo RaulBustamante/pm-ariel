@@ -68,6 +68,28 @@
         <div class="card p-4">
             <p class="text-xs text-slate-600">{{ __('dashboard.finish') }}</p>
             <p class="mt-1 text-2xl font-bold text-slate-900">{{ $kpis['finish']?->format('d/m/y') ?? '—' }}</p>
+
+            {{-- La fecha comprometida contra la que calcula el plan.
+                 Son dos cosas distintas y la diferencia entre ellas es la
+                 conversación que hay que tener a tiempo: el motor dice cuándo
+                 acaba esto, no cuándo se prometió que acabaría. --}}
+            @php
+                $committed = $project->planned_finish;
+                $slip = $committed && $kpis['finish']
+                    ? (int) $committed->startOfDay()->diffInDays($kpis['finish'], false)
+                    : null;
+            @endphp
+
+            @if ($committed)
+                <p class="mt-2 text-[11px] {{ ($slip ?? 0) > 0 ? 'font-medium text-[var(--color-badge-danger-fg)]' : 'text-slate-500' }}">
+                    @if (($slip ?? 0) > 0)
+                        {{ __('projects.over_committed', ['days' => $slip]) }}
+                    @else
+                        {{ __('projects.planned_finish') }}: {{ $committed->format('d/m/y') }}
+                    @endif
+                </p>
+            @endif
+
             <p class="mt-2 text-[11px] text-slate-500">
                 {{ __('tasks.critical_path') }}: {{ $kpis['critical'] }}
             </p>

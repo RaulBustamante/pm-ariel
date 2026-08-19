@@ -58,4 +58,9 @@ return [
     'delete_type_code' => 'Escribe :code para confirmar',
     'delete_confirmation_failed' => 'No se borro nada: lo que escribiste no coincide con :code.',
     'deleted' => 'Se borro el proyecto :name.',
+    'planned_finish' => 'Fecha comprometida',
+    'planned_finish_help' => 'Cuando se prometio que acabaria. Es otra cosa que la fecha que calcula el plan, y la diferencia entre las dos es la conversacion que hay que tener a tiempo.',
+    'committed_vs_calculated' => 'Comprometido :committed · el plan calcula :calculated',
+    'over_committed' => 'El plan acaba :days dia(s) despues de lo comprometido.',
+
 ];

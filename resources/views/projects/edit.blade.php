@@ -50,6 +50,18 @@
                         <label for="start-field" class="field-label">{{ __('tasks.project_start') }}</label>
                         <input id="start-field" type="date" name="planned_start"
                                value="{{ old('planned_start', $project->planned_start?->format('Y-m-d')) }}" class="field">
+                    </div>
+
+                    {{-- La fecha comprometida, que es otra cosa que la calculada.
+                         La columna existía desde la Etapa 3 y nadie la escribía ni
+                         la leía. El motor dice cuándo acaba el plan; esto dice
+                         cuándo se prometió que acabaría, y la diferencia entre las
+                         dos es la conversación que hay que tener a tiempo. --}}
+                    <div>
+                        <label for="finish-field" class="field-label">{{ __('projects.planned_finish') }}</label>
+                        <input id="finish-field" type="date" name="planned_finish"
+                               value="{{ old('planned_finish', $project->planned_finish?->format('Y-m-d')) }}" class="field">
+                        <p class="field-help">{{ __('projects.planned_finish_help') }}</p>
                         {{-- Se avisa antes, no después: cambiar esta fecha mueve
                              todas las tareas del proyecto. --}}
                         <p class="field-help mt-1">{{ __('projects.start_help') }}</p>

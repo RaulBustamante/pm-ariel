@@ -143,4 +143,8 @@ return [
     'changed' => 'cambió',
     'parent' => 'Paquete',
 
+    'calendar' => 'Jornada de esta tarea',
+    'calendar_default' => 'La del proyecto',
+    'calendar_help' => 'Solo si esta tarea se trabaja con un horario distinto: un turno de noche, un contratista con otra jornada.',
+
 ];

@@ -143,4 +143,8 @@ return [
     'changed' => 'changed',
     'parent' => 'Package',
 
+    'calendar' => 'Working hours for this task',
+    'calendar_default' => "The project's",
+    'calendar_help' => 'Only if this task runs on different hours: a night shift, a contractor on another schedule.',
+
 ];

@@ -49,6 +49,9 @@ final class DocumentCatalogue
         'project_schedule' => 'projects.gantt',
         'schedule_baseline' => 'projects.edit',
         'cost_estimates' => 'projects.analysis',
+        'archived_project_documents' => 'projects.documents',
+        'requirements_traceability_matrix' => 'projects.requirements',
+        'requirements_traceability_updates' => 'projects.requirements',
         'earned_value_report' => 'projects.earned-value',
         'cost_forecasts' => 'projects.earned-value',
         'resource_requirements' => 'projects.resources.index',
@@ -134,6 +137,13 @@ final class DocumentCatalogue
         // Y las dos actas, que cierran la cuarta especie.
         if ((string) config("pmi_documents.catalogue.{$code}.kind") === 'record') {
             return route('projects.documents.record', [$project, $code]);
+        }
+
+        // Y los derivados que el motor sabe armar. Van **antes** de `ROUTES`
+        // para que agregar uno nuevo no obligue a tocar esta clase: si el motor
+        // lo conoce, ya tiene pantalla.
+        if (app(DerivedDocument::class)->handles($code)) {
+            return route('projects.documents.derived', [$project, $code]);
         }
 
         $route = self::ROUTES[$code] ?? null;
