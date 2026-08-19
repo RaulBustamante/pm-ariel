@@ -1,4 +1,4 @@
-name: pm-ariel
+version: "2.4"
 
 x-app: &app
   build:
@@ -92,4 +92,3 @@ volumes:
 networks:
   app_internal:
     internal: true
-
