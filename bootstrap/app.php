@@ -17,6 +17,18 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // The public TLS proxy forwards requests to the internal nginx service.
+        // Preserve the original HTTPS scheme so redirects and secure cookies
+        // remain correct in production.
+        $middleware->trustProxies(
+            at: '*',
+            headers: Request::HEADER_X_FORWARDED_FOR
+                | Request::HEADER_X_FORWARDED_HOST
+                | Request::HEADER_X_FORWARDED_PORT
+                | Request::HEADER_X_FORWARDED_PROTO
+                | Request::HEADER_X_FORWARDED_PREFIX,
+        );
+
         // En el grupo web completo, no en rutas sueltas: así ningún módulo que
         // se agregue después puede saltarse el cambio de contraseña temporal ni
         // seguir atendiendo a una cuenta ya desactivada.
