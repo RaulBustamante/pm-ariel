@@ -42,6 +42,8 @@ final class StoreTaskRequest extends FormRequest
             'duration' => ['nullable', 'string', 'max:20'],
             'constraint_type' => ['nullable', Rule::in(array_column(ConstraintType::cases(), 'value'))],
             'constraint_date' => ['nullable', 'date'],
+            'requested_start' => ['nullable', 'date'],
+            'deadline' => ['nullable', 'date'],
 
             // Acotado al proyecto: sin eso, un identificador escrito a mano
             // programaria esta tarea con la jornada de otro cliente.
@@ -92,18 +94,37 @@ final class StoreTaskRequest extends FormRequest
                 if ($type !== null && $type !== '' && ConstraintType::from($type)->needsDate() && blank($this->input('constraint_date'))) {
                     $validator->errors()->add('constraint_date', __('tasks.constraint_needs_date'));
                 }
+
+                if ($this->filled('requested_start') && $this->filled('deadline')) {
+                    $start = strtotime((string) $this->input('requested_start'));
+                    $deadline = strtotime((string) $this->input('deadline'));
+
+                    if ($start !== false && $deadline !== false && $deadline < $start) {
+                        $validator->errors()->add('deadline', __('tasks.deadline_before_start'));
+                    }
+                }
             },
         ];
     }
 
     protected function prepareForValidation(): void
     {
-        $this->merge([
+        $normalized = [
             'owner_id' => $this->input('owner_id') ?: null,
             'parent_id' => $this->input('parent_id') ?: null,
             'constraint_type' => $this->input('constraint_type') ?: ConstraintType::AsSoonAsPossible->value,
             'constraint_date' => $this->input('constraint_date') ?: null,
-        ]);
+        ];
+
+        if ($this->exists('requested_start')) {
+            $normalized['requested_start'] = $this->input('requested_start') ?: null;
+        }
+
+        if ($this->exists('deadline')) {
+            $normalized['deadline'] = $this->input('deadline') ?: null;
+        }
+
+        $this->merge($normalized);
     }
 
     public function durationMinutes(): int

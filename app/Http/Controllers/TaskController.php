@@ -130,6 +130,8 @@ final class TaskController extends Controller
             'duration_minutes' => $request->durationMinutes(),
             'constraint_type' => $request->input('constraint_type'),
             'constraint_date' => $request->input('constraint_date'),
+            'requested_start' => $request->input('requested_start'),
+            'deadline' => $request->input('deadline'),
             'calendar_id' => $request->input('calendar_id'),
             'owner_id' => $request->input('owner_id'),
             'parent_id' => $request->input('parent_id'),
@@ -152,6 +154,12 @@ final class TaskController extends Controller
             'duration_minutes' => $request->durationMinutes(),
             'constraint_type' => $request->input('constraint_type'),
             'constraint_date' => $request->input('constraint_date'),
+            'requested_start' => $request->has('requested_start')
+                ? $request->input('requested_start')
+                : $task->requested_start,
+            'deadline' => $request->has('deadline')
+                ? $request->input('deadline')
+                : $task->deadline,
             'owner_id' => $request->input('owner_id'),
             // Como el costo real: `has` y no `??`, para que vaciar las notas
             // de verdad las vacie. La Lista no manda este campo, y con `??`

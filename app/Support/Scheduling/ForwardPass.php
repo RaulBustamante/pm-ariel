@@ -73,6 +73,13 @@ final class ForwardPass
             // el proyecto apareciera empezando antes de existir.
             $start = $this->later($start, $projectStart);
 
+            // Una fecha elegida por la persona funciona como "no antes de":
+            // respeta su decisión sin romper una dependencia que obligue a
+            // comenzar después.
+            if ($task->requestedStart !== null) {
+                $start = $this->later($start, $task->requestedStart);
+            }
+
             $start = $this->applyConstraint($task, $start, $calendar);
 
             // Las tareas con trabajo real no empiezan fuera de la jornada; los

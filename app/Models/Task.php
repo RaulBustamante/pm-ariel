@@ -30,6 +30,8 @@ use Illuminate\Support\Carbon;
  * texto si no se declaran aquí.
  *
  * @property Carbon|null $constraint_date
+ * @property Carbon|null $requested_start
+ * @property Carbon|null $deadline
  * @property Carbon|null $early_start
  * @property Carbon|null $early_finish
  * @property Carbon|null $late_start
@@ -39,7 +41,7 @@ use Illuminate\Support\Carbon;
  */
 #[Fillable([
     'project_id', 'parent_id', 'name', 'description', 'duration_minutes',
-    'constraint_type', 'constraint_date', 'calendar_id', 'sort_order',
+    'constraint_type', 'constraint_date', 'requested_start', 'deadline', 'calendar_id', 'sort_order',
     'cost', 'actual_cost', 'percent_complete', 'actual_start', 'actual_finish', 'owner_id',
 ])]
 class Task extends Model
@@ -55,6 +57,8 @@ class Task extends Model
             'duration_minutes' => 'integer',
             'sort_order' => 'integer',
             'constraint_date' => 'datetime',
+            'requested_start' => 'datetime',
+            'deadline' => 'datetime',
             'early_start' => 'datetime',
             'early_finish' => 'datetime',
             'late_start' => 'datetime',
@@ -257,6 +261,12 @@ class Task extends Model
             sortOrder: (int) $this->sort_order,
             cost: (float) $this->cost,
             percentComplete: (float) $this->percent_complete,
+            requestedStart: $this->requested_start instanceof DateTimeInterface
+                ? DateTimeImmutable::createFromInterface($this->requested_start)
+                : null,
+            deadline: $this->deadline instanceof DateTimeInterface
+                ? DateTimeImmutable::createFromInterface($this->deadline)->setTime(23, 59, 59)
+                : null,
         );
     }
 }

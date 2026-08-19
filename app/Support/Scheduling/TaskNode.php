@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Support\Scheduling;
 
+use DateTimeImmutable;
 use InvalidArgumentException;
 
 /**
@@ -30,6 +31,10 @@ final readonly class TaskNode
         /** Solo para el rollup de resumen: costo y avance de la hoja. */
         public float $cost = 0.0,
         public float $percentComplete = 0.0,
+        /** Inicio elegido por la persona; las dependencias aún pueden empujarlo. */
+        public ?DateTimeImmutable $requestedStart = null,
+        /** Fecha máxima comprometida para terminar. */
+        public ?DateTimeImmutable $deadline = null,
     ) {
         if ($id === '') {
             throw new InvalidArgumentException('Una tarea necesita identificador.');

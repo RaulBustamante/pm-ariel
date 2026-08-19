@@ -129,6 +129,23 @@
                         </div>
                     @endif
 
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        <div>
+                            <label for="task-start-field" class="field-label">{{ __('tasks.requested_start') }}</label>
+                            <input id="task-start-field" type="date" name="requested_start"
+                                   value="{{ old('requested_start', $task->requested_start?->format('Y-m-d')) }}" class="field">
+                            <p class="field-help">{{ __('tasks.requested_start_help') }}</p>
+                        </div>
+                        <div>
+                            <label for="task-deadline-field" class="field-label">{{ __('tasks.deadline') }}</label>
+                            <input id="task-deadline-field" type="date" name="deadline"
+                                   value="{{ old('deadline', $task->deadline?->format('Y-m-d')) }}"
+                                   min="{{ old('requested_start', $task->requested_start?->format('Y-m-d')) }}" class="field">
+                            @error('deadline') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
+                            <p class="field-help">{{ __('tasks.deadline_help') }}</p>
+                        </div>
+                    </div>
+
                     <div>
                         <label for="constraint-date-field" class="field-label">{{ __('tasks.constraint_date') }}</label>
                         <input id="constraint-date-field" type="date" name="constraint_date"
@@ -578,5 +595,22 @@
             select.addEventListener('change', apply);
             apply();
         });
+
+        (() => {
+            const start = document.getElementById('task-start-field');
+            const deadline = document.getElementById('task-deadline-field');
+
+            if (!start || !deadline) return;
+
+            const syncDeadline = () => {
+                deadline.min = start.value;
+                if (deadline.value && start.value && deadline.value < start.value) {
+                    deadline.value = start.value;
+                }
+            };
+
+            start.addEventListener('change', syncDeadline);
+            syncDeadline();
+        })();
     </script>
 @endpush

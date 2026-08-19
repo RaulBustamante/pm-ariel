@@ -428,6 +428,40 @@ final class SchedulerScenariosTest extends TestCase
         $this->assertFinish($result, 'B', '2026-01-12 18:00');
     }
 
+    #[Test]
+    public function a_requested_start_respects_dependencies_and_a_deadline_exposes_conflict(): void
+    {
+        $result = $this->calculate(
+            [
+                $this->task('A', days: 3),
+                new TaskNode(
+                    id: 'B',
+                    durationMinutes: 2 * self::DAY,
+                    requestedStart: $this->at('2026-01-06 09:00'),
+                    deadline: $this->at('2026-01-09 23:59:59'),
+                ),
+            ],
+            [DependencyLink::finishToStart('A', 'B')],
+        );
+
+        // La persona pidió martes, pero A termina el miércoles: B reacciona a
+        // la dependencia y comienza el jueves, sin violarla.
+        $this->assertStart($result, 'B', '2026-01-08 09:00');
+        $this->assertFinish($result, 'B', '2026-01-09 18:00');
+        $this->assertSame(0, $result->task('B')->totalFloatMinutes);
+
+        $late = $this->calculate([
+            new TaskNode(
+                id: 'C',
+                durationMinutes: 5 * self::DAY,
+                requestedStart: $this->at('2026-01-08 09:00'),
+                deadline: $this->at('2026-01-09 23:59:59'),
+            ),
+        ]);
+
+        $this->assertSame(-3 * self::DAY, $late->task('C')->totalFloatMinutes);
+    }
+
     // ---------------------------------------------------------------- 24 a 28
 
     #[Test]

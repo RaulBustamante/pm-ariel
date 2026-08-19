@@ -30,6 +30,11 @@ return [
     'cost' => 'Costo',
     'constraint' => 'Restricción',
     'constraint_date' => 'Fecha de la restricción',
+    'requested_start' => 'Fecha de inicio',
+    'requested_start_help' => 'La tarea no comenzará antes de esta fecha. Si una dependencia termina después, el inicio se recorre automáticamente.',
+    'deadline' => 'Fecha límite',
+    'deadline_help' => 'Compromiso máximo de cierre. Si el plan ya no llega, la tarea mostrará holgura negativa.',
+    'deadline_before_start' => 'La fecha límite no puede ser anterior a la fecha de inicio.',
     'row' => 'Renglón',
 
     'created' => 'Tarea agregada y plan recalculado.',

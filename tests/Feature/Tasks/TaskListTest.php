@@ -77,6 +77,54 @@ final class TaskListTest extends TestCase
         $this->assertSame('1', $task->wbs_code);
     }
 
+    #[Test]
+    public function a_task_can_choose_its_start_and_a_congruent_deadline(): void
+    {
+        $this->actingAs($this->manager)->post(route('projects.tasks.store', $this->project), [
+            'name' => 'Inicio elegido',
+            'duration' => '2d',
+            'requested_start' => '2026-01-12',
+            'deadline' => '2026-01-14',
+        ])->assertRedirect();
+
+        $task = Task::query()->where('name', 'Inicio elegido')->firstOrFail();
+
+        $this->assertSame('2026-01-12', $task->requested_start?->format('Y-m-d'));
+        $this->assertSame('2026-01-14', $task->deadline?->format('Y-m-d'));
+        $this->assertSame('2026-01-12', $task->early_start?->format('Y-m-d'));
+
+        $this->actingAs($this->manager)->post(route('projects.tasks.store', $this->project), [
+            'name' => 'Fechas incongruentes',
+            'duration' => '1d',
+            'requested_start' => '2026-01-20',
+            'deadline' => '2026-01-19',
+        ])->assertSessionHasErrors('deadline');
+    }
+
+    #[Test]
+    public function an_inline_update_does_not_erase_the_requested_dates(): void
+    {
+        $task = new Task;
+        $task->fill([
+            'project_id' => $this->project->id,
+            'name' => 'Con fechas',
+            'duration_minutes' => self::DAY,
+            'requested_start' => '2026-01-12',
+            'deadline' => '2026-01-20',
+            'sort_order' => 1,
+        ]);
+        $task->save();
+
+        $this->actingAs($this->manager)->put(route('projects.tasks.update', [$this->project, $task]), [
+            'name' => 'Con fechas editada',
+            'duration' => '1d',
+        ])->assertRedirect();
+
+        $task->refresh();
+        $this->assertSame('2026-01-12', $task->requested_start?->format('Y-m-d'));
+        $this->assertSame('2026-01-20', $task->deadline?->format('Y-m-d'));
+    }
+
     /** El campo acepta lo que la gente ya escribe sin pensarlo. */
     #[Test]
     public function the_duration_field_understands_how_people_write(): void

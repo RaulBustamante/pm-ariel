@@ -67,6 +67,13 @@ final class BackwardPass
             $finish = $latestFinish ?? $projectFinish;
             $finish = $this->applyConstraint($task, $finish, $calendar);
 
+            // La fecha límite no adelanta artificialmente el plan temprano:
+            // aprieta el recorrido tardío y, si ya no se puede cumplir, genera
+            // holgura negativa para que el conflicto quede visible.
+            if ($task->deadline !== null) {
+                $finish = $this->earlier($finish, $task->deadline);
+            }
+
             $lateFinishes[$id] = $finish;
             $lateStarts[$id] = $calendar->subtractWorkingMinutes($finish, $task->durationMinutes);
         }

@@ -30,6 +30,11 @@ return [
     'cost' => 'Cost',
     'constraint' => 'Constraint',
     'constraint_date' => 'Constraint date',
+    'requested_start' => 'Start date',
+    'requested_start_help' => 'The task will not start before this date. If a dependency ends later, the start moves automatically.',
+    'deadline' => 'Deadline',
+    'deadline_help' => 'Latest committed finish. If the plan can no longer meet it, the task shows negative float.',
+    'deadline_before_start' => 'The deadline cannot be before the start date.',
     'row' => 'Row',
 
     'created' => 'Task added and plan recalculated.',
