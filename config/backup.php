@@ -67,6 +67,7 @@ return [
     */
 
     'mysqldump_path' => env('BACKUP_MYSQLDUMP_PATH', 'mysqldump'),
+    'mysql_ssl' => (bool) env('BACKUP_MYSQL_SSL', true),
     'git_path' => env('BACKUP_GIT_PATH', 'git'),
 
     /*

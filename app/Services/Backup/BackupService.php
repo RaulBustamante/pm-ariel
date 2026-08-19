@@ -126,11 +126,12 @@ final class BackupService
 
         try {
             $this->files->put($credentials, sprintf(
-                "[client]\nuser=%s\npassword=\"%s\"\nhost=%s\nport=%s\n",
+                "[client]\nuser=%s\npassword=\"%s\"\nhost=%s\nport=%s\n%s",
                 $config['username'],
                 $config['password'],
                 $config['host'],
                 $config['port'],
+                config('backup.mysql_ssl', true) ? '' : "skip-ssl\n",
             ));
 
             $process = new Process([
