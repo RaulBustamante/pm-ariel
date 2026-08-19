@@ -13,6 +13,7 @@ x-app: &app
     - /opt/pm-ariel/backups:/backups
   networks:
     - app_internal
+    - app_egress
 
 services:
   app:
@@ -92,3 +93,4 @@ volumes:
 networks:
   app_internal:
     internal: true
+  app_egress: {}
