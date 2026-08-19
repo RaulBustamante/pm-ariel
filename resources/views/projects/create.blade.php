@@ -85,11 +85,22 @@
         <fieldset class="space-y-2 border-t border-slate-100 pt-5">
             <legend class="text-sm font-semibold text-slate-900">{{ __('wizard.step_when') }}</legend>
 
-            <div class="max-w-xs">
-                <label for="start-field" class="field-label">{{ __('tasks.project_start') }}</label>
-                <input id="start-field" type="date" name="planned_start" class="field"
-                       value="{{ old('planned_start', now()->startOfWeek()->addWeek()->format('Y-m-d')) }}">
-                <p class="field-help mt-1">{{ __('wizard.step_when_help') }}</p>
+            <div class="grid max-w-2xl gap-4 sm:grid-cols-2">
+                <div>
+                    <label for="start-field" class="field-label">{{ __('tasks.project_start') }}</label>
+                    <input id="start-field" type="date" name="planned_start" class="field"
+                           value="{{ old('planned_start') }}" required>
+                    @error('planned_start') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
+                    <p class="field-help mt-1">{{ __('wizard.step_when_help') }}</p>
+                </div>
+
+                <div>
+                    <label for="finish-field" class="field-label">{{ __('projects.planned_finish') }}</label>
+                    <input id="finish-field" type="date" name="planned_finish" class="field"
+                           value="{{ old('planned_finish') }}" min="{{ old('planned_start') }}">
+                    @error('planned_finish') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
+                    <p class="field-help mt-1">{{ __('projects.planned_finish_help') }}</p>
+                </div>
             </div>
         </fieldset>
 
@@ -119,3 +130,24 @@
         </div>
     </form>
 @endsection
+
+@push('scripts')
+    <script>
+        (() => {
+            const start = document.getElementById('start-field');
+            const finish = document.getElementById('finish-field');
+
+            if (!start || !finish) return;
+
+            const syncFinish = () => {
+                finish.min = start.value;
+                if (finish.value && start.value && finish.value < start.value) {
+                    finish.value = start.value;
+                }
+            };
+
+            start.addEventListener('change', syncFinish);
+            syncFinish();
+        })();
+    </script>
+@endpush

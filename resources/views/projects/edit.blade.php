@@ -49,7 +49,8 @@
                     <div>
                         <label for="start-field" class="field-label">{{ __('tasks.project_start') }}</label>
                         <input id="start-field" type="date" name="planned_start"
-                               value="{{ old('planned_start', $project->planned_start?->format('Y-m-d')) }}" class="field">
+                               value="{{ old('planned_start', $project->planned_start?->format('Y-m-d')) }}" class="field" required>
+                        @error('planned_start') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
                     </div>
 
                     {{-- La fecha comprometida, que es otra cosa que la calculada.
@@ -60,7 +61,9 @@
                     <div>
                         <label for="finish-field" class="field-label">{{ __('projects.planned_finish') }}</label>
                         <input id="finish-field" type="date" name="planned_finish"
-                               value="{{ old('planned_finish', $project->planned_finish?->format('Y-m-d')) }}" class="field">
+                               value="{{ old('planned_finish', $project->planned_finish?->format('Y-m-d')) }}"
+                               min="{{ old('planned_start', $project->planned_start?->format('Y-m-d')) }}" class="field">
+                        @error('planned_finish') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
                         <p class="field-help">{{ __('projects.planned_finish_help') }}</p>
                         {{-- Se avisa antes, no después: cambiar esta fecha mueve
                              todas las tareas del proyecto. --}}
@@ -220,3 +223,24 @@
         </section>
     @endcan
 @endsection
+
+@push('scripts')
+    <script>
+        (() => {
+            const start = document.getElementById('start-field');
+            const finish = document.getElementById('finish-field');
+
+            if (!start || !finish) return;
+
+            const syncFinish = () => {
+                finish.min = start.value;
+                if (finish.value && start.value && finish.value < start.value) {
+                    finish.value = start.value;
+                }
+            };
+
+            start.addEventListener('change', syncFinish);
+            syncFinish();
+        })();
+    </script>
+@endpush

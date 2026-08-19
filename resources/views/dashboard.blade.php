@@ -256,5 +256,7 @@
                 </ul>
             </section>
         @endif
+
+        @include('dashboard._team-activities')
     @endif
 @endsection

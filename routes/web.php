@@ -41,6 +41,7 @@ use App\Http\Controllers\TaskCommentController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TaskDependencyController;
 use App\Http\Controllers\TaskImportController;
+use App\Http\Controllers\TeamActivityController;
 use App\Support\Initiation\InitiationStep;
 use Illuminate\Support\Facades\Route;
 
@@ -67,6 +68,7 @@ Route::middleware('auth')->group(function (): void {
     Route::put('change-password', [PasswordChangeController::class, 'update'])->name('password.change.update');
 
     Route::get('dashboard', [HomeController::class, 'index'])->name('dashboard');
+    Route::get('team-activities', [TeamActivityController::class, 'index'])->name('team-activities.index');
 
     Route::get('onboarding', [OnboardingController::class, 'show'])->name('onboarding');
     Route::post('onboarding/demo', [OnboardingController::class, 'loadDemo'])->name('onboarding.demo.store');

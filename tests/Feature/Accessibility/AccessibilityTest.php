@@ -89,6 +89,7 @@ final class AccessibilityTest extends TestCase
     {
         return [
             route('dashboard'),
+            route('team-activities.index'),
             route('onboarding'),
             route('preferences.edit'),
             route('projects.index'),
@@ -142,7 +143,7 @@ final class AccessibilityTest extends TestCase
             'tasks.', 'gantt.', 'kanban.', 'calendar.', 'calendars.', 'advisor.',
             'projects.', 'initiation.', 'dashboard.', 'reports.', 'filters.',
             'onboarding.', 'shortcuts.', 'attachments.', 'import.', 'wizard.',
-            'org_units.', 'hierarchy.', 'glossary.', 'errors.', 'constraints.',
+            'org_units.', 'hierarchy.', 'glossary.', 'errors.', 'constraints.', 'team.',
         ];
 
         foreach ($this->screens() as $url) {
@@ -153,8 +154,8 @@ final class AccessibilityTest extends TestCase
             $visible = strip_tags($content);
 
             foreach ($prefixes as $prefix) {
-                $this->assertStringNotContainsString(
-                    $prefix,
+                $this->assertDoesNotMatchRegularExpression(
+                    '/(?<![A-Za-z0-9_])'.preg_quote($prefix, '/').'[A-Za-z0-9_.-]+/',
                     $visible,
                     "Se ve una clave sin traducir que empieza con «{$prefix}» en {$url}",
                 );

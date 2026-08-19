@@ -88,6 +88,7 @@ final class ProjectController extends Controller
                 'description' => $request->input('description'),
                 'org_unit_id' => $request->input('org_unit_id'),
                 'planned_start' => $request->input('planned_start'),
+                'planned_finish' => $request->input('planned_finish'),
             ],
             $owner,
             $template,

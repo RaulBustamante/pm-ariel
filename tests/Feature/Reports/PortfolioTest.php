@@ -15,6 +15,7 @@ use App\Services\Scheduling\ProjectScheduler;
 use App\Support\Reporting\Portfolio;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -175,6 +176,57 @@ final class PortfolioTest extends TestCase
                 );
             }
         }
+    }
+
+    #[Test]
+    public function the_home_and_team_view_show_only_the_reporting_line_activities(): void
+    {
+        $project = $this->project('EQP-1', 0);
+        $report = User::factory()->create(['name' => 'Rodrigo Equipo', 'is_active' => true, 'must_change_password' => false]);
+        $outsider = User::factory()->create(['name' => 'Persona Externa', 'is_active' => true, 'must_change_password' => false]);
+
+        DB::table('user_hierarchy')->insert([
+            'manager_id' => $this->manager->id,
+            'subordinate_id' => $report->id,
+            'effective_from' => now()->toDateString(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        app(\App\Support\Visibility\VisibilityScope::class)->flush();
+
+        $reportTask = new Task;
+        $reportTask->fill([
+            'project_id' => $project->id,
+            'name' => 'Actividad de Rodrigo',
+            'owner_id' => $report->id,
+            'duration_minutes' => self::DAY,
+            'sort_order' => 1,
+        ]);
+        $reportTask->forceFill(['early_start' => now(), 'early_finish' => now()->addDay()])->save();
+
+        $outsideTask = new Task;
+        $outsideTask->fill([
+            'project_id' => $project->id,
+            'name' => 'Actividad externa',
+            'owner_id' => $outsider->id,
+            'duration_minutes' => self::DAY,
+            'sort_order' => 2,
+        ]);
+        $outsideTask->forceFill(['early_start' => now(), 'early_finish' => now()->addDay()])->save();
+
+        $this->actingAs($this->manager)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee(__('team.dashboard_title'))
+            ->assertSee('Actividad de Rodrigo')
+            ->assertDontSee('Actividad externa');
+
+        $this->actingAs($this->manager)
+            ->get(route('team-activities.index'))
+            ->assertOk()
+            ->assertSee('Rodrigo Equipo')
+            ->assertSee('Actividad de Rodrigo')
+            ->assertDontSee('Actividad externa');
     }
 
     // ------------------------------------------------- Quién tocó qué

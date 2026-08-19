@@ -63,6 +63,7 @@ final class InitiationWalkthroughTest extends TestCase
         $this->actingAs($manager)
             ->post(route('projects.store'), [
                 'code' => 'INV-01',
+                'planned_start' => '2026-04-06',
                 'name' => 'Inventario de refacciones',
                 'description' => 'Control de refacciones críticas',
             ])

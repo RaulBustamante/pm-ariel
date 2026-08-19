@@ -12,6 +12,7 @@ use App\Services\Advisor\ProjectAdvisor;
 use App\Support\Reporting\MyWeek;
 use App\Support\Reporting\Portfolio;
 use App\Support\Reporting\ProjectDashboard;
+use App\Support\Reporting\TeamActivities;
 use App\Support\Visibility\VisibilityScope;
 use Illuminate\View\View;
 
@@ -28,6 +29,7 @@ final class HomeController extends Controller
         private readonly ProjectAdvisor $advisor,
         private readonly MyWeek $week,
         private readonly Portfolio $portfolio,
+        private readonly TeamActivities $teamActivities,
     ) {}
 
     public function index(VisibilityScope $visibility): View
@@ -70,6 +72,11 @@ final class HomeController extends Controller
         $withCosts = $projects->isNotEmpty()
             && $projects->every(fn (Project $project): bool => $viewer->can('viewCosts', $project));
 
+        $teamUserIds = $this->teamActivities->userIds($viewer, $visibility);
+        $teamQuery = $this->teamActivities->query($viewer, $visibility)
+            ->where('percent_complete', '<', 100);
+        $teamActivitiesTotal = (clone $teamQuery)->count();
+
         return view('dashboard', [
             // Todos los proyectos en un renglón cada uno. Las tarjetas
             // contestaban «¿cómo va este?» doce veces; esto contesta «¿cómo
@@ -82,6 +89,13 @@ final class HomeController extends Controller
             // pregunta con la que se abre el sistema en la mañana, y antes
             // obligaba a entrar proyecto por proyecto a armarla de memoria.
             'week' => $this->week->for($viewer, $projects),
+            'teamMembersCount' => count($teamUserIds),
+            'teamActivitiesTotal' => $teamActivitiesTotal,
+            'teamActivities' => $teamQuery
+                ->orderByRaw('early_finish IS NULL')
+                ->orderBy('early_finish')
+                ->limit(12)
+                ->get(),
             'projects' => $projects->map(function (Project $project) use ($findings): array {
                 $kpis = $this->dashboard->kpis($project);
 

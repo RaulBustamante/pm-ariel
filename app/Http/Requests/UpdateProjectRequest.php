@@ -34,8 +34,8 @@ final class UpdateProjectRequest extends FormRequest
             ],
             'description' => ['nullable', 'string'],
             'org_unit_id' => ['nullable', 'integer', Rule::exists('org_units', 'id')->withoutTrashed()],
-            'planned_start' => ['nullable', 'date'],
-            'planned_finish' => ['nullable', 'date'],
+            'planned_start' => ['required', 'date'],
+            'planned_finish' => ['nullable', 'date', 'after_or_equal:planned_start'],
             'status' => ['required', Rule::in(['draft', 'active', 'on_hold', 'closed', 'cancelled'])],
             'currency' => ['required', 'string', 'size:3'],
         ];

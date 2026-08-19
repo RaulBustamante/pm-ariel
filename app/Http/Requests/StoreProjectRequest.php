@@ -42,7 +42,8 @@ final class StoreProjectRequest extends FormRequest
             'members.*' => ['integer', Rule::exists('users', 'id')->withoutTrashed()],
 
             // Paso 3 — cuándo
-            'planned_start' => ['nullable', 'date'],
+            'planned_start' => ['required', 'date'],
+            'planned_finish' => ['nullable', 'date', 'after_or_equal:planned_start'],
 
             // Paso 4 — cómo se mide. Los entregables entran como tareas de
             // primer nivel, que es lo que evita terminar el asistente en una
@@ -85,6 +86,7 @@ final class StoreProjectRequest extends FormRequest
             'code' => strtoupper(trim((string) $this->input('code'))),
             'org_unit_id' => $this->input('org_unit_id') ?: null,
             'template_id' => $this->input('template_id') ?: null,
+            'planned_finish' => $this->input('planned_finish') ?: null,
         ]);
     }
 }

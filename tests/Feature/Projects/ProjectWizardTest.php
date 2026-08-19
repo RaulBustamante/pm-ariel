@@ -128,6 +128,33 @@ final class ProjectWizardTest extends TestCase
     }
 
     #[Test]
+    public function the_start_is_chosen_and_the_committed_date_cannot_precede_it(): void
+    {
+        $this->actingAs($this->manager)
+            ->post(route('projects.store'), $this->payload([
+                'planned_start' => '',
+                'planned_finish' => '2026-04-01',
+            ]))
+            ->assertSessionHasErrors('planned_start');
+
+        $this->actingAs($this->manager)
+            ->post(route('projects.store'), $this->payload([
+                'planned_finish' => '2026-04-05',
+            ]))
+            ->assertSessionHasErrors('planned_finish');
+
+        $this->actingAs($this->manager)
+            ->post(route('projects.store'), $this->payload([
+                'planned_finish' => '2026-04-30',
+            ]))
+            ->assertRedirect();
+
+        $project = Project::query()->where('code', 'INV-9')->firstOrFail();
+
+        $this->assertSame('2026-04-30', $project->planned_finish?->format('Y-m-d'));
+    }
+
+    #[Test]
     public function the_chosen_members_can_edit_the_plan(): void
     {
         $other = User::factory()->create(['is_active' => true]);
