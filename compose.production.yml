@@ -44,6 +44,7 @@ services:
       - app_storage:/var/www/html/storage:ro
     networks:
       - app_internal
+      - proxy_access
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1/up"]
       interval: 15s
@@ -94,3 +95,4 @@ networks:
   app_internal:
     internal: true
   app_egress: {}
+  proxy_access: {}
