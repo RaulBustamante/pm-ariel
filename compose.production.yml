@@ -1,5 +1,3 @@
-version: "2.4"
-
 x-app: &app
   build:
     context: .
@@ -8,6 +6,8 @@ x-app: &app
   env_file:
     - .env.production
   restart: unless-stopped
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
   volumes:
     - app_storage:/var/www/html/storage
     - /opt/pm-ariel/backups:/backups
@@ -20,9 +20,6 @@ services:
     <<: *app
     environment:
       RUN_MIGRATIONS: "true"
-    depends_on:
-      db:
-        condition: service_healthy
     healthcheck:
       test: ["CMD", "php-fpm", "-t"]
       interval: 15s
@@ -65,31 +62,8 @@ services:
       app:
         condition: service_healthy
 
-  db:
-    image: mysql:8.4
-    restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: ${DB_DATABASE}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_RANDOM_ROOT_PASSWORD: "yes"
-    command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - app_internal
-    healthcheck:
-      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
-      interval: 10s
-      timeout: 5s
-      retries: 12
-      start_period: 20s
-
 volumes:
   app_storage:
-  mysql_data:
 
 networks:
   app_internal:
