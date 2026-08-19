@@ -34,3 +34,6 @@ Thumbs.db
 
 # Respaldos generados en local: nunca entran al repositorio
 /storage/backups
+
+# Los expedientes se arman al vuelo y se borran al mandarlos.
+/storage/framework/archives
