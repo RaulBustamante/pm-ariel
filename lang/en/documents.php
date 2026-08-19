@@ -126,4 +126,10 @@ return [
     'issue_weekly' => 'Issue the weekly status',
     'issue_complete' => 'Issue the complete file',
     'issue_sheet' => 'Issue the project sheet',
+    'phase_title' => 'What should already exist',
+    'phase_now' => 'This project is in :phase, with :progress % earned progress.',
+    'phase_missing' => ':count still to issue',
+    'phase_complete' => 'Up to date',
+    'phase_help' => 'The phase is derived from progress; there is nothing to capture. This warns, it does not block: a system that stops you advancing without the right document gets solved by issuing empty documents to get through the door, and then the file is complete and says nothing.',
+
 ];

@@ -126,4 +126,10 @@ return [
     'issue_weekly' => 'Emitir el corte semanal',
     'issue_complete' => 'Emitir el expediente completo',
     'issue_sheet' => 'Emitir la ficha del proyecto',
+    'phase_title' => 'Que deberia existir ya',
+    'phase_now' => 'Este proyecto va en :phase, con :progress % de avance ganado.',
+    'phase_missing' => 'Faltan :count por emitir',
+    'phase_complete' => 'Al corriente',
+    'phase_help' => 'La fase se deduce del avance; no hay nada que capturar. Esto avisa, no bloquea: un sistema que impide avanzar sin el documento correcto se resuelve emitiendo documentos vacios para pasar la puerta, y entonces el expediente queda completo y no dice nada.',
+
 ];

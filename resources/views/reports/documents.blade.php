@@ -35,6 +35,60 @@
         </p>
     </section>
 
+    {{-- ------------------------------------------------------------------
+         7.23 · Qué debería existir ya, según en qué fase va este proyecto
+
+         La cobertura de arriba dice cuántos de los setenta se pueden emitir, y
+         desde que el catálogo está completo eso es siempre setenta. La pregunta
+         que queda sin contestar es la del proyecto: **de los que ya se le
+         debieron haber emitido, cuáles faltan**.
+
+         La fase se deduce del avance y no se captura. Un campo de fase es algo
+         que alguien tiene que acordarse de mover, y en cuanto se queda atrás el
+         aviso miente en la dirección más peligrosa: diciendo que todo está bien.
+         ------------------------------------------------------------------ --}}
+    <section class="card hud-in mb-4 p-4">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0">
+                <h2 class="card-title">{{ __('documents.phase_title') }}</h2>
+                <p class="mt-1 text-xs text-slate-600">
+                    {{ __('documents.phase_now', [
+                        'phase' => __("documents.group_{$phase['phase']}"),
+                        'progress' => $phase['progress'],
+                    ]) }}
+                </p>
+            </div>
+
+            <span class="badge shrink-0 {{ $phase['missing'] > 0 ? 'badge-warn' : 'badge-ok' }}">
+                {{ $phase['missing'] > 0
+                    ? __('documents.phase_missing', ['count' => $phase['missing']])
+                    : __('documents.phase_complete') }}
+            </span>
+        </div>
+
+        <div class="mt-3 flex flex-wrap gap-1.5">
+            @foreach ($phase['expected'] as $item)
+                {{-- Emitido, pendiente-y-ya-tocaba, o todavía no le toca. Los
+                     tres se distinguen: marcar como faltante algo de una fase
+                     que el proyecto no ha alcanzado enciende el aviso desde el
+                     primer día, y un aviso siempre encendido deja de leerse. --}}
+                @php
+                    $due = ! $item['issued']
+                        && array_search($item['group'], \App\Support\Documents\DocumentCatalogue::GROUPS, true)
+                           <= array_search($phase['phase'], \App\Support\Documents\DocumentCatalogue::GROUPS, true);
+                @endphp
+
+                <span class="badge {{ $item['issued'] ? 'badge-ok' : ($due ? 'badge-warn' : 'badge-neutral') }}"
+                      title="{{ __("documents.group_{$item['group']}") }}">
+                    <span aria-hidden="true">{{ $item['issued'] ? '✓' : ($due ? '!' : '·') }}</span>
+                    {{ __("documents.doc_{$item['code']}") }}
+                </span>
+            @endforeach
+        </div>
+
+        <p class="field-help mt-3 max-w-3xl">{{ __('documents.phase_help') }}</p>
+    </section>
+
     <p class="mb-4 max-w-3xl text-sm text-slate-600">{{ __('documents.intro') }}</p>
 
     @php

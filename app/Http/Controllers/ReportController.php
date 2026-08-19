@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Services\Scheduling\TaskOutliner;
 use App\Support\Documents\DocumentCatalogue;
+use App\Support\Documents\DocumentCoverage;
 use App\Support\Reporting\FindingDigest;
 use App\Support\Reporting\ProjectReportData;
 use App\Support\Reporting\WeeklyReport;
@@ -95,6 +96,12 @@ final class ReportController extends Controller
         return view('reports.documents', [
             'project' => $project,
             'groups' => $catalogue->forProject($project),
+            // Que documentos **deberian existir ya** segun en que fase va
+            // este proyecto. El tablero dice que existe; eso es media
+            // pregunta, porque los setenta estan listos desde el primer dia
+            // y un proyecto que arranca ve setenta renglones verdes sin
+            // aprender nada.
+            'phase' => app(DocumentCoverage::class)->for($project),
             'coverage' => $catalogue->coverage(),
             // El historial de lo emitido. Es lo que contesta <<que le mande a
             // Jorge hace tres semanas>>, que el sistema no podia responder:
