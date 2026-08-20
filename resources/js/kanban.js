@@ -1,11 +1,15 @@
 /*
-| Arrastrar tarjetas del tablero, y abrir el detalle con doble clic.
+| Arrastrar tarjetas del tablero.
 |
 | **Mejora progresiva, no requisito.** Sin JavaScript el tablero sigue completo:
 | cada tarjeta trae sus botones para moverla a las otras dos columnas, el título
 | es un enlace normal al detalle, y todo eso funciona con teclado y con lector de
 | pantalla. Este archivo solo agrega una forma más rápida de hacer lo mismo —
 | nunca la única. Por eso los botones no se esconden al cargar.
+|
+| El doble clic para abrir el detalle vive en `task-detail.js`: la lista lo
+| necesita igual que el tablero, y tenerlo aquí lo dejaba además apagado para
+| quien no puede mover tarjetas.
 |
 | Al soltar se envía un formulario normal, igual que en el Gantt: sin peticiones
 | a mano, sin estado paralelo en el navegador y sin una pantalla que se quede
@@ -16,25 +20,8 @@ function initKanban() {
     const form = document.querySelector('[data-kanban-move-form]');
     const cards = document.querySelectorAll('[data-kanban-card]');
 
-    if (cards.length === 0) {
-        return;
-    }
-
-    // El doble clic vive aparte del arrastre: no necesita el formulario, así que
-    // funciona incluso para quien solo puede ver el tablero.
-    document.querySelectorAll('[data-task-url]').forEach((card) => {
-        card.addEventListener('dblclick', (event) => {
-            // Si el doble clic cayó sobre el enlace o sobre un botón, ese
-            // elemento ya hace lo suyo y duplicarlo abriría dos veces.
-            if (event.target.closest('a, button, input')) {
-                return;
-            }
-
-            window.location.href = card.dataset.taskUrl;
-        });
-    });
-
-    if (!form) {
+    // Sin tarjetas movibles o sin formulario no hay nada que arrastrar.
+    if (cards.length === 0 || !form) {
         return;
     }
 

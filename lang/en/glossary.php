@@ -87,4 +87,16 @@ return [
     'progress' => 'How much of the task is done, captured by hand by whoever is working it.',
     'progress_example' => 'The state comes from it: 0 % not started, 100 % done. There is no separate state to keep in sync, so the list, the board and the Gantt cannot disagree.',
 
+    'wbs_label' => 'Task number',
+    'wbs' => 'The number that identifies each task within the plan: 1, 2, 3… Tasks inside a package carry the package number and a dot: 1.1, 1.2, 1.3.',
+    'wbs_example' => 'This is the number you type under "Depends on". It is recalculated on its own when you move tasks, so it always reads top to bottom.',
+
+    'predecessor_label' => 'Depends on',
+    'predecessor' => 'The task that has to happen before this one. You type its number: "1.2" means "this one starts when 1.2 finishes". An empty field means the task waits for nobody.',
+    'predecessor_example' => 'You can add wait or overlap — "1.2+2d" is 2 days of wait; "1.2-1d" pulls it a day earlier — and change the relationship with two letters: SS start together, FF finish together. With no letters it is the usual one: one finishes, the other starts. If you would rather not learn the code, open the task detail and pick it from a list.',
+
+    'float_label' => 'Float',
+    'float' => 'How much this task can slip without moving the project delivery date.',
+    'float_example' => 'At zero the task is critical: every day it slips, delivery slips. Negative means it is already late against a committed date.',
+
 ];

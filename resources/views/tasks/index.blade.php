@@ -34,16 +34,24 @@
                 <caption class="sr-only">{{ __('tasks.title') }}</caption>
                 <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-600">
                     <tr>
-                        <th scope="col" class="px-2 py-2 text-right">{{ __('tasks.row') }}</th>
+                        <th scope="col" class="px-2 py-2 text-right">
+                            {{ __('tasks.wbs') }}
+                            <x-help-term term="wbs" />
+                        </th>
                         <th scope="col" class="px-3 py-2">{{ __('tasks.name') }}</th>
                         <th scope="col" class="px-2 py-2">{{ __('tasks.duration') }}</th>
-                        <th scope="col" class="px-2 py-2">{{ __('tasks.predecessors') }}</th>
+                        {{-- La columna que nadie entiende sin que se la expliquen:
+                             un número suelto y, a veces, dos letras. --}}
+                        <th scope="col" class="px-2 py-2">
+                            {{ __('tasks.predecessors') }}
+                            <x-help-term term="predecessor" />
+                        </th>
                         <th scope="col" class="px-3 py-2">{{ __('tasks.start') }}</th>
                         <th scope="col" class="px-3 py-2">{{ __('tasks.finish') }}</th>
                         @expert
                             <th scope="col" class="px-2 py-2">
                                 {{ __('tasks.float') }}
-                                <x-help-term term="risk" :definition="__('tasks.float_explained')" />
+                                <x-help-term term="float" />
                             </th>
                         @endexpert
                         <th scope="col" class="px-3 py-2">{{ __('tasks.owner') }}</th>
@@ -67,6 +75,38 @@
         </div>
 
         @stack('outside-table')
+
+        <p class="mb-3 text-xs text-slate-500">{{ __('tasks.detail_hint_row') }}</p>
+
+        {{-- Lo que la tabla dice en símbolos, dicho en palabras.
+             El Gantt siempre tuvo su leyenda; la Lista no, y es la pantalla donde
+             la gente entra primero. Quien nunca ha usado la herramienta veía
+             flechas y rombos sin nada que los tradujera.
+             Va plegada: quien ya sabe leerla no tiene por qué cargar con ella. --}}
+        <details class="mb-6 rounded-lg bg-surface p-4 ring-1 ring-slate-200">
+            <summary class="cursor-pointer text-sm font-medium text-slate-800">{{ __('tasks.legend') }}</summary>
+
+            <div class="mt-3 grid gap-x-6 gap-y-2 text-xs text-slate-600 sm:grid-cols-2">
+                @foreach ([
+                    ['▸', __('tasks.legend_summary')],
+                    ['◆', __('tasks.legend_milestone')],
+                    [__('tasks.critical'), __('tasks.legend_critical')],
+                    ['⋯', __('tasks.legend_detail')],
+                    ['✎', __('tasks.legend_notes')],
+                    ['◀ ▶', __('tasks.legend_indent')],
+                    ['▲ ▼', __('tasks.legend_move')],
+                    ['✕', __('tasks.legend_delete')],
+                ] as [$glyph, $meaning])
+                    <p class="flex gap-2">
+                        <span aria-hidden="true" class="w-14 shrink-0 text-slate-500">{{ $glyph }}</span>
+                        <span>{{ $meaning }}</span>
+                    </p>
+                @endforeach
+            </div>
+
+            <p class="mt-3 border-t border-slate-100 pt-3 text-xs text-slate-600">{{ __('tasks.predecessors_help') }}</p>
+            <p class="mt-1 text-xs text-slate-600">{{ __('tasks.expression_help') }}</p>
+        </details>
     @endif
 
     <div class="grid gap-6 lg:grid-cols-3">

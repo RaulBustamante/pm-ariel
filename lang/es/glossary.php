@@ -87,4 +87,16 @@ return [
     'progress' => 'Qué tanto de la tarea está hecho, capturado a mano por quien la trabaja.',
     'progress_example' => 'De ahí sale el estado: 0 % sin empezar, 100 % terminada. No hay un estado aparte que mantener al día, así que la lista, el tablero y el Gantt no pueden discrepar.',
 
+    'wbs_label' => 'Número de la tarea',
+    'wbs' => 'El número que identifica a cada tarea dentro del plan: 1, 2, 3… Las tareas que van dentro de un paquete llevan el número del paquete y un punto: 1.1, 1.2, 1.3.',
+    'wbs_example' => 'Es el número que se escribe en «Depende de». Se recalcula solo cuando mueves tareas, así que siempre va en orden de arriba abajo.',
+
+    'predecessor_label' => 'Depende de',
+    'predecessor' => 'La tarea que tiene que ocurrir antes que esta. Se escribe su número: «1.2» significa «esta empieza cuando termine la 1.2». Si el campo está vacío, la tarea no espera a nadie.',
+    'predecessor_example' => 'Se le puede agregar espera o traslape —«1.2+2d» son 2 días de espera; «1.2-1d» la adelanta un día— y cambiar la relación con dos letras: SS arrancan juntas, FF terminan juntas. Sin letras es la normal: una termina, la otra empieza. Si prefieres no aprender el código, abre el detalle de la tarea y escógela de una lista.',
+
+    'float_label' => 'Holgura',
+    'float' => 'Cuánto puede retrasarse esta tarea sin mover la fecha de entrega del proyecto.',
+    'float_example' => 'En cero, la tarea es crítica: cualquier día que se retrase se lo lleva la entrega. En negativo, ya va tarde contra una fecha comprometida.',
+
 ];

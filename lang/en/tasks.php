@@ -16,7 +16,7 @@ return [
     'duration' => 'Duration',
     'duration_help' => 'Write it however you like: 3d, 4h, 30m, 2w. Leave it at 0 for a milestone.',
     'predecessors' => 'Depends on',
-    'predecessors_help' => 'The row number. "12" is finish-to-start; "12FS+2d" adds 2 days of wait; "15SS" starts together with row 15. Separate several with commas.',
+    'predecessors_help' => 'Type the number in the first column of the task that comes first. "1.2" means this one starts when that one finishes; "1.2+2d" leaves 2 days of wait; "1.2SS" makes both start together. Separate several with commas.',
     'owner' => 'Owner',
     'start' => 'Start',
     'finish' => 'Finish',
@@ -36,6 +36,8 @@ return [
     'deadline_help' => 'Latest committed finish. If the plan can no longer meet it, the task shows negative float.',
     'deadline_before_start' => 'The deadline cannot be before the start date.',
     'row' => 'Row',
+    'wbs' => 'No.',
+    'reference_of' => 'Number of ":name". This is what you type under "Depends on".',
 
     'created' => 'Task added and plan recalculated.',
     'updated' => 'Task updated and plan recalculated.',
@@ -106,6 +108,18 @@ return [
     'real_dates_help' => 'Written automatically when progress is captured: the start as soon as it passes zero, the finish on reaching 100 %. Nobody types them.',
     'open_detail' => 'Open the detail',
     'detail_hint' => 'Double-click a card to open its detail.',
+    'detail_hint_row' => 'Double-click a row — outside the fields — to open the detail of that task. The "..." at the end of the row opens it too.',
+
+    // --- List legend ------------------------------------------------------
+    'legend' => 'What does each symbol mean?',
+    'legend_summary' => 'Package: groups the tasks below it. Its duration and progress come from them; they are not typed in.',
+    'legend_milestone' => 'Milestone: takes no time, marks a date — a delivery, a signature, a kick-off.',
+    'legend_critical' => 'If this task slips one day, the whole project delivers one day later.',
+    'legend_detail' => 'Opens the task detail: notes, attachments, dependencies and history.',
+    'legend_notes' => 'Same as above, but this task already has notes written.',
+    'legend_indent' => 'Moves the task into the package above it, or takes it out.',
+    'legend_move' => 'Moves the task up or down within its group.',
+    'legend_delete' => 'Deletes the task. If it has tasks below it, they go too.',
     'mark_done' => 'Mark as done',
 
     // --- Depends on, in plain words (stage 9) ------------------------------

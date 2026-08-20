@@ -77,6 +77,51 @@ final class TaskListTest extends TestCase
         $this->assertSame('1', $task->wbs_code);
     }
 
+    /**
+     * La lista tiene que poder contestar sola «¿qué es ese número?».
+     *
+     * El campo «Depende de» se guarda y se vuelve a dibujar con el código de la
+     * EDT, pero la primera columna mostraba la posición en pantalla: dos números
+     * distintos, ninguno explicado, y el usuario tecleaba «3» y le aparecía
+     * «1.2». Estas tres cosas juntas son las que cierran el hueco.
+     */
+    #[Test]
+    public function the_list_explains_the_number_written_under_depends_on(): void
+    {
+        $first = $this->addTask('Montaje de racks');
+        $second = $this->addTask('Acomodo en racks');
+
+        $this->actingAs($this->manager)->put(route('projects.tasks.update', [$this->project, $second]), [
+            'name' => $second->name,
+            'duration' => '1d',
+            'predecessors' => '1',
+        ])->assertRedirect();
+
+        $response = $this->actingAs($this->manager)->get(route('projects.tasks.index', $this->project));
+
+        $response->assertOk();
+        // El número de la primera columna es el mismo que se escribe en el campo.
+        $response->assertSee($first->refresh()->wbs_code, false);
+        $response->assertSee(__('tasks.reference_of', ['name' => $first->name]));
+        // Y la dependencia se puede leer sin conocer el código.
+        $response->assertSee(__('tasks.rel_FS_short').' '.$first->wbs_code.' '.$first->name);
+        $response->assertSee(__('glossary.predecessor_label'));
+    }
+
+    /** El doble clic del tablero, también en la lista. */
+    #[Test]
+    public function a_row_carries_the_address_of_its_detail(): void
+    {
+        $task = $this->addTask('Con detalle');
+
+        $this->actingAs($this->manager)
+            ->get(route('projects.tasks.index', $this->project))
+            ->assertOk()
+            ->assertSee('data-task-url="'.route('projects.tasks.show', [$this->project, $task]).'"', false)
+            ->assertSee(__('tasks.detail_hint_row'))
+            ->assertSee(__('tasks.legend'));
+    }
+
     #[Test]
     public function a_task_can_choose_its_start_and_a_congruent_deadline(): void
     {

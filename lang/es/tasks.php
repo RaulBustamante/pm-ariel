@@ -16,7 +16,7 @@ return [
     'duration' => 'Duración',
     'duration_help' => 'Escríbela como quieras: 3d, 4h, 30m, 2s. Déjala en 0 para un hito.',
     'predecessors' => 'Depende de',
-    'predecessors_help' => 'El número de renglón. «12» es fin a inicio; «12FS+2d» agrega 2 días de espera; «15SS» arranca junto con la 15. Separa varias con coma.',
+    'predecessors_help' => 'Se escribe el número de la primera columna de la tarea que va antes. «1.2» significa que esta empieza cuando aquella termine; «1.2+2d» deja 2 días de espera; «1.2SS» hace que las dos arranquen juntas. Separa varias con coma.',
     'owner' => 'Responsable',
     'start' => 'Inicio',
     'finish' => 'Fin',
@@ -36,6 +36,8 @@ return [
     'deadline_help' => 'Compromiso máximo de cierre. Si el plan ya no llega, la tarea mostrará holgura negativa.',
     'deadline_before_start' => 'La fecha límite no puede ser anterior a la fecha de inicio.',
     'row' => 'Renglón',
+    'wbs' => 'N.º',
+    'reference_of' => 'Número de «:name». Es el que se escribe en «Depende de».',
 
     'created' => 'Tarea agregada y plan recalculado.',
     'updated' => 'Tarea actualizada y plan recalculado.',
@@ -106,6 +108,18 @@ return [
     'real_dates_help' => 'Se anotan solas al capturar avance: la de arranque en cuanto pasa de cero, la de cierre al llegar a 100 %. Nadie las teclea.',
     'open_detail' => 'Abrir el detalle',
     'detail_hint' => 'Doble clic en la tarjeta para abrir el detalle.',
+    'detail_hint_row' => 'Doble clic en un renglón —fuera de los campos— abre el detalle de esa tarea. También lo abre el «⋯» del final del renglón.',
+
+    // --- Leyenda de la lista ---------------------------------------------
+    'legend' => '¿Qué significa cada símbolo?',
+    'legend_summary' => 'Paquete: agrupa a las tareas de abajo. Su duración y su avance salen de ellas, no se capturan.',
+    'legend_milestone' => 'Hito: no dura nada, marca una fecha —una entrega, una firma, un arranque.',
+    'legend_critical' => 'Si esta tarea se retrasa un día, la entrega del proyecto se retrasa un día.',
+    'legend_detail' => 'Abre el detalle de la tarea: notas, adjuntos, dependencias e historial.',
+    'legend_notes' => 'Igual que el anterior, pero esta tarea ya tiene notas escritas.',
+    'legend_indent' => 'Mete la tarea dentro del paquete de arriba, o la saca.',
+    'legend_move' => 'Sube o baja la tarea dentro de su grupo.',
+    'legend_delete' => 'Elimina la tarea. Si tiene tareas debajo, también se van.',
     'mark_done' => 'Marcar terminada',
 
     // --- Depende de, en español (Etapa 9) ---------------------------------

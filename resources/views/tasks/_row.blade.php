@@ -2,7 +2,15 @@
     /** @var \App\Models\Task $task */
     $depth = (int) ($task->outline_depth ?? 0);
     $predecessors = $predecessorText[$task->id] ?? '';
+    $predecessorsSaid = $predecessorSummary[$task->id] ?? '';
     $isCritical = (bool) $task->is_critical;
+
+    // El número que de verdad se escribe en «Depende de». La columna mostraba la
+    // posición en pantalla, pero el campo se guarda y se vuelve a dibujar con el
+    // código de la EDT: el usuario tecleaba «3», le aparecía «1.2», y no había
+    // en toda la lista dónde leer de dónde salió ese número.
+    $reference = (string) ($task->wbs_code ?: $row);
+    $detailUrl = route('projects.tasks.show', [$project, $task]);
 @endphp
 
 {{-- El formulario vive fuera de la tabla: un `<form>` no puede ser hijo directo
@@ -16,8 +24,13 @@
     </form>
 @endpush
 
-<tr class="{{ $task->is_summary ? 'bg-slate-50/60 font-medium' : '' }}">
-    <td class="px-2 py-1.5 text-right align-middle font-mono text-xs text-slate-400">{{ $row }}</td>
+{{-- Doble clic en cualquier parte no editable del renglón abre el detalle, igual
+     que en el tablero. La puerta de verdad sigue siendo el enlace del final: el
+     doble clic no existe para quien navega con teclado. --}}
+<tr data-task-url="{{ $detailUrl }}"
+    class="{{ $task->is_summary ? 'bg-slate-50/60 font-medium' : '' }}">
+    <td class="px-2 py-1.5 text-right align-middle font-mono text-xs text-slate-400"
+        title="{{ __('tasks.reference_of', ['name' => $task->name]) }}">{{ $reference }}</td>
 
     <td class="px-3 py-1.5">
         <div class="flex items-center gap-1.5" style="padding-left: {{ $depth * 1.25 }}rem">
@@ -28,7 +41,7 @@
             @endif
 
             <input type="text" name="name" form="task-{{ $task->id }}" value="{{ $task->name }}"
-                   aria-label="{{ __('tasks.name') }} — {{ __('tasks.row') }} {{ $row }}"
+                   aria-label="{{ __('tasks.name') }} — {{ __('tasks.wbs') }} {{ $reference }}"
                    class="w-full min-w-[10rem] rounded border-transparent bg-transparent px-1 py-0.5 text-sm hover:border-slate-300 focus:border-hud-500 focus:bg-surface focus:ring-1 focus:ring-hud-500">
 
             @if ($isCritical && ! $task->is_summary)
@@ -54,9 +67,13 @@
 
     <td class="px-2 py-1.5">
         @unless ($task->is_summary)
+            {{-- El `title` dice en español lo que la expresión dice en clave:
+                 «después de 1.2 Montaje de racks». Sin él, el número no se puede
+                 traducir a nada desde esta pantalla. --}}
             <input type="text" name="predecessors" form="task-{{ $task->id }}" value="{{ $predecessors }}"
                    placeholder="12FS+2d"
-                   aria-label="{{ __('tasks.predecessors') }} — {{ $task->name }}"
+                   @if ($predecessorsSaid !== '') title="{{ $predecessorsSaid }}" @endif
+                   aria-label="{{ __('tasks.predecessors') }} — {{ $task->name }}@if ($predecessorsSaid !== ''): {{ $predecessorsSaid }}@endif"
                    class="w-24 rounded border-transparent bg-transparent px-1 py-0.5 font-mono text-xs hover:border-slate-300 focus:border-hud-500 focus:bg-surface focus:ring-1 focus:ring-hud-500">
         @endunless
     </td>
@@ -120,7 +137,7 @@
             {{-- La puerta al detalle. Estaba solo en el Gantt, el calendario y el
                  inicio; desde la lista —que es donde la gente vive— no había
                  forma de llegar a las notas, los adjuntos ni el historial. --}}
-            <a href="{{ route('projects.tasks.show', [$project, $task]) }}"
+            <a href="{{ $detailUrl }}"
                title="{{ __('tasks.open_detail') }}"
                class="rounded px-1 py-0.5 text-xs text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-hud-500">
                 <span aria-hidden="true">{{ $task->hasNotes() ? '✎' : '⋯' }}</span>

@@ -15,6 +15,7 @@ use App\Services\Scheduling\ProjectScheduler;
 use App\Services\Scheduling\TaskOutliner;
 use App\Support\Reporting\TaskTimeline;
 use App\Support\Scheduling\DependencyExpression;
+use App\Support\Scheduling\DependencyType;
 use App\Support\Scheduling\DurationParser;
 use App\Support\Scheduling\ProjectDurations;
 use App\Support\Scheduling\TaskFilter;
@@ -67,6 +68,11 @@ final class TaskController extends Controller
             'maxRows' => self::MAX_ROWS,
             'durations' => $durations,
             'predecessorText' => $this->predecessorTextFor($project, $outline, $durations),
+            // La misma dependencia dicha en español. La expresión «1.2FS+2d» es
+            // rapidísima de teclear y opaca de leer: quien no la conoce ve un
+            // número sin dueño. El texto va en el `title` del campo, así que la
+            // pantalla no crece y la respuesta está donde nace la duda.
+            'predecessorSummary' => $this->predecessorSummaryFor($project, $outline, $durations),
             'members' => $project->members()->orderBy('name')->get(),
             'lastRun' => $project->scheduleRuns()->first(),
         ]);
@@ -292,6 +298,56 @@ final class TaskController extends Controller
         return array_map(
             fn (array $links): string => $expression->format($links),
             $byTask,
+        );
+    }
+
+    /**
+     * Cada dependencia dicha como se diría en voz alta: «después de 1.2 Montaje
+     * de racks». Es lo que traduce el número que aparece en «Depende de».
+     *
+     * @param  Collection<int, Task>  $outline
+     * @return array<int, string>
+     */
+    private function predecessorSummaryFor(Project $project, Collection $outline, DurationParser $durations): array
+    {
+        $byId = [];
+
+        foreach ($outline as $position => $task) {
+            $byId[(int) $task->id] = [
+                'reference' => (string) ($task->wbs_code ?: $position + 1),
+                'name' => (string) $task->name,
+            ];
+        }
+
+        $dayMinutes = max(1, $durations->toMinutes('1d'));
+        $phrases = [];
+
+        foreach ($project->taskDependencies()->get() as $dependency) {
+            $predecessor = $byId[(int) $dependency->predecessor_id] ?? null;
+
+            if ($predecessor === null) {
+                continue;
+            }
+
+            $type = DependencyType::tryFrom((string) $dependency->type) ?? DependencyType::FinishToStart;
+
+            $phrase = __('tasks.rel_'.$type->value.'_short')
+                .' '.$predecessor['reference'].' '.$predecessor['name'];
+
+            $lagDays = (int) round(((int) $dependency->lag_minutes) / $dayMinutes);
+
+            if ($lagDays !== 0) {
+                $phrase .= ' '.($lagDays > 0
+                    ? __('tasks.lag_after', ['days' => $lagDays])
+                    : __('tasks.lag_before', ['days' => abs($lagDays)]));
+            }
+
+            $phrases[(int) $dependency->successor_id][] = $phrase;
+        }
+
+        return array_map(
+            static fn (array $lines): string => implode('; ', $lines),
+            $phrases,
         );
     }
 
