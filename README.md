@@ -188,3 +188,23 @@ código.** Agregar un idioma es copiar la carpeta y listarlo en
 El nombre del producto vive en `config/branding.php` y en ningún otro lado. El
 comando `branding:verify` falla si se filtra al código, y corre dentro del CI.
 Cambiar de nombre es editar un archivo.
+
+## Despliegue
+
+El VPS tiene una copia de trabajo del repositorio en `/opt/pm-ariel`, con una
+llave de despliegue de solo lectura. El ciclo es: cambias aquí, empujas a
+GitHub, y el servidor jala.
+
+```
+git push origin main                              # desde tu maquina
+ssh root@el-servidor /root/deploy-pm-ariel.sh     # en el VPS
+```
+
+El script hace `git pull`, reconstruye las dos imagenes y las levanta.
+
+**`docker compose build` no funciona en este servidor:** buildx es 0.14.1 y
+compose exige 0.17 o mas. Por eso las imagenes se construyen con `docker build
+--target app|web` y compose solo las levanta con `--no-build`. Si algun dia se
+actualiza buildx, el script se puede simplificar.
+
+`.env.production` vive solo en el servidor y nunca entra al repositorio.
