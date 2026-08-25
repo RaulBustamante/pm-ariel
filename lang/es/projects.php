@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 return [
 
+    // El selector de la barra superior. Cambiarse de proyecto era salir al
+    // listado y volver a entrar; ahora el nombre de arriba se abre.
+    'switch' => 'Cambiar de proyecto',
+    'switch_search' => 'Buscar por nombre o clave',
+    'switch_no_matches' => 'Ningún proyecto coincide con lo que escribiste.',
+    'switch_current' => 'el que estás viendo',
+
     'settings' => 'Ajustes',
     'details' => 'Datos del proyecto',
 

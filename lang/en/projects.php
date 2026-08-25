@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 return [
 
+    // The top-bar switcher. Changing projects used to mean going out to the
+    // list and coming back in; now the name up top opens.
+    'switch' => 'Switch project',
+    'switch_search' => 'Search by name or code',
+    'switch_no_matches' => 'No project matches what you typed.',
+    'switch_current' => 'the one you are viewing',
+
     'settings' => 'Settings',
     'details' => 'Project details',
 

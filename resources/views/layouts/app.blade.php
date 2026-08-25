@@ -7,6 +7,11 @@
     // exactamente lo que delata a un tema oscuro mal hecho. Sin atributo manda
     // `prefers-color-scheme`, que es lo que significa «Sistema».
     $theme = auth()->user()?->theme ?? \App\Models\User::THEME_SYSTEM;
+
+    // El proyecto abierto, si la pantalla es de un proyecto. Sale de la
+    // dirección y no de la vista: las treinta pantallas de proyecto ya ponen el
+    // nombre en `heading` y ninguna tiene que enterarse de esto.
+    $currentProject = request()->route('project');
 @endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
       @if ($theme !== \App\Models\User::THEME_SYSTEM) data-theme="{{ $theme }}" @endif
@@ -102,7 +107,15 @@
                     <span class="flex h-7 w-7 items-center justify-center rounded bg-hud-500 text-xs font-bold text-[#04141a] lg:hidden">
                         {{ mb_substr(config('branding.short_name'), 0, 2) }}
                     </span>
-                    <h1 class="truncate text-base font-semibold tracking-tight text-slate-900">@yield('heading')</h1>
+                    {{-- Dentro de un proyecto el título es también la puerta
+                         para cambiarse a otro: el nombre ya estaba ahí, y
+                         cambiarse costaba salir al listado y volver a entrar.
+                         Fuera de un proyecto no hay nada que elegir. --}}
+                    @if ($currentProject instanceof \App\Models\Project)
+                        <x-project-switcher :project="$currentProject" />
+                    @else
+                        <h1 class="truncate text-base font-semibold tracking-tight text-slate-900">@yield('heading')</h1>
+                    @endif
                 </div>
 
                 <div class="flex shrink-0 items-center gap-2">
