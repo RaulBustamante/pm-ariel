@@ -25,8 +25,18 @@ use Illuminate\Support\Collection;
  */
 final class MyWeek
 {
-    /** Cuántos renglones caben en una tarjeta de inicio sin volverse una tabla. */
-    private const PER_LIST = 8;
+    /*
+     * Tope de seguridad, no límite de presentación.
+     *
+     * Antes eran ocho, y el resto se resumía en «y 9 más» — que dice que hay
+     * nueve pero no cuáles, y obliga a salir a buscarlas. Ahora la tarjeta se
+     * recorre con barra y la lista va completa; este número solo evita que un
+     * administrador con cientos de tareas visibles se lleve todas al inicio.
+     *
+     * Cuando el tope corta, el renglón de «y N más» sigue apareciendo: cortar
+     * en silencio es lo que hacía que la lista incompleta se leyera completa.
+     */
+    private const PER_LIST = 50;
 
     /**
      * @param  Collection<int, Project>  $projects  los que el usuario alcanza a ver

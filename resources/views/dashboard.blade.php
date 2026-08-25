@@ -60,27 +60,41 @@
                         @if ($week[$key]->isEmpty())
                             <p class="mt-2 text-xs italic text-slate-500">{{ __("dashboard.week_no_{$key}") }}</p>
                         @else
-                            <ul class="mt-2 space-y-1.5">
-                                @foreach ($week[$key] as $task)
-                                    <li class="min-w-0">
-                                        <a href="{{ route('projects.tasks.show', [$task->project, $task]) }}"
-                                           class="block truncate text-xs text-slate-800 hover:text-hud-400">
-                                            {{ $task->name }}
-                                        </a>
-                                        {{-- La clave del proyecto en cada renglón: sin
-                                             ella, una lista que mezcla cinco proyectos
-                                             obliga a adivinar de cuál es cada tarea. --}}
-                                        <span class="font-mono text-[10px] text-slate-500">
-                                            {{ $task->project?->code }}
-                                            @if ($key === 'late' && $task->owner_id === null)
-                                                · {{ __('reports.unassigned') }}
-                                            @elseif ($task->early_finish)
-                                                · {{ $task->early_finish->format('d/m') }}
-                                            @endif
-                                        </span>
-                                    </li>
-                                @endforeach
-                            </ul>
+                            {{-- La lista va completa y la tarjeta se recorre.
+                                 Antes cabían ocho y el resto era «y 9 más», que
+                                 dice cuántas faltan pero no cuáles — y obliga a
+                                 salir del inicio a averiguarlo.
+
+                                 `tabindex` no es un adorno: una caja que se
+                                 desplaza y no recibe foco es una caja que solo
+                                 se puede recorrer con ratón. Con foco, las
+                                 flechas y AvPág la recorren. --}}
+                            <div class="scroll-pane mt-2 max-h-52 pr-1"
+                                 tabindex="0"
+                                 role="group"
+                                 aria-label="{{ __("dashboard.week_{$key}") }}">
+                                <ul class="space-y-1.5">
+                                    @foreach ($week[$key] as $task)
+                                        <li class="min-w-0">
+                                            <a href="{{ route('projects.tasks.show', [$task->project, $task]) }}"
+                                               class="block truncate text-xs text-slate-800 hover:text-hud-400">
+                                                {{ $task->name }}
+                                            </a>
+                                            {{-- La clave del proyecto en cada renglón: sin
+                                                 ella, una lista que mezcla cinco proyectos
+                                                 obliga a adivinar de cuál es cada tarea. --}}
+                                            <span class="font-mono text-[10px] text-slate-500">
+                                                {{ $task->project?->code }}
+                                                @if ($key === 'late' && $task->owner_id === null)
+                                                    · {{ __('reports.unassigned') }}
+                                                @elseif ($task->early_finish)
+                                                    · {{ $task->early_finish->format('d/m') }}
+                                                @endif
+                                            </span>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
 
                             @if ($week['counts'][$key] > $week[$key]->count())
                                 <p class="mt-2 text-[10px] text-slate-500">
