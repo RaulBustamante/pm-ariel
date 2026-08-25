@@ -35,6 +35,15 @@
         {{ __('filters.only_mine') }}
     </label>
 
+    {{-- «Qué traigo detenido»: la revisión para la que existe este filtro. Es
+         una pregunta aparte del avance — lo que espera puede estar al 0 % o al
+         90 % — y por eso es una casilla y no una opción del menú de avance. --}}
+    <label class="flex items-center gap-1.5 whitespace-nowrap px-1 text-sm text-slate-700">
+        <input type="checkbox" name="waiting" value="1" @checked($filter->onlyWaiting)
+               class="rounded border-slate-300 text-brand-700">
+        {{ __('tasks.only_waiting') }}
+    </label>
+
     <button type="submit" class="btn btn-secondary btn-sm">{{ __('filters.apply') }}</button>
 
     @if ($filter->isActive())

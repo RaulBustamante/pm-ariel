@@ -89,6 +89,26 @@ return [
 
     // --- Seguimiento del trabajo (Etapa 8) -------------------------------
     'state' => 'Estado',
+    // --- La espera --------------------------------------------------------
+    //
+    // Un eje aparte del avance, no un cuarto estado suyo: una tarea puede estar
+    // en curso al 85 % y esperando aprobacion al mismo tiempo.
+    'waiting' => 'En espera de',
+    'waiting_none' => 'No está esperando nada',
+    'waiting_help' => 'Para cuando la tarea no avanza por algo de afuera: una firma, una prueba del usuario, una respuesta. Convive con el avance, no lo reemplaza — una tarea al 85 % puede estar esperando. No mueve ninguna fecha del plan.',
+    'waiting_approval' => 'Esperando aprobación',
+    'waiting_uat' => 'En pruebas del usuario (UAT)',
+    'waiting_client' => 'Esperando respuesta del cliente',
+    'waiting_third_party' => 'Esperando a un tercero',
+    'waiting_blocked' => 'Detenida por un impedimento',
+    'waiting_note' => '¿A quién esperas?',
+    'waiting_note_help' => 'Quién tiene que responder, y el folio si hay uno. Ejemplo: «Sistemas, para dar de alta al usuario» o «Ana Ruiz, acta de UAT».',
+    'waiting_since' => 'Esperando desde',
+    'waiting_since_date' => 'Esperando desde el :date (:count día(s))',
+    'waiting_days_short' => ':count d',
+    'waiting_clock_help' => 'La fecha la pone el sistema al empezar la espera. Cambiar el tipo la reinicia; corregir la nota no. Al llegar al 100 % la espera se limpia sola.',
+    'only_waiting' => 'Solo las que esperan',
+
     'state_todo' => 'Sin empezar',
     'state_doing' => 'En curso',
     'state_done' => 'Terminada',

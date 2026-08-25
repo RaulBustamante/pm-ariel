@@ -91,6 +91,25 @@
                                                     · {{ $task->early_finish->format('d/m') }}
                                                 @endif
                                             </span>
+
+                                            {{-- Lo que está esperando se marca
+                                                 donde ya cae, sin sacarlo de su
+                                                 tarjeta: sigue siendo trabajo de
+                                                 esta semana, pero saber que está
+                                                 detenido cambia a quién hay que
+                                                 llamar hoy. --}}
+                                            @if ($task->isWaiting())
+                                                @php $reason = $task->waitingReason(); @endphp
+                                                <span class="ml-1 whitespace-nowrap text-[10px] text-[var(--color-badge-warn-fg)]"
+                                                      @if ($task->waiting_since)
+                                                          title="{{ __('tasks.waiting_since_date', [
+                                                              'date' => $task->waiting_since->format('d/m/Y'),
+                                                              'count' => $task->waitingDays(),
+                                                          ]) }}"
+                                                      @endif>
+                                                    · {{ __("tasks.waiting_{$reason->value}") }}
+                                                </span>
+                                            @endif
                                         </li>
                                     @endforeach
                                 </ul>

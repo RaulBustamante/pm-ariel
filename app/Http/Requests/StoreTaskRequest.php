@@ -8,6 +8,7 @@ use App\Models\Project;
 use App\Support\Scheduling\ConstraintType;
 use App\Support\Scheduling\DurationParser;
 use App\Support\Scheduling\ProjectDurations;
+use App\Support\Tasks\WaitingReason;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
@@ -65,6 +66,11 @@ final class StoreTaskRequest extends FormRequest
             // depende que el valor ganado sepa si puede calcular el CPI.
             'actual_cost' => ['nullable', 'numeric', 'min:0'],
             'percent_complete' => ['nullable', 'numeric', 'between:0,100'],
+
+            // La espera. `waiting_since` no se valida porque no se captura: la
+            // escribe el modelo al empezar la espera.
+            'waiting_on' => ['nullable', Rule::in(WaitingReason::values())],
+            'waiting_note' => ['nullable', 'string', 'max:255'],
             'predecessors' => ['nullable', 'string', 'max:255'],
             'parent_id' => ['nullable', 'integer'],
         ];
@@ -122,6 +128,17 @@ final class StoreTaskRequest extends FormRequest
 
         if ($this->exists('deadline')) {
             $normalized['deadline'] = $this->input('deadline') ?: null;
+        }
+
+        // El «—» del menú llega como cadena vacía y significa «no está
+        // esperando». En la columna eso es null: un '' guardado haría que
+        // `isWaiting()` dijera que sí y pintara un distintivo sin texto.
+        if ($this->exists('waiting_on')) {
+            $normalized['waiting_on'] = $this->input('waiting_on') ?: null;
+        }
+
+        if ($this->exists('waiting_note')) {
+            $normalized['waiting_note'] = trim((string) $this->input('waiting_note')) ?: null;
         }
 
         $this->merge($normalized);

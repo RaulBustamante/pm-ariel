@@ -8,6 +8,7 @@ use App\Models\Concerns\RecordsAudit;
 use App\Support\Scheduling\ConstraintType;
 use App\Support\Scheduling\TaskConstraint;
 use App\Support\Scheduling\TaskNode;
+use App\Support\Tasks\WaitingReason;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -38,11 +39,15 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $late_finish
  * @property Carbon|null $actual_start
  * @property Carbon|null $actual_finish
+ * @property Carbon|null $waiting_since
  */
 #[Fillable([
     'project_id', 'parent_id', 'name', 'description', 'duration_minutes',
     'constraint_type', 'constraint_date', 'requested_start', 'deadline', 'calendar_id', 'sort_order',
     'cost', 'actual_cost', 'percent_complete', 'actual_start', 'actual_finish', 'owner_id',
+    // La espera: el tipo y la nota los captura la gente. `waiting_since`
+    // **no** va aqui a proposito -- la lleva el modelo, como `actual_start`.
+    'waiting_on', 'waiting_note',
 ])]
 class Task extends Model
 {
@@ -72,6 +77,7 @@ class Task extends Model
             'percent_complete' => 'decimal:2',
             'actual_start' => 'datetime',
             'actual_finish' => 'datetime',
+            'waiting_since' => 'datetime',
         ];
     }
 
@@ -118,6 +124,39 @@ class Task extends Model
             if ($progress <= 0) {
                 $task->actual_start = null;
             }
+
+            // Una tarea terminada no espera a nadie. Si se cierra con una espera
+            // puesta, la espera se va con ella: dejarla haria que el Asesor
+            // siguiera reclamando seguimiento de algo ya entregado, y que el
+            // distintivo dijera <<esperando aprobacion>> sobre algo aprobado.
+            //
+            // La nota se borra tambien. Guardarla dejaria <<falta que Sistemas
+            // lo de de alta>> colgado de una tarea al 100 %, que es peor que no
+            // tenerla; la bitacora de auditoria conserva la historia.
+            if ($progress >= 100) {
+                $task->waiting_on = null;
+                $task->waiting_note = null;
+            }
+        });
+
+        /*
+        | El reloj de la espera.
+        |
+        | Va en el modelo por la misma razon que las fechas reales: lo escriben
+        | el detalle, el filtro y manana lo que se agregue, y el que se agregue
+        | se olvidaria de reiniciarlo.
+        |
+        | **Cambiar el tipo de espera reinicia la fecha** --de UAT a aprobacion
+        | es una espera nueva, y arrastrar la fecha vieja diria que llevas tres
+        | semanas esperando una firma que pediste hoy--. **Editar solo la nota no
+        | la reinicia**: sigues esperando lo mismo, nada mas aclaraste a quien.
+        */
+        static::saving(function (self $task): void {
+            if (! $task->isDirty('waiting_on')) {
+                return;
+            }
+
+            $task->waiting_since = $task->waiting_on === null ? null : now();
         });
     }
 
@@ -214,6 +253,49 @@ class Task extends Model
         }
 
         return $progress > 0 ? 'doing' : 'todo';
+    }
+
+    /**
+     * ¿Está detenida esperando algo de afuera?
+     *
+     * Convive con `state()` y no lo reemplaza: una tarea puede estar «en curso
+     * al 85 %» **y** esperando aprobación al mismo tiempo. Son dos preguntas
+     * distintas —cuánto se hizo, y por qué no avanza— y las dos tienen
+     * respuesta.
+     */
+    public function isWaiting(): bool
+    {
+        return $this->waitingReason() !== null;
+    }
+
+    /**
+     * El tipo de espera, o null.
+     *
+     * Se resuelve por el enum y no se devuelve el texto crudo de la columna: un
+     * valor viejo que ya no esté en el catálogo se lee como «no está esperando»
+     * en vez de pintar un distintivo sin traducción.
+     */
+    public function waitingReason(): ?WaitingReason
+    {
+        return WaitingReason::tryFrom((string) $this->waiting_on);
+    }
+
+    /**
+     * Días corridos que lleva esperando.
+     *
+     * Corridos y no laborales, a propósito: es el número que se lee al lado de
+     * una fecha, y quien está esperando una respuesta no deja de esperarla el
+     * sábado. El umbral del Asesor sí cuenta días laborales, porque ahí la
+     * pregunta es otra —«¿ya llevo una semana de trabajo detenido?»— y un fin de
+     * semana no es demora.
+     */
+    public function waitingDays(): ?int
+    {
+        if (! $this->isWaiting() || $this->waiting_since === null) {
+            return null;
+        }
+
+        return (int) $this->waiting_since->startOfDay()->diffInDays(now()->startOfDay());
     }
 
     /** ¿Hay algo escrito en las notas? */

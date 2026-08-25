@@ -181,6 +181,19 @@ final class TaskController extends Controller
                 ? $request->input('actual_cost')
                 : $task->actual_cost,
             'percent_complete' => $request->input('percent_complete') ?? $task->percent_complete,
+            // La espera se captura solo en el detalle, asi que va con `has` y no
+            // con `??`: sin eso, decir <<ya no estoy esperando>> nunca la
+            // quitaria, y cualquier guardado desde la Lista la conservaria.
+            //
+            // `waiting_since` no aparece aqui a proposito. El reloj lo lleva el
+            // modelo: cambiar el tipo lo reinicia, corregir la nota no, y
+            // cerrar la tarea lo limpia.
+            'waiting_on' => $request->has('waiting_on')
+                ? $request->input('waiting_on')
+                : $task->waiting_on,
+            'waiting_note' => $request->has('waiting_note')
+                ? $request->input('waiting_note')
+                : $task->waiting_note,
         ]);
 
         if ($request->has('predecessors')) {

@@ -45,6 +45,11 @@ return [
     'overdue' => ':task should have finished on :date and is still at zero per cent.',
     'overdue_why' => 'Either progress is not being captured, or the task has not started. Both matter, and both are cheaper to fix today than in two weeks.',
 
+    // The forgotten wait: the only delay a phone call fixes.
+    'waiting_too_long' => 'Task :task has spent :days working day(s) in ":reason", since :date.',
+    'waiting_too_long_why' => 'A task stalled waiting on a signature, a test or a third party does not fall behind on its own: it falls behind because nobody asked again. It is the only delay a phone call fixes, and the easiest to miss, because the task does not look wrong — it has progress, it has an owner, and its date has not arrived yet.',
+    'waiting_too_long_why_note' => 'Waiting on: :note. A task stalled waiting on somebody does not fall behind on its own: it falls behind because nobody asked again. It is the only delay a phone call fixes, and the easiest to miss, because the task does not look wrong.',
+
     'milestone_orphan' => 'Milestone :task depends on nothing.',
     'milestone_orphan_why' => 'A milestone marks that something finished. If nothing feeds it, it stays pinned to the project start and claims delivery happens on day one — which is exactly what nobody notices in a long Gantt.',
 

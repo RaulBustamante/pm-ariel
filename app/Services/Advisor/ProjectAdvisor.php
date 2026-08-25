@@ -11,6 +11,7 @@ use App\Models\Task;
 use App\Models\TaskAssignment;
 use App\Support\Scheduling\DurationParser;
 use App\Support\Scheduling\WorkingCalendar;
+use DateTimeImmutable;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -32,13 +33,37 @@ final class ProjectAdvisor
     private const OVERALLOCATION_THRESHOLD = 100;
 
     /**
+     * Días **laborales** esperando antes de que valga la pena empujar.
+     *
+     * Cinco es una semana de trabajo completa detenida. Laborales y no corridos
+     * porque un fin de semana no es demora — la misma regla que toda la
+     * aritmética de este sistema.
+     *
+     * Se resistió la tentación de poner un umbral por tipo de espera (una firma
+     * a los 3 días, un UAT a los 10): serían cinco números que alguien tendría
+     * que mantener y justificar, y una regla que nadie puede comprobar es una
+     * regla que la gente aprende a ignorar.
+     */
+    private const WAITING_THRESHOLD_DAYS = 5;
+
+    /**
+     * Tope del recorrido día por día. Un año de calendario basta y sobra: pasado
+     * eso el hallazgo dice lo mismo, y el número existe para que una espera que
+     * alguien dejó abierta en 2019 no se vuelva un recorrido de miles de vueltas.
+     */
+    private const WAITING_SCAN_LIMIT = 400;
+
+    /**
      * Recalcula todos los hallazgos del proyecto y los guarda.
      *
      * @return Collection<int, ProjectFinding>
      */
     public function analyze(Project $project): Collection
     {
-        $project->loadMissing(['tasks.owner']);
+        // Los calendarios entran porque la regla de la espera cuenta en días
+        // laborales, y `WorkingCalendar` es el único lugar que sabe qué es un
+        // fin de semana o un feriado.
+        $project->loadMissing(['tasks.owner', 'calendars']);
 
         $findings = [
             ...$this->overallocatedResources($project),
@@ -47,6 +72,7 @@ final class ProjectAdvisor
             ...$this->negativeFloat($project),
             ...$this->overdueWithoutProgress($project),
             ...$this->milestonesWithoutPredecessors($project),
+            ...$this->waitingTooLong($project),
         ];
 
         return DB::transaction(function () use ($project, $findings): Collection {
@@ -324,6 +350,93 @@ final class ProjectAdvisor
         }
 
         return $findings;
+    }
+
+    /**
+     * Regla 7 — **esperando demasiado**. Una tarea detenida esperando una firma,
+     * una prueba o la respuesta de un tercero no se atrasa sola: se atrasa
+     * porque nadie volvió a preguntar. Es el único atraso que se arregla con una
+     * llamada, y el más fácil de no ver, porque la tarea no se ve mal —tiene
+     * avance, tiene responsable y su fecha todavía no llegó.
+     *
+     * Cuenta en días **laborales**: una espera que empezó el viernes no lleva
+     * dos días de retraso el domingo.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function waitingTooLong(Project $project): array
+    {
+        $findings = [];
+
+        $calendar = $project->calendars->firstWhere('is_default', true)?->toWorkingCalendar()
+            ?? WorkingCalendar::standard();
+
+        // `now()` y no `new DateTimeImmutable('today')`: el resto de las reglas
+        // usa `now()`, que es lo unico que respeta un reloj congelado. Con la
+        // fecha del sistema, la regla media la espera contra el dia real y
+        // avisaba de esperas de tres dias como si llevaran meses.
+        $today = now()->startOfDay()->toDateTimeImmutable();
+
+        foreach ($project->tasks->where('is_summary', false) as $task) {
+            if (! $task->isWaiting() || $task->waiting_since === null) {
+                continue;
+            }
+
+            $days = $this->workingDaysBetween($calendar, $task->waiting_since->toDateTimeImmutable(), $today);
+
+            if ($days < self::WAITING_THRESHOLD_DAYS) {
+                continue;
+            }
+
+            $reason = $task->waitingReason();
+
+            $findings[] = [
+                'rule' => 'task.waiting_too_long',
+                // Crítica si además está en la ruta crítica o ya pasó su fecha
+                // comprometida: ahí la espera dejó de ser una molestia y ya se
+                // está comiendo la entrega.
+                'severity' => $task->is_critical || ($task->deadline !== null && $task->deadline->isPast())
+                    ? ProjectFinding::SEVERITY_CRITICAL
+                    : ProjectFinding::SEVERITY_WARNING,
+                'task_id' => (int) $task->id,
+                'message' => __('advisor.waiting_too_long', [
+                    'task' => $task->name,
+                    'reason' => $reason === null ? '' : __("tasks.waiting_{$reason->value}"),
+                    'days' => $days,
+                    'date' => $task->waiting_since->format('d/m/Y'),
+                ]),
+                'why' => $task->waiting_note === null
+                    ? __('advisor.waiting_too_long_why')
+                    : __('advisor.waiting_too_long_why_note', ['note' => $task->waiting_note]),
+            ];
+        }
+
+        return $findings;
+    }
+
+    /**
+     * Días laborales entre dos fechas, contando el día de inicio como cero.
+     *
+     * Se recorre día por día y no con aritmética de calendario porque los
+     * feriados y las excepciones no siguen ninguna fórmula: los conoce
+     * `WorkingCalendar` y nadie más. El recorrido está acotado, así que una
+     * espera olvidada durante años no se vuelve un bucle largo.
+     */
+    private function workingDaysBetween(WorkingCalendar $calendar, DateTimeImmutable $from, DateTimeImmutable $to): int
+    {
+        $days = 0;
+        $cursor = $from->setTime(0, 0);
+        $limit = $to->setTime(0, 0);
+
+        for ($step = 0; $step < self::WAITING_SCAN_LIMIT && $cursor < $limit; $step++) {
+            $cursor = $cursor->modify('+1 day');
+
+            if ($calendar->isWorkingDay($cursor)) {
+                $days++;
+            }
+        }
+
+        return $days;
     }
 
     private function overlaps(?Task $a, ?Task $b): bool

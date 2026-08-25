@@ -74,6 +74,58 @@
                         <p class="field-help">{{ __('evm.actual_cost_help') }}</p>
                     </div>
 
+                    {{-- La espera: por qué no avanza, cuando la razón está
+                         afuera.
+
+                         Va junto al avance porque son las dos mitades de la
+                         misma pregunta —cuánto se hizo, y por qué está
+                         detenido— pero en su propio bloque, porque son ejes
+                         distintos: una tarea al 85 % puede estar esperando una
+                         firma, y las dos cosas son ciertas. --}}
+                    <fieldset class="rounded-md border border-slate-200 p-3">
+                        <legend class="px-1 text-xs font-semibold uppercase tracking-wide text-slate-600">
+                            {{ __('tasks.waiting') }}
+                        </legend>
+
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label for="waiting-field" class="field-label">{{ __('tasks.waiting') }}</label>
+                                <select id="waiting-field" name="waiting_on" class="field">
+                                    <option value="">{{ __('tasks.waiting_none') }}</option>
+                                    @foreach (\App\Support\Tasks\WaitingReason::cases() as $reason)
+                                        <option value="{{ $reason->value }}"
+                                                @selected(old('waiting_on', $task->waiting_on) === $reason->value)>
+                                            {{ __("tasks.waiting_{$reason->value}") }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="waiting-note-field" class="field-label">{{ __('tasks.waiting_note') }}</label>
+                                <input id="waiting-note-field" type="text" name="waiting_note" maxlength="255"
+                                       value="{{ old('waiting_note', $task->waiting_note) }}" class="field">
+                            </div>
+                        </div>
+
+                        <p class="field-help mt-2">{{ __('tasks.waiting_note_help') }}</p>
+
+                        @if ($task->isWaiting() && $task->waiting_since)
+                            {{-- Desde cuándo, que es lo único que permite dar
+                                 seguimiento. La fecha la pone el sistema; si la
+                                 escribiera la gente, pondría hoy cada vez que
+                                 tocara la tarea. --}}
+                            <p class="mt-2 rounded border border-[var(--color-badge-warn-line)] bg-[var(--color-badge-warn-bg)] px-2.5 py-1.5 text-xs text-[var(--color-badge-warn-fg)]">
+                                {{ __('tasks.waiting_since_date', [
+                                    'date' => $task->waiting_since->format('d/m/Y'),
+                                    'count' => $task->waitingDays(),
+                                ]) }}
+                            </p>
+                        @endif
+
+                        <p class="field-help mt-2">{{ __('tasks.waiting_clock_help') }}</p>
+                    </fieldset>
+
                     <div class="grid gap-3 sm:grid-cols-2">
                         <div>
                             <label for="owner-field" class="field-label">{{ __('tasks.owner') }}</label>

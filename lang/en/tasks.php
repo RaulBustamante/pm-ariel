@@ -89,6 +89,26 @@ return [
 
     // --- Work tracking (stage 8) -----------------------------------------
     'state' => 'State',
+    // --- Waiting ----------------------------------------------------------
+    //
+    // An axis of its own, not a fourth progress state: a task can be 85 % done
+    // and awaiting approval at the same time.
+    'waiting' => 'Waiting on',
+    'waiting_none' => 'Not waiting on anything',
+    'waiting_help' => 'For when the task is not moving because of something outside it: a signature, a user test, an answer. It lives alongside progress rather than replacing it — a task at 85 % can be waiting. It moves no date in the plan.',
+    'waiting_approval' => 'Awaiting approval',
+    'waiting_uat' => 'In user testing (UAT)',
+    'waiting_client' => 'Awaiting client response',
+    'waiting_third_party' => 'Awaiting a third party',
+    'waiting_blocked' => 'Blocked',
+    'waiting_note' => 'Who are you waiting on?',
+    'waiting_note_help' => 'Who has to answer, and the ticket number if there is one. For example: "IT, to create the user account" or "Ana Ruiz, UAT sign-off".',
+    'waiting_since' => 'Waiting since',
+    'waiting_since_date' => 'Waiting since :date (:count day(s))',
+    'waiting_days_short' => ':count d',
+    'waiting_clock_help' => 'The system sets the date when the wait starts. Changing the kind of wait resets it; fixing the note does not. Reaching 100 % clears the wait on its own.',
+    'only_waiting' => 'Only the ones waiting',
+
     'state_todo' => 'Not started',
     'state_doing' => 'In progress',
     'state_done' => 'Done',
