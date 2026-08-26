@@ -241,6 +241,18 @@ final class PortfolioTest extends TestCase
      * falta y no como un sistema roto.
      */
     #[Test]
+    public function the_team_block_remains_visible_without_reporting_line_activities(): void
+    {
+        $this->project('EQP-EMPTY', 0);
+
+        $this->actingAs($this->manager)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee(__('team.dashboard_title'))
+            ->assertSee(__('team.empty_open'));
+    }
+
+    #[Test]
     public function the_system_records_who_created_and_who_touched_each_row(): void
     {
         $project = $this->project('AUT-1');

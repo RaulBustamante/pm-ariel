@@ -30,7 +30,7 @@
             </div>
         </div>
     @else
-    @if (($week ?? null) && array_sum($week['counts']) > 0)
+    @if ($week ?? null)
         {{-- Mi semana, cruzando todos los proyectos.
              El corte semanal contesta «cómo va este proyecto»; esto contesta la
              otra pregunta, la de la mañana: «¿qué me toca?». Nadie trabaja en un

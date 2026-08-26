@@ -167,4 +167,17 @@ final class MyWeekTest extends TestCase
         // altura con barra.
         $response->assertSee(__('dashboard.week_no_closed'));
     }
+
+    #[Test]
+    public function los_cuatro_bloques_siguen_visibles_cuando_la_semana_esta_vacia(): void
+    {
+        $response = $this->actingAs($this->manager)->get(route('dashboard'));
+
+        $response->assertOk();
+
+        foreach (['late', 'due', 'next', 'closed'] as $key) {
+            $response->assertSee(__("dashboard.week_{$key}"));
+            $response->assertSee(__("dashboard.week_no_{$key}"));
+        }
+    }
 }

@@ -1,5 +1,4 @@
-@if (($teamMembersCount ?? 0) > 0)
-    <section class="card hud-in mt-4 overflow-hidden">
+<section class="card hud-in mt-4 overflow-hidden">
         <div class="card-header">
             <div>
                 <h2 class="card-title">{{ __('team.dashboard_title') }}</h2>
@@ -42,5 +41,4 @@
                 </table>
             </div>
         @endif
-    </section>
-@endif
+</section>
