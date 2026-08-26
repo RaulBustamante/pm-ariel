@@ -17,13 +17,15 @@ declare(strict_types=1);
 
 return [
 
-    'name' => env('BRANDING_NAME', env('APP_NAME', 'Project Management')),
+    'name' => env('BRANDING_NAME', env('APP_NAME', 'Tesseract Flow')),
 
-    'short_name' => env('BRANDING_SHORT_NAME', 'PM'),
+    'short_name' => env('BRANDING_SHORT_NAME', 'Tesseract Flow'),
 
-    'tagline' => env('BRANDING_TAGLINE', ''),
+    'tagline' => env('BRANDING_TAGLINE', 'Gestión de proyectos · PMI'),
 
-    'logo' => env('BRANDING_LOGO', ''),
+    'logo' => env('BRANDING_LOGO', 'images/tesseract-flow-logo.png'),
+
+    'mark' => env('BRANDING_MARK', 'images/tesseract-flow-mark.png'),
 
     'colors' => [
         'primary' => env('BRANDING_COLOR_PRIMARY', '#1d4ed8'),

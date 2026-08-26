@@ -1,4 +1,4 @@
-# Gestión de Proyectos — Ariel Premium Supply
+# Tesseract Flow — Gestión de proyectos · PMI
 
 Sistema de administración de proyectos con ruta crítica: acta constitutiva
 guiada, plan de trabajo, Gantt, tablero, calendario y avisos proactivos.
@@ -185,7 +185,7 @@ código.** Agregar un idioma es copiar la carpeta y listarlo en
 
 ## Marca
 
-El nombre del producto vive en `config/branding.php` y en ningún otro lado. El
+El nombre, lema y rutas de los logotipos de Tesseract Flow viven en `config/branding.php`. El
 comando `branding:verify` falla si se filtra al código, y corre dentro del CI.
 Cambiar de nombre es editar un archivo.
 

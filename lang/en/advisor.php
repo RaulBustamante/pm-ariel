@@ -8,7 +8,7 @@ return [
     'heading' => 'What is worth reviewing',
     'intro' => 'The system checks the plan after every change and flags what threatens delivery. It says what is happening and why; the decision is still yours.',
 
-    'why_no_suggestion' => 'It does not yet propose what to do. Detecting that someone is at 180 % is arithmetic you can verify; telling you whose work to move is a judgement, and without real Ariel projects to learn from, a bad suggestion would cost more than it saves.',
+    'why_no_suggestion' => 'It does not yet propose what to do. Detecting that someone is at 180 % is arithmetic you can verify; telling you whose work to move is a judgement, and without real projects from the organization to learn from, a bad suggestion would cost more than it saves.',
 
     'none' => 'Nothing to flag. The plan looks healthy.',
     'analyze' => 'Check the plan',

@@ -9,7 +9,7 @@ return [
     'create' => 'Nuevo puesto',
     'edit' => 'Editar puesto',
     'name' => 'Nombre del puesto',
-    'name_help' => 'Como se le llama en Ariel. Por ejemplo: Gerencia de Sistemas.',
+    'name_help' => 'Como se le llama en tu organización. Por ejemplo: Gerencia de Sistemas.',
     'level' => 'Nivel',
     'level_help' => '1 es lo mas alto de la organizacion. Solo ordena; no da acceso a nada.',
     'people' => 'Personas',

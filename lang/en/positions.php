@@ -9,7 +9,7 @@ return [
     'create' => 'New position',
     'edit' => 'Edit position',
     'name' => 'Position name',
-    'name_help' => 'What it is called at Ariel. For example: Systems Manager.',
+    'name_help' => 'What it is called in your organization. For example: Systems Manager.',
     'level' => 'Level',
     'level_help' => '1 is the top of the organisation. It only orders; it grants no access.',
     'people' => 'People',

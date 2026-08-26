@@ -8,7 +8,7 @@ return [
     'heading' => 'Qué conviene revisar',
     'intro' => 'El sistema revisa el plan después de cada cambio y señala lo que amenaza la entrega. Dice qué pasa y por qué; la decisión sigue siendo tuya.',
 
-    'why_no_suggestion' => 'Todavía no propone qué hacer. Detectar que alguien está al 180 % es aritmética que puedes comprobar; decirte a quién moverle el trabajo es un juicio, y sin proyectos reales de Ariel de los cuales aprender, una sugerencia mala costaría más de lo que ahorra.',
+    'why_no_suggestion' => 'Todavía no propone qué hacer. Detectar que alguien está al 180 % es aritmética que puedes comprobar; decirte a quién moverle el trabajo es un juicio, y sin proyectos reales de la organización de los cuales aprender, una sugerencia mala costaría más de lo que ahorra.',
 
     'none' => 'Nada que señalar. El plan se ve sano.',
     'analyze' => 'Revisar el plan',

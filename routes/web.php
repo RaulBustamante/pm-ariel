@@ -15,6 +15,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\PasswordChangeController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\BaselineController;
+use App\Http\Controllers\BuzonController;
 use App\Http\Controllers\CalendarSettingsController;
 use App\Http\Controllers\CalendarViewController;
 use App\Http\Controllers\DashboardController;
@@ -76,6 +77,9 @@ Route::middleware('auth')->group(function (): void {
 
     Route::get('preferences', [PreferencesController::class, 'edit'])->name('preferences.edit');
     Route::put('preferences', [PreferencesController::class, 'update'])->name('preferences.update');
+
+    Route::post('buzon', [BuzonController::class, 'store'])->name('buzon.store');
+    Route::get('buzon/adjuntos/{adjunto}', [BuzonController::class, 'attachment'])->name('buzon.adjunto');
 
     Route::get('projects', [ProjectController::class, 'index'])->name('projects.index');
     Route::get('projects/create', [ProjectController::class, 'create'])->name('projects.create');
@@ -285,6 +289,9 @@ Route::middleware('auth')->group(function (): void {
     });
 
     Route::prefix('admin')->name('admin.')->group(function (): void {
+        Route::get('buzon', [BuzonController::class, 'index'])->name('buzon.index');
+        Route::patch('buzon/{ticket}', [BuzonController::class, 'update'])->name('buzon.update');
+        Route::delete('buzon/{ticket}', [BuzonController::class, 'destroy'])->name('buzon.destroy');
         Route::get('users', [UserController::class, 'index'])->name('users.index');
         Route::get('users/create', [UserController::class, 'create'])->name('users.create');
         Route::post('users', [UserController::class, 'store'])->name('users.store');
