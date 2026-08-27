@@ -591,6 +591,89 @@
         opacity: 0.45;
     }
 
+    /* --- La marca en la entrada -------------------------------------------- */
+
+    /*
+    | El logotipo de la pantalla de entrada.
+    |
+    | Es una **placa** y no una imagen suelta porque el archivo trae su propio
+    | fondo oscuro horneado. Sobre el tema claro, un rectangulo oscuro
+    | deliberado --con esquinas redondeadas, su filo y su luz-- se lee como
+    | parte de la marca; el mismo rectangulo sin nada se lee como un error de
+    | recorte. Se asume el fondo en vez de disimularlo.
+    |
+    | El filo y el resplandor usan el cian del HUD, que es el mismo acento que
+    | ya trae el logotipo y el que usa el resto del producto. No entra un color
+    | nuevo al sistema.
+    */
+    .brand-plate {
+        position: relative;
+        z-index: 1;
+        display: block;
+        overflow: hidden;
+        border-radius: 16px;
+        box-shadow:
+            0 20px 44px -20px rgb(0 0 0 / 0.55),
+            0 0 0 1px color-mix(in srgb, var(--color-hud-400) 24%, transparent);
+    }
+
+    .brand-plate img {
+        display: block;
+        width: 100%;
+        height: auto;
+    }
+
+    /*
+    | El halo detras de la placa.
+    |
+    | Da profundidad sin dibujar un borde mas. Va en un pseudoelemento para no
+    | agregar un nodo al arbol solo para decorar, igual que la reticula del
+    | fondo. `pointer-events: none` porque nada de esto debe atrapar un clic.
+    */
+    .brand-glow {
+        position: relative;
+    }
+
+    .brand-glow::before {
+        content: '';
+        position: absolute;
+        inset: -30% -14% -14% -14%;
+        z-index: 0;
+        background: radial-gradient(
+            58% 58% at 50% 42%,
+            color-mix(in srgb, var(--color-hud-400) 26%, transparent) 0%,
+            transparent 72%
+        );
+        filter: blur(30px);
+        pointer-events: none;
+    }
+
+    /*
+    | El filo de luz sobre la tarjeta.
+    |
+    | Un hilo de un pixel que recoge el cian del logotipo y lo baja a la
+    | tarjeta, para que las dos piezas se lean como una sola y no como dos
+    | recuadros apilados.
+    */
+    .brand-card {
+        position: relative;
+        z-index: 1;
+        overflow: hidden;
+    }
+
+    .brand-card::before {
+        content: '';
+        position: absolute;
+        inset: 0 0 auto 0;
+        height: 1px;
+        background: linear-gradient(
+            90deg,
+            transparent 0%,
+            color-mix(in srgb, var(--color-hud-400) 55%, transparent) 50%,
+            transparent 100%
+        );
+    }
+
     /* --- Listas que se recorren -------------------------------------------- */
 
     /* Una lista mas larga que su caja.

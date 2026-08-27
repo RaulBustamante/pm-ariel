@@ -10,12 +10,25 @@
 </head>
 <body class="h-full bg-slate-100 text-slate-900 antialiased">
     <main class="flex min-h-full flex-col items-center justify-center px-4 py-12">
-        <div class="w-full max-w-md">
-            <div class="mb-8 text-center">
-                <img src="{{ asset(config('branding.logo')) }}" alt="{{ config('branding.name') }} · {{ config('branding.tagline') }}" class="mx-auto w-full max-w-sm rounded-lg shadow-raised">
+        {{-- El logotipo y la tarjeta comparten ancho y viven en el mismo
+             contenedor: antes el logotipo iba a `max-w-sm` y la tarjeta a
+             `max-w-md`, y ese desajuste de cuatro rem era la mitad de por qué la
+             composición se veía chueca. La otra mitad era el archivo, que traía
+             el 64 % de su altura en fondo vacío. --}}
+        <div class="brand-glow w-full max-w-md">
+            {{-- La placa de la marca. El archivo ya viene recortado al arte, así
+                 que aquí solo se redondea, se le pone filo y se le da luz. --}}
+            <div class="brand-plate hud-in mb-7">
+                <img src="{{ asset(config('branding.logo')) }}"
+                     alt="{{ config('branding.name') }} · {{ config('branding.tagline') }}"
+                     width="719" height="295">
             </div>
 
-            <div class="rounded-lg bg-surface p-6 shadow-sm ring-1 ring-slate-200">
+            {{-- La tarjeta entra después del logotipo, no al mismo tiempo: la
+                 mirada aterriza en la marca y luego en el formulario. Con
+                 `prefers-reduced-motion` las dos aparecen de golpe, y el
+                 contenido nunca depende de que la animación termine. --}}
+            <div class="brand-card hud-in hud-in-2 rounded-xl bg-surface p-6 shadow-raised ring-1 ring-slate-200">
                 @yield('content')
             </div>
         </div>

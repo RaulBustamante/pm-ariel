@@ -23,6 +23,10 @@ return [
 
     'tagline' => env('BRANDING_TAGLINE', 'Gestión de proyectos · PMI'),
 
+    // El logotipo **horizontal** de la entrada, mark y texto juntos. Se espera
+    // una relacion de al menos 2:1 y sin franjas muertas: un archivo casi
+    // cuadrado deja el logotipo nadando en su propio fondo, que es como se veia
+    // antes de recortarlo. `BrandingTest` fija esa forma.
     'logo' => env('BRANDING_LOGO', 'images/tesseract-flow-logo.png'),
 
     'mark' => env('BRANDING_MARK', 'images/tesseract-flow-mark.png'),
