@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title') · {{ config('branding.name') }}</title>
-    <link rel="icon" type="image/png" href="{{ asset(config('branding.mark')) }}">
+    <link rel="icon" type="image/png" href="{{ \App\Support\Branding\BrandAsset::url('mark') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full bg-slate-100 text-slate-900 antialiased">
@@ -19,7 +19,7 @@
             {{-- La placa de la marca. El archivo ya viene recortado al arte, así
                  que aquí solo se redondea, se le pone filo y se le da luz. --}}
             <div class="brand-plate hud-in mb-7">
-                <img src="{{ asset(config('branding.logo')) }}"
+                <img src="{{ \App\Support\Branding\BrandAsset::url('logo') }}"
                      alt="{{ config('branding.name') }} · {{ config('branding.tagline') }}"
                      width="719" height="295">
             </div>

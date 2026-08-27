@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Branding;
 
+use App\Support\Branding\BrandAsset;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -50,6 +51,73 @@ final class BrandingTest extends TestCase
             "El logotipo de la entrada es un logotipo horizontal: {$width}x{$height} da una relacion de "
             .round($ratio, 2).', y abajo de 2 vuelve a leerse como un recuadro alto.',
         );
+    }
+
+    #[Test]
+    public function the_brand_url_carries_the_fingerprint_of_the_file(): void
+    {
+        // Sin la huella, cambiar el logotipo deja el servidor con el archivo
+        // nuevo y el navegador pintando el viejo: el despliegue reporta verde y
+        // la pantalla dice que no paso nada. Es la falla mas cara de
+        // diagnosticar que hay, porque no hay error que buscar.
+        BrandAsset::forget();
+
+        $url = BrandAsset::url('logo');
+        $file = public_path((string) config('branding.logo'));
+
+        $this->assertStringContainsString('?v=', $url);
+        $this->assertStringContainsString(substr((string) md5_file($file), 0, 8), $url);
+    }
+
+    #[Test]
+    public function the_fingerprint_changes_when_the_file_changes(): void
+    {
+        // Lo que de verdad importa: que la direccion cambie sola en cuanto
+        // cambia un byte. Se prueba con dos archivos distintos y no con el mismo
+        // dos veces, que no probaria nada.
+        $dir = 'brand-test-'.bin2hex(random_bytes(4));
+        @mkdir(public_path($dir));
+
+        try {
+            file_put_contents(public_path("{$dir}/a.png"), 'primero');
+            file_put_contents(public_path("{$dir}/b.png"), 'segundo');
+
+            BrandAsset::forget();
+            config()->set('branding.logo', "{$dir}/a.png");
+            $first = BrandAsset::url('logo');
+
+            BrandAsset::forget();
+            config()->set('branding.logo', "{$dir}/b.png");
+            $second = BrandAsset::url('logo');
+
+            $this->assertNotSame($first, $second);
+        } finally {
+            @unlink(public_path("{$dir}/a.png"));
+            @unlink(public_path("{$dir}/b.png"));
+            @rmdir(public_path($dir));
+        }
+    }
+
+    #[Test]
+    public function a_missing_brand_file_is_not_given_a_fake_fingerprint(): void
+    {
+        // La imagen rota es la senal de que la marca apunta a donde no hay nada.
+        // Inventarle una huella esconderia el problema sin arreglarlo.
+        BrandAsset::forget();
+        config()->set('branding.logo', 'images/no-existe-este-archivo.png');
+
+        $this->assertStringNotContainsString('?v=', BrandAsset::url('logo'));
+    }
+
+    #[Test]
+    public function the_sign_in_page_serves_a_versioned_logo(): void
+    {
+        BrandAsset::forget();
+
+        $response = $this->get(route('login'));
+
+        $response->assertOk();
+        $response->assertSee(BrandAsset::url('logo'), escape: false);
     }
 
     #[Test]

@@ -21,7 +21,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title') · {{ config('branding.name') }}</title>
-    <link rel="icon" type="image/png" href="{{ asset(config('branding.mark')) }}">
+    <link rel="icon" type="image/png" href="{{ \App\Support\Branding\BrandAsset::url('mark') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="h-full">
@@ -37,7 +37,7 @@
              (ver la nota en app.css) y aquí hace falta un valor absoluto. --}}
         <aside class="hidden w-56 shrink-0 flex-col border-r border-slate-200 bg-shell lg:flex">
             <div class="flex h-14 items-center gap-2 border-b border-slate-200 px-4">
-                <img src="{{ asset(config('branding.mark')) }}" alt="" class="h-8 w-8 object-contain">
+                <img src="{{ \App\Support\Branding\BrandAsset::url('mark') }}" alt="" class="h-8 w-8 object-contain">
                 <span class="truncate text-sm font-semibold tracking-tight text-white">{{ config('branding.short_name') }}</span>
             </div>
 
@@ -109,7 +109,7 @@
                  salida. En pantalla chica también hace de navegación. --}}
             <header class="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-surface/95 px-4 backdrop-blur lg:px-6">
                 <div class="flex min-w-0 items-center gap-3">
-                    <img src="{{ asset(config('branding.mark')) }}" alt="" class="h-8 w-8 object-contain lg:hidden">
+                    <img src="{{ \App\Support\Branding\BrandAsset::url('mark') }}" alt="" class="h-8 w-8 object-contain lg:hidden">
                     {{-- Dentro de un proyecto el título es también la puerta
                          para cambiarse a otro: el nombre ya estaba ahí, y
                          cambiarse costaba salir al listado y volver a entrar.
