@@ -48,6 +48,17 @@ final class UserPolicy
         return ! $user->is($target) && $this->create($user);
     }
 
+    /**
+     * Ponerle contraseña a otra cuenta es poder entrar en ella: se permite a
+     * quien administra usuarios, nunca sobre uno mismo. Para la propia está
+     * "cambiar mi contraseña", que sí exige la actual y por eso sigue
+     * sosteniendo ante auditoría que el dueño fue quien la cambió.
+     */
+    public function resetPassword(User $user, User $target): bool
+    {
+        return ! $user->is($target) && $this->create($user);
+    }
+
     public function assignRoles(User $user): bool
     {
         return ! $this->isReadOnly($user) && $user->hasPermission(Permission::ROLES_MANAGE);

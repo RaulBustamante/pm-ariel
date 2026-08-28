@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\HierarchyController;
 use App\Http\Controllers\Admin\OrgUnitController;
 use App\Http\Controllers\Admin\PositionController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\UserPasswordController;
 use App\Http\Controllers\AdvisorController;
 use App\Http\Controllers\AnalysisController;
 use App\Http\Controllers\AttachmentController;
@@ -297,6 +298,11 @@ Route::middleware('auth')->group(function (): void {
         Route::post('users', [UserController::class, 'store'])->name('users.store');
         Route::get('users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
         Route::put('users/{user}', [UserController::class, 'update'])->name('users.update');
+
+        // Aparte de 'users.update': la contraseña no viaja en el formulario de
+        // perfil para que un guardado de rutina no pueda tocarla.
+        Route::put('users/{user}/password', [UserPasswordController::class, 'update'])->name('users.password.update');
+        Route::post('users/{user}/password/reset', [UserPasswordController::class, 'reset'])->name('users.password.reset');
 
         Route::get('org-units', [OrgUnitController::class, 'index'])->name('org-units.index');
         Route::get('org-units/create', [OrgUnitController::class, 'create'])->name('org-units.create');

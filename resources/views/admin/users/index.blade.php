@@ -59,6 +59,17 @@
                                         {{ __('common.edit') }}<span class="sr-only"> — {{ $user->name }}</span>
                                     </a>
                                 @endcan
+                                @can('resetPassword', $user)
+                                    <form method="POST" action="{{ route('admin.users.password.reset', $user) }}"
+                                          class="ml-3 inline"
+                                          onsubmit="return confirm('{{ __('users.password_reset_confirm') }}')">
+                                        @csrf
+                                        <button type="submit"
+                                                class="rounded text-brand-700 underline hover:text-brand-800 focus:outline-none focus:ring-2 focus:ring-hud-500">
+                                            {{ __('users.password_reset_action') }}<span class="sr-only"> — {{ $user->name }}</span>
+                                        </button>
+                                    </form>
+                                @endcan
                             </td>
                         </tr>
                     @endforeach
