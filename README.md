@@ -207,4 +207,52 @@ compose exige 0.17 o mas. Por eso las imagenes se construyen con `docker build
 --target app|web` y compose solo las levanta con `--no-build`. Si algun dia se
 actualiza buildx, el script se puede simplificar.
 
-`.env.production` vive solo en el servidor y nunca entra al repositorio.
+`.env.production` vive solo en el servidor y nunca entra al repositorio. Un
+cambio a `.env.production.example` **no llega solo a produccion**: la plantilla
+documenta que variables existen, y el archivo de verdad se edita en el servidor.
+
+El servidor jala de `main`. Una rama empujada a GitHub no le llega hasta que
+este en main.
+
+### Si el script no corre
+
+`deploy-pm-ariel.sh` es lo mismo que estos cuatro pasos, y sirven cuando hay que
+ver donde falla o cuando un intermediario bloquea la llamada al script completo:
+
+```
+cd /opt/pm-ariel && git pull --ff-only origin main
+docker build --target app -t pm-ariel-app:latest .
+docker build --target web -t pm-ariel-web:latest .
+docker compose -f compose.production.yml up -d --no-build
+```
+
+Entrar por SSH sin sesion interactiva necesita `SSH_ASKPASS`: OpenSSH lee la
+contraseña de la terminal y no de la entrada estandar, asi que una tuberia no
+alcanza. `plink` de PuTTY tampoco, porque pide confirmar la llave del host en la
+consola. **La contraseña va en una variable de entorno, nunca en un archivo.**
+
+Para `git push` no hace falta ningun token en un `.env`: Git Credential Manager
+ya guarda la credencial en el almacen cifrado de Windows. La contraseña de la
+cuenta de GitHub **no** sirve para `git push` desde 2021 — si algun dia se
+necesita automatizar, se crea un token en GitHub y se guarda en el gestor de
+credenciales, no en texto plano.
+
+## Correr las pruebas en Windows
+
+Dos cosas que no salen de la configuracion del repositorio:
+
+```
+PHP=/c/laragon/bin/php/php-8.4.24-Win32-vs17-x64/php.exe
+DB_PORT=3307 DB_USERNAME=pm_ariel DB_PASSWORD='...' "$PHP" artisan test
+```
+
+- **El `php` del PATH es 8.2** (XAMPP) y `composer.json` exige >= 8.4.1, asi que
+  `php artisan` muere en `platform_check.php`. El 8.4 esta en Laragon. `ci.ps1`
+  ya lo resuelve solo y respeta la variable `PM_ARIEL_PHP`.
+- **MySQL local escucha en 3307.** `phpunit.xml` fuerza `mysql` y la base
+  `pm_ariel_test` pero **no define `DB_PORT`**, asi que sin pasarlo cae al 3306 y
+  todo falla con «connection refused». Hay un `.env.testing` que dice `sqlite`,
+  pero `phpunit.xml` le gana.
+
+Conviene medir la linea base antes de atribuirse una falla: `git stash` y correr
+lo mismo en HEAD limpio.
