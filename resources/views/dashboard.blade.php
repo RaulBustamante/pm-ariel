@@ -93,36 +93,53 @@
                                                class="block truncate text-xs text-slate-800 hover:text-hud-400">
                                                 {{ $task->name }}
                                             </a>
-                                            {{-- La clave del proyecto en cada renglón: sin
-                                                 ella, una lista que mezcla cinco proyectos
-                                                 obliga a adivinar de cuál es cada tarea. --}}
-                                            <span class="font-mono text-[10px] text-slate-500">
-                                                {{ $task->project?->code }}
-                                                @if ($key === 'late' && $task->owner_id === null)
-                                                    · {{ __('reports.unassigned') }}
-                                                @elseif ($task->early_finish)
-                                                    · {{ $task->early_finish->format('d/m') }}
+                                            {{-- De qué proyecto es. Antes decía solo el
+                                                 código —«GP-06»— que identifica el proyecto
+                                                 sin nombrarlo: obligaba a recordar de
+                                                 memoria una tabla de siete equivalencias
+                                                 para leer la propia lista de pendientes.
+
+                                                 El nombre se encoge y la fecha no: es el
+                                                 dato corto y el que se busca por posición.
+                                                 Al revés, un nombre largo se comería el día
+                                                 y la fecha desaparecería sin avisar. --}}
+                                            <span class="mt-0.5 flex items-center gap-1 text-[10px] text-slate-500">
+                                                <x-project-tag :project="$task->project" />
+
+                                                <span class="shrink-0">
+                                                    @if ($key === 'late' && $task->owner_id === null)
+                                                        · {{ __('reports.unassigned') }}
+                                                    @elseif ($task->early_finish)
+                                                        · {{ $task->early_finish->format('d/m') }}
+                                                    @endif
+                                                </span>
+
+                                                {{-- Lo que está esperando se marca
+                                                     donde ya cae, sin sacarlo de su
+                                                     tarjeta: sigue siendo trabajo de
+                                                     esta semana, pero saber que está
+                                                     detenido cambia a quién hay que
+                                                     llamar hoy.
+
+                                                     Va dentro de este renglón y no
+                                                     después: el renglón ahora es un
+                                                     `flex`, y un hermano suelto caería
+                                                     a una línea nueva — el proyecto se
+                                                     ganaría a costa de que cada tarea
+                                                     detenida ocupe el doble. --}}
+                                                @if ($task->isWaiting())
+                                                    @php $reason = $task->waitingReason(); @endphp
+                                                    <span class="shrink-0 whitespace-nowrap text-[var(--color-badge-warn-fg)]"
+                                                          @if ($task->waiting_since)
+                                                              title="{{ __('tasks.waiting_since_date', [
+                                                                  'date' => $task->waiting_since->format('d/m/Y'),
+                                                                  'count' => $task->waitingDays(),
+                                                              ]) }}"
+                                                          @endif>
+                                                        · {{ __("tasks.waiting_{$reason->value}") }}
+                                                    </span>
                                                 @endif
                                             </span>
-
-                                            {{-- Lo que está esperando se marca
-                                                 donde ya cae, sin sacarlo de su
-                                                 tarjeta: sigue siendo trabajo de
-                                                 esta semana, pero saber que está
-                                                 detenido cambia a quién hay que
-                                                 llamar hoy. --}}
-                                            @if ($task->isWaiting())
-                                                @php $reason = $task->waitingReason(); @endphp
-                                                <span class="ml-1 whitespace-nowrap text-[10px] text-[var(--color-badge-warn-fg)]"
-                                                      @if ($task->waiting_since)
-                                                          title="{{ __('tasks.waiting_since_date', [
-                                                              'date' => $task->waiting_since->format('d/m/Y'),
-                                                              'count' => $task->waitingDays(),
-                                                          ]) }}"
-                                                      @endif>
-                                                    · {{ __("tasks.waiting_{$reason->value}") }}
-                                                </span>
-                                            @endif
                                         </li>
                                     @endforeach
                                 </ul>

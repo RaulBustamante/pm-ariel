@@ -30,7 +30,13 @@
                                 <td>
                                     <a href="{{ route('projects.tasks.show', [$task->project, $task]) }}" class="font-medium text-slate-900 hover:text-brand-700 hover:underline">{{ $task->name }}</a>
                                 </td>
-                                <td class="font-mono text-xs text-slate-500">{{ $task->project?->code }}</td>
+                                {{-- La columna se llama «Proyecto» y decía un
+                                     código correlativo. Aquí hay más ancho que
+                                     en las tarjetas del inicio, así que cabe el
+                                     nombre y el código juntos. --}}
+                                <td class="text-xs text-slate-500">
+                                    <x-project-tag :project="$task->project" show-code />
+                                </td>
                                 <td class="whitespace-nowrap text-xs {{ $task->early_finish?->isPast() ? 'font-semibold text-[var(--color-badge-danger-fg)]' : 'text-slate-600' }}">
                                     {{ $task->early_finish?->format('d/m/Y') ?? '—' }}
                                 </td>

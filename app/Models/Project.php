@@ -50,6 +50,48 @@ class Project extends Model
     public const WRITING_ROLES = [self::ROLE_MANAGER, self::ROLE_MEMBER];
 
     /**
+     * Colores para distinguir proyectos en una lista que mezcla varios.
+     *
+     * Escogidos para el lienzo oscuro y para que se distingan entre sí sin
+     * depender de ver rojo y verde: ninguno es el único par que separa a dos
+     * proyectos, y en pantalla el color **siempre** va junto al nombre. El
+     * color acelera el reconocimiento; no carga con el significado solo.
+     *
+     * Son hexadecimales y no clases de Tailwind a propósito: la clase saldría
+     * de un dato, y Tailwind solo compila lo que encuentra escrito en el
+     * código. Una clase armada en tiempo de ejecución se purga y el punto
+     * aparece transparente.
+     */
+    private const SWATCHES = [
+        '#f59e0b', // ámbar
+        '#22d3ee', // cian
+        '#a78bfa', // violeta
+        '#a3e635', // lima
+        '#f472b6', // rosa
+        '#fb923c', // naranja
+        '#60a5fa', // azul
+        '#34d399', // esmeralda
+        '#facc15', // amarillo
+        '#e879f9', // fucsia
+    ];
+
+    /**
+     * El color de este proyecto, estable entre pantallas y entre sesiones.
+     *
+     * Sale del identificador y no de un hash del nombre: renombrar un proyecto
+     * no debería cambiarle el color, porque el color es justamente lo que la
+     * gente aprende a reconocer de un vistazo.
+     *
+     * Con más proyectos que colores, dos comparten tono. No se arregla con una
+     * paleta más grande —los tonos dejarían de distinguirse, que es lo único
+     * que importa aquí— sino con el nombre al lado, que siempre está.
+     */
+    public function swatch(): string
+    {
+        return self::SWATCHES[$this->id % count(self::SWATCHES)];
+    }
+
+    /**
      * @return HasOne<ProjectCharter, $this>
      */
     public function charter(): HasOne
