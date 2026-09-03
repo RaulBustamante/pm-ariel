@@ -6,7 +6,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\ProjectFinding;
-use App\Models\Role;
 use App\Models\User;
 use App\Services\Advisor\ProjectAdvisor;
 use App\Support\Reporting\MyWeek;
@@ -51,9 +50,21 @@ final class HomeController extends Controller
             'tasks' => fn ($tasks) => $tasks->where('is_summary', false),
         ]);
 
-        if (! $viewer->hasRole(Role::ADMIN) && ! $viewer->hasRole(Role::AUDITOR)) {
-            $visibility->scopeProjects($query, $viewer);
-        }
+        // **El inicio siempre está filtrado, incluso para un administrador.**
+        //
+        // Antes se saltaba el filtro con los mismos dos roles que se lo saltan
+        // en los listados, y era la decisión equivocada para esta pantalla en
+        // particular: el inicio no es un listado, es «lo mío». Cada cosa que
+        // vive aquí lo da por hecho —«mi semana» cuenta tareas propias, el
+        // portafolio suma avance y dinero, el asesor señala qué atender— y con
+        // el filtro apagado todo eso hablaba del trabajo de los demás sin
+        // decirlo. Con siete proyectos ya confundía; con doscientos, el inicio
+        // del administrador no se puede leer.
+        //
+        // Ver todo sigue siendo posible, en las dos pantallas hechas para eso:
+        // el listado de proyectos y `admin.projects.index`, que además dice
+        // quién trae qué. Son preguntas distintas y ahora viven aparte.
+        $visibility->scopeProjects($query, $viewer);
 
         // Se acota el número: un inicio que recorre doscientos proyectos para
         // pintar tarjetas tarda más que cualquiera de las pantallas de detalle,

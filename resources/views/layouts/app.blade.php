@@ -59,6 +59,18 @@
                 @canany(['viewAny'], [App\Models\User::class])
                     <p class="nav-section">{{ __('common.administration') }}</p>
 
+                    {{-- Lleva su propio permiso y no el del bloque: ver a los
+                         usuarios y ver el trabajo de todos son dos cosas
+                         distintas, y `viewAll` es la que decide esta. Los dos
+                         roles que la tienen —administrador y auditor— tambien
+                         pueden ver usuarios, asi que ninguno se queda sin la
+                         seccion por estar aqui dentro. --}}
+                    @can('viewAll', App\Models\Project::class)
+                        <x-nav-link :href="route('admin.projects.index')" :active="request()->routeIs('admin.projects.*')" icon="folder">
+                            {{ __('project_overview.title') }}
+                        </x-nav-link>
+                    @endcan
+
                     <x-nav-link :href="route('admin.users.index')" :active="request()->routeIs('admin.users.*')" icon="users">
                         {{ __('common.users') }}
                     </x-nav-link>
@@ -140,13 +152,22 @@
             {{-- Navegación en pantalla chica: la lateral se oculta, pero el
                  acceso no puede desaparecer con ella. --}}
             <nav class="flex gap-1 overflow-x-auto border-b border-slate-200 bg-surface px-4 py-2 lg:hidden" aria-label="{{ __('common.dashboard') }}">
+                {{-- Cada enlace dice qué permiso necesita, y los que no se
+                     cumplen no se dibujan. La barra lateral ya lo hacía con sus
+                     `@can`; esta lista no, así que en pantalla chica ofrecía
+                     «Usuarios» o «Estructura» a quien solo iba a recibir un 403.
+                     Un enlace que lleva a una puerta cerrada es peor que no
+                     tener el enlace: parece una falla del sistema. --}}
                 @foreach ([
                     ['route' => 'dashboard', 'label' => __('common.dashboard'), 'pattern' => 'dashboard'],
-                    ['route' => 'projects.index', 'label' => __('initiation.projects'), 'pattern' => 'projects.*'],
-                    ['route' => 'admin.users.index', 'label' => __('common.users'), 'pattern' => 'admin.users.*'],
-                    ['route' => 'admin.hierarchy.index', 'label' => __('hierarchy.title'), 'pattern' => 'admin.hierarchy.*'],
-                    ['route' => 'admin.org-units.index', 'label' => __('org_units.title'), 'pattern' => 'admin.org-units.*'],
+                    ['route' => 'projects.index', 'label' => __('initiation.projects'), 'pattern' => 'projects.*', 'can' => ['viewAny', App\Models\Project::class]],
+                    ['route' => 'admin.projects.index', 'label' => __('project_overview.title'), 'pattern' => 'admin.projects.*', 'can' => ['viewAll', App\Models\Project::class]],
+                    ['route' => 'admin.users.index', 'label' => __('common.users'), 'pattern' => 'admin.users.*', 'can' => ['viewAny', App\Models\User::class]],
+                    ['route' => 'admin.hierarchy.index', 'label' => __('hierarchy.title'), 'pattern' => 'admin.hierarchy.*', 'can' => ['viewAny', App\Models\User::class]],
+                    ['route' => 'admin.org-units.index', 'label' => __('org_units.title'), 'pattern' => 'admin.org-units.*', 'can' => ['viewAny', App\Models\OrgUnit::class]],
                 ] as $link)
+                    @continue(isset($link['can']) && ! auth()->user()?->can(...$link['can']))
+
                     <a href="{{ route($link['route']) }}"
                        @if (request()->routeIs($link['pattern'])) aria-current="page" @endif
                        class="shrink-0 rounded-md px-3 py-1.5 text-sm font-medium

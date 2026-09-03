@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\HierarchyController;
 use App\Http\Controllers\Admin\OrgUnitController;
 use App\Http\Controllers\Admin\PositionController;
+use App\Http\Controllers\Admin\ProjectOverviewController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\UserPasswordController;
 use App\Http\Controllers\AdvisorController;
@@ -295,6 +296,11 @@ Route::middleware('auth')->group(function (): void {
     });
 
     Route::prefix('admin')->name('admin.')->group(function (): void {
+        // El mapa de quién trae qué proyectos. Vive en `admin` y no junto al
+        // listado de proyectos a propósito: el listado contesta «¿qué traigo
+        // yo?» —filtrado a quien mira— y esta contesta «¿quién trae qué?», que
+        // es una pregunta de administración y no de trabajo diario.
+        Route::get('projects', [ProjectOverviewController::class, 'index'])->name('projects.index');
         Route::get('buzon', [BuzonController::class, 'index'])->name('buzon.index');
         Route::patch('buzon/{ticket}', [BuzonController::class, 'update'])->name('buzon.update');
         Route::delete('buzon/{ticket}', [BuzonController::class, 'destroy'])->name('buzon.destroy');

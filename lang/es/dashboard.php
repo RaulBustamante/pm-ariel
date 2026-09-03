@@ -52,4 +52,9 @@ return [
     'week_no_due' => 'Nada te vence esta semana.',
     'week_no_next' => 'No te arranca nada la semana que entra.',
     'week_no_closed' => 'Todavia no cierras nada esta semana.',
+
+    // Para quien puede ver todo: decir que esta pantalla no lo hace, y
+    // dónde sí. Sin esto, un administrador no sabe si le falta algo.
+    'scoped_to_me' => 'Aquí aparecen solo los proyectos que cargas tú o tu gente, no todos los del sistema.',
+    'see_all_projects' => 'Ver todos los proyectos y quién trae qué',
 ];

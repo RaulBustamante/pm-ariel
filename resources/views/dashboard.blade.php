@@ -9,6 +9,19 @@
         $projects = $projects ?? collect();
     @endphp
 
+    {{-- Esta pantalla es «lo mío», y para quien puede ver todo eso hay que
+         decirlo. Sin este renglón, un administrador que aquí ve tres proyectos
+         y sabe que hay veinte no tiene forma de saber si el sistema le está
+         escondiendo algo o si simplemente no es suyo. La respuesta —y la puerta
+         a donde sí se ve todo— cabe en una línea. --}}
+    @can('viewAll', App\Models\Project::class)
+        <p class="mb-4 rounded-md bg-slate-50 px-4 py-2.5 text-xs text-slate-600 ring-1 ring-slate-200">
+            {{ __('dashboard.scoped_to_me') }}
+            <a href="{{ route('admin.projects.index') }}"
+               class="font-medium text-brand-700 underline hover:no-underline">{{ __('dashboard.see_all_projects') }}</a>
+        </p>
+    @endcan
+
     @if ($projects->isEmpty())
         {{-- Estado vacío con guía: qué es esto, por qué está vacío y qué hacer.
              Una pantalla en blanco deja al usuario adivinando si el sistema

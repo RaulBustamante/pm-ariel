@@ -30,6 +30,24 @@ final class ProjectPolicy
             || $user->hasRole(Role::AUDITOR);
     }
 
+    /**
+     * Ver el mapa completo: todos los proyectos y quién tiene cuáles.
+     *
+     * No es lo mismo que `viewAny`, y por eso es su propia habilidad. `viewAny`
+     * contesta «¿puede entrar al listado?» —que casi todos pueden, cada uno con
+     * lo suyo—; esta contesta «¿puede ver lo que no le toca, incluido lo de
+     * quien no está en su cadena de mando?».
+     *
+     * Son los dos roles que ya se saltaban el filtro de visibilidad en los
+     * listados: el administrador y el auditor. A propósito **no** se le da al
+     * portfolio_manager: hoy nadie lo pidió, y ampliar quién ve el trabajo
+     * ajeno es una decisión de la organización, no una comodidad de pantalla.
+     */
+    public function viewAll(User $user): bool
+    {
+        return $user->hasRole(Role::ADMIN) || $user->hasRole(Role::AUDITOR);
+    }
+
     /** Regla 1 y regla 4. */
     public function view(User $user, Project $project): bool
     {

@@ -52,4 +52,9 @@ return [
     'week_no_due' => 'Nothing of yours is due this week.',
     'week_no_next' => 'Nothing of yours starts next week.',
     'week_no_closed' => 'You have not closed anything this week yet.',
+
+    // For whoever can see everything: say that this screen does not, and
+    // where it can be seen. Without this, an admin cannot tell what is missing.
+    'scoped_to_me' => 'Only the projects you or your people own show up here, not every project in the system.',
+    'see_all_projects' => 'See every project and who has what',
 ];
