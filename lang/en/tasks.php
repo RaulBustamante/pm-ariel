@@ -55,6 +55,31 @@ return [
     'cannot_up' => 'It is already the first in its group.',
     'cannot_down' => 'It is already the last in its group.',
 
+    // Capture inside a package without having to indent afterwards.
+    'add_subtask' => 'Subtask',
+    'add_subtask_of' => 'Add a subtask inside ":name"',
+    'new_subtask_of' => 'New subtask of ":name"',
+    'new_subtask_hint' => 'It is born inside the package: no need to indent it afterwards. On save, the form stays here so you can capture the next one.',
+    'new_subtask_exit' => 'Create it at the top level instead',
+
+    // Reorganize as a group. One task at a time means one project recalculation
+    // and one page reload per arrow click.
+    'bulk_title' => 'Move several at once',
+    'bulk_hint' => 'Tick the tasks in the first column and pick which package they go into. They all move together, with a single recalculation.',
+    'bulk_select' => 'Select ":name" to move it as part of a group',
+    'bulk_select_all' => 'Select every visible task',
+    'bulk_parent' => 'Put them inside',
+    'bulk_top_level' => 'Top level (pull them out of their package)',
+    'bulk_apply' => 'Move the selected ones',
+    'bulk_selected_count' => ':count selected',
+    'bulk_none_selected' => 'You did not tick any task. Tick at least one in the first column.',
+    'bulk_moved' => ':count task(s) moved and plan recalculated.',
+    'bulk_cycle' => 'A task cannot end up inside one of its own subtasks: ":name" is a descendant of the one you are moving.',
+    'bulk_into_itself' => 'A task cannot end up inside itself.',
+
+    'legend_subtask' => 'Creates a subtask already inside this package, with no need to indent it afterwards.',
+    'legend_bulk' => 'Tick several tasks to move them into the same package together.',
+
     'dependency_unreadable' => 'I cannot read ":piece". Try 12, 12FS+2d or 15SS.',
     'dependency_unknown_task' => 'There is no task :reference in this project.',
     'dependency_repeated' => 'Task :reference appears twice. Once is enough.',

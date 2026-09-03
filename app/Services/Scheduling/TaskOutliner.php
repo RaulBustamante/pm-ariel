@@ -8,6 +8,7 @@ use App\Models\Project;
 use App\Models\Task;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 
 /**
  * Mover tareas dentro del esquema: indentar, desindentar, subir y bajar.
@@ -98,6 +99,158 @@ final class TaskOutliner
 
             return true;
         });
+    }
+
+    /**
+     * Mueve varias tareas dentro de un mismo padre en una sola operación.
+     *
+     * Existe porque el camino de una en una no escala: cada indentada es un
+     * recálculo del proyecto y una recarga de la lista, así que acomodar cinco
+     * subtareas seguidas costaba cinco de las dos cosas. Aquí las cinco se
+     * mueven dentro de una transacción y el proyecto se recalcula una vez.
+     *
+     * A diferencia de `indent()`, el padre lo escoge el usuario y no es
+     * forzosamente la hermana de arriba. Eso abre dos formas de romper el árbol
+     * que ahí eran imposibles, y las dos se cierran aquí:
+     *
+     * - **Meter una tarea dentro de sí misma o de una de sus descendientes.**
+     *   Dejaría una rama huérfana del recorrido de `outline()` y colgada de un
+     *   ciclo: la tarea no volvería a aparecer en pantalla.
+     * - **Mover una rama y sus hijas por separado.** Si el usuario marca un
+     *   paquete y también algo de adentro, lo que quiere es mover el paquete
+     *   completo; mover las dos cosas lo desarmaría. Las descendientes de otra
+     *   seleccionada se ignoran, porque ya viajan con su padre.
+     *
+     * El orden relativo de lo seleccionado se conserva: llegan al final del
+     * nuevo padre en el mismo orden en que se leen en la lista.
+     *
+     * @param  Collection<int, Task>  $tasks  En el orden en que deben quedar.
+     * @return int Cuántas se movieron de verdad.
+     *
+     * @throws InvalidArgumentException Si el destino crearía un ciclo.
+     */
+    public function reparent(Project $project, Collection $tasks, ?Task $newParent): int
+    {
+        $tasks = $tasks->filter(fn (Task $task): bool => $task->project_id === $project->id)->values();
+
+        if ($tasks->isEmpty()) {
+            return 0;
+        }
+
+        if ($newParent !== null) {
+            $this->assertBelongs($project, $newParent);
+
+            // El ciclo se busca **subiendo desde el destino**, no bajando desde
+            // lo seleccionado. Es la misma pregunta dicha al revés —«¿el nuevo
+            // padre cuelga de alguna de las que se están moviendo?»— y así se
+            // contesta con un solo recorrido en vez de uno por tarea.
+            //
+            // Bajar desde el destino seria la pregunta equivocada: buscaria a
+            // la tarea entre las hijas de su futuro padre, que es precisamente
+            // donde todavia no esta.
+            $blocked = $this->ancestorIds($project, $newParent);
+            $blocked[] = (int) $newParent->id;
+
+            foreach ($tasks as $task) {
+                if (! in_array((int) $task->id, $blocked, true)) {
+                    continue;
+                }
+
+                throw new InvalidArgumentException((int) $task->id === (int) $newParent->id
+                    ? __('tasks.bulk_into_itself')
+                    : __('tasks.bulk_cycle', ['name' => $newParent->name]));
+            }
+        }
+
+        $selected = $tasks->map(fn (Task $task): int => (int) $task->id)->all();
+
+        // Lo que ya viaja con su padre no se mueve aparte.
+        $movable = $tasks->reject(
+            fn (Task $task): bool => array_intersect($this->ancestorIds($project, $task), $selected) !== [],
+        )->values();
+
+        if ($movable->isEmpty()) {
+            return 0;
+        }
+
+        $newParentId = $newParent?->id;
+
+        // Los identificadores y los padres se sacan **antes** de escribir nada,
+        // porque lo que sigue no vuelve a tocar estos modelos.
+        //
+        // `outline()` le cuelga a cada tarea un `outline_depth` que no es una
+        // columna, y eso la deja marcada como modificada: un `$task->update()`
+        // sobre uno de esos modelos intenta guardar el atributo de adorno junto
+        // con lo demás y la base rechaza la escritura completa. Aquí se escribe
+        // por identificador para no depender de con qué venía cargado el
+        // modelo — el que llama tiene derecho a pasar el esquema tal como se
+        // dibuja en pantalla, que es justo lo que hace la lista.
+        $moves = $movable->map(fn (Task $task): array => [
+            'id' => (int) $task->id,
+            'from' => $task->parent_id,
+        ])->all();
+
+        return DB::transaction(function () use ($moves, $newParentId, $project): int {
+            $ids = array_column($moves, 'id');
+
+            $next = (int) Task::query()
+                ->where('project_id', $project->id)
+                ->where('parent_id', $newParentId)
+                ->whereNotIn('id', $ids)
+                ->max('sort_order') + 1;
+
+            $touchedParents = [];
+
+            foreach ($moves as $move) {
+                $touchedParents[] = $move['from'];
+
+                Task::query()->whereKey($move['id'])->update([
+                    'parent_id' => $newParentId,
+                    'sort_order' => $next++,
+                    'updated_at' => now(),
+                ]);
+            }
+
+            // Los padres de origen se quedan con huecos en la numeración. No
+            // rompe nada, pero deja el orden dependiendo del id en vez de lo
+            // que el usuario decidió la próxima vez que mueva algo ahí.
+            foreach (array_unique(array_merge($touchedParents, [$newParentId]), SORT_REGULAR) as $parentId) {
+                $this->resequence($project->id, $parentId, 0);
+            }
+
+            return count($moves);
+        });
+    }
+
+    /**
+     * Los ids de los padres de una tarea, subiendo hasta la raíz.
+     *
+     * Se resuelve con una sola consulta al proyecto y un recorrido en memoria:
+     * una consulta por nivel convertiría un árbol hondo en decenas de viajes a
+     * la base, y el proyecto entero cabe de sobra en memoria — la lista misma
+     * ya lo carga completo en `outline()`.
+     *
+     * El `in_array` del recorrido no es defensa de más: si un ciclo alcanzara a
+     * guardarse, sin él este `while` no termina nunca.
+     *
+     * @return list<int>
+     */
+    private function ancestorIds(Project $project, Task $task): array
+    {
+        $parents = Task::query()
+            ->where('project_id', $project->id)
+            ->get(['id', 'parent_id'])
+            ->mapWithKeys(fn (Task $row): array => [(int) $row->id => $row->parent_id]);
+
+        $found = [];
+        $current = $task->parent_id;
+
+        while ($current !== null && ! in_array((int) $current, $found, true)) {
+            $found[] = (int) $current;
+            $current = $parents->get((int) $current);
+        }
+
+        return $found;
     }
 
     /**

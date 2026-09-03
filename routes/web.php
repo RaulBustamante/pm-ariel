@@ -153,6 +153,11 @@ Route::middleware('auth')->group(function (): void {
             ->whereIn('action', ['indent', 'outdent', 'up', 'down'])
             ->name('projects.tasks.outline');
         Route::post('tasks/recalculate', [TaskController::class, 'recalculate'])->name('projects.tasks.recalculate');
+        // Mover varias tareas al mismo paquete de un golpe. Va sin `{task}` en
+        // la direccion porque el sujeto es una seleccion y no una tarea suelta:
+        // los identificadores viajan en el cuerpo. No compite con
+        // `tasks/{task}`, que solo responde a PUT y DELETE.
+        Route::post('tasks/reparent', [TaskController::class, 'reparent'])->name('projects.tasks.reparent');
 
         // Comentarios y dependencias de una tarea. Van aparte del controlador de
         // tareas porque no recalculan lo mismo: comentar no toca el plan, y

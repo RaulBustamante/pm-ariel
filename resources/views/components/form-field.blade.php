@@ -1,4 +1,4 @@
-@props(['name', 'label', 'type' => 'text', 'value' => '', 'required' => false, 'help' => null])
+@props(['name', 'label', 'type' => 'text', 'value' => '', 'required' => false, 'help' => null, 'autofocus' => false])
 
 @php
     $id = $name . '-field';
@@ -21,6 +21,7 @@
            name="{{ $name }}"
            value="{{ old($name, $value) }}"
            @if ($required) required @endif
+           @if ($autofocus) autofocus @endif
            @if ($describedBy) aria-describedby="{{ $describedBy }}" @endif
            @if ($errors->has($name)) aria-invalid="true" @endif
            {{ $attributes->merge([

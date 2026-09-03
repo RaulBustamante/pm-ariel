@@ -2,6 +2,7 @@
 // aquí son mejoras encima, nunca requisitos.
 import './gantt.js';
 import './kanban.js';
+import './task-bulk.js';
 import './task-detail.js';
 import './shortcuts.js';
 import './project-switcher.js';

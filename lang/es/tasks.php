@@ -55,6 +55,33 @@ return [
     'cannot_up' => 'Ya es la primera de su grupo.',
     'cannot_down' => 'Ya es la última de su grupo.',
 
+    // Capturar dentro de un paquete sin tener que indentar despues. El alta
+    // siempre creaba al primer nivel: capturar cinco subtareas costaba cinco
+    // altas mas cinco indentadas, y la mitad del trabajo era acomodar.
+    'add_subtask' => 'Subtarea',
+    'add_subtask_of' => 'Agregar una subtarea dentro de «:name»',
+    'new_subtask_of' => 'Nueva subtarea de «:name»',
+    'new_subtask_hint' => 'Nace ya dentro del paquete: no hay que indentarla despues. Al guardar, el formulario se queda aqui para capturar la siguiente.',
+    'new_subtask_exit' => 'Mejor crearla al primer nivel',
+
+    // Reacomodar en grupo. Una tarea a la vez es un recalculo del proyecto y
+    // una recarga por cada flechita; cinco subtareas seguidas eran cinco.
+    'bulk_title' => 'Mover varias de una vez',
+    'bulk_hint' => 'Marca las tareas en la primera columna y escoge dentro de que paquete van. Se mueven todas juntas, con un solo recalculo.',
+    'bulk_select' => 'Seleccionar «:name» para moverla en grupo',
+    'bulk_select_all' => 'Seleccionar todas las tareas visibles',
+    'bulk_parent' => 'Meterlas dentro de',
+    'bulk_top_level' => 'Primer nivel (sacarlas de su paquete)',
+    'bulk_apply' => 'Mover las seleccionadas',
+    'bulk_selected_count' => ':count seleccionada(s)',
+    'bulk_none_selected' => 'No marcaste ninguna tarea. Marca al menos una en la primera columna.',
+    'bulk_moved' => ':count tarea(s) movidas y plan recalculado.',
+    'bulk_cycle' => 'Una tarea no puede quedar dentro de una de sus propias subtareas: «:name» es descendiente de la que quieres mover.',
+    'bulk_into_itself' => 'Una tarea no puede quedar dentro de si misma.',
+
+    'legend_subtask' => 'Crea una subtarea ya dentro de este paquete, sin tener que indentarla despues.',
+    'legend_bulk' => 'Marca varias tareas para moverlas juntas al mismo paquete.',
+
     'dependency_unreadable' => 'No entiendo «:piece». Prueba con 12, 12FS+2d o 15SS.',
     'dependency_unknown_task' => 'No existe la tarea :reference en este proyecto.',
     'dependency_repeated' => 'La tarea :reference aparece dos veces. Con una basta.',

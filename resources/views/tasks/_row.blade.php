@@ -28,7 +28,21 @@
      que en el tablero. La puerta de verdad sigue siendo el enlace del final: el
      doble clic no existe para quien navega con teclado. --}}
 <tr data-task-url="{{ $detailUrl }}"
+    data-task-row="{{ $task->id }}"
     class="{{ $task->is_summary ? 'bg-slate-50/60 font-medium' : '' }}">
+    {{-- La casilla para moverla en grupo. Pertenece al formulario de abajo por
+         el atributo `form`, igual que los campos del renglon pertenecen al de
+         su tarea: un `<form>` no puede envolver renglones de una tabla sin que
+         el navegador lo saque de ahi y rompa el cuerpo. --}}
+    @can('update', $project)
+        <td class="px-2 py-1.5 align-middle">
+            <input type="checkbox" name="tasks[]" value="{{ $task->id }}"
+                   form="{{ $bulkFormId }}" data-bulk-task
+                   aria-label="{{ __('tasks.bulk_select', ['name' => $task->name]) }}"
+                   class="h-3.5 w-3.5 rounded border-slate-300 text-brand-700 focus:ring-2 focus:ring-hud-500">
+        </td>
+    @endcan
+
     <td class="px-2 py-1.5 text-right align-middle font-mono text-xs text-slate-400"
         title="{{ __('tasks.reference_of', ['name' => $task->name]) }}">{{ $reference }}</td>
 
@@ -162,6 +176,21 @@
                     'down' => ['▼', __('tasks.move_down')],
                 ];
             @endphp
+
+            {{-- Crear la hija ya dentro de este paquete.
+                 Es la salida al camino largo: el alta siempre nacia al primer
+                 nivel, asi que capturar cinco subtareas costaba cinco altas
+                 mas cinco indentadas, y la mitad del trabajo era acomodar algo
+                 que ya se sabia donde iba desde el principio.
+                 Es un enlace y no un boton porque no cambia nada: solo lleva a
+                 la misma lista con el formulario de alta apuntado a este
+                 paquete. Se puede compartir, recargar y abrir en otra pestana. --}}
+            <a href="{{ route('projects.tasks.index', [$project, 'parent' => $task->id]) }}#{{ \App\Http\Controllers\TaskController::NEW_TASK_ANCHOR }}"
+               title="{{ __('tasks.add_subtask_of', ['name' => $task->name]) }}"
+               class="rounded px-1 py-0.5 text-xs text-slate-500 hover:bg-slate-100 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-hud-500">
+                <span aria-hidden="true">+</span>
+                <span class="sr-only">{{ __('tasks.add_subtask_of', ['name' => $task->name]) }}</span>
+            </a>
 
             @foreach ($outlineActions as $action => [$glyph, $label])
                 <form method="POST" action="{{ route('projects.tasks.outline', [$project, $task, $action]) }}" class="inline">

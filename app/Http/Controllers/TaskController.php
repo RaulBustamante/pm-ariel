@@ -38,6 +38,14 @@ final class TaskController extends Controller
     /** Renglones que se dibujan de una vez en la vista Lista. */
     private const MAX_ROWS = 300;
 
+    /**
+     * El ancla del formulario de alta. Vive en una constante porque la usan el
+     * controlador --al redirigir-- y la vista, y si las dos se separan el
+     * usuario acaba mirando el encabezado de la lista en vez del campo donde
+     * iba a escribir.
+     */
+    public const NEW_TASK_ANCHOR = 'nueva-tarea';
+
     public function __construct(
         private readonly TaskOutliner $outliner,
         private readonly ProjectScheduler $scheduler,
@@ -58,8 +66,14 @@ final class TaskController extends Controller
         // el motor aguanta 2,000 tareas en 220 ms, pero el DOM no.
         $capped = $visible->count() > self::MAX_ROWS;
 
+        // El paquete dentro del que se va a capturar. Llega en la direccion y
+        // no en la sesion: asi el enlace de cada renglon se puede compartir y
+        // recargar, y no queda un modo pegado en otra pestana.
+        $parent = $this->parentFromRequest($request, $project);
+
         return view('tasks.index', [
             'project' => $project,
+            'parent' => $parent,
             'tasks' => $capped ? $visible->take(self::MAX_ROWS) : $visible,
             'filter' => $filter,
             'visibleCount' => $visible->count(),
@@ -148,7 +162,10 @@ final class TaskController extends Controller
         ]);
         $task->save();
 
-        return $this->afterChange($project, __('tasks.created'));
+        // Se regresa al mismo paquete. Capturar cinco subtareas seguidas es el
+        // caso normal, y devolver el formulario al primer nivel obligaba a
+        // buscar otra vez el renglon y oprimir «Subtarea» en cada una.
+        return $this->afterChange($project, __('tasks.created'), $task->parent_id);
     }
 
     public function update(StoreTaskRequest $request, Project $project, Task $task): RedirectResponse
@@ -240,6 +257,61 @@ final class TaskController extends Controller
         }
 
         return $this->afterChange($project, __('tasks.moved'));
+    }
+
+    /**
+     * Mover varias tareas al mismo paquete de un golpe.
+     *
+     * El camino de una en una ya existia con las flechitas y no escala: cada
+     * clic es un recalculo del proyecto entero y una recarga de una pantalla
+     * que trae un formulario por renglon. Acomodar las diez tareas de una
+     * semana eran quince recargas; aqui es una.
+     */
+    public function reparent(Request $request, Project $project): RedirectResponse
+    {
+        $this->authorize('update', $project);
+
+        $data = $request->validate([
+            'tasks' => ['required', 'array', 'min:1'],
+            'tasks.*' => ['integer'],
+            'parent_id' => ['nullable', 'integer'],
+        ]);
+
+        // El orden en que llegan las casillas lo decide el navegador. El que
+        // importa es el de la pantalla: es el que el usuario esta viendo y el
+        // que espera encontrar dentro del paquete al terminar.
+        $wanted = array_map('intval', $data['tasks']);
+        $selected = $this->outliner->outline($project)
+            ->filter(fn (Task $task): bool => in_array((int) $task->id, $wanted, true))
+            ->values();
+
+        if ($selected->isEmpty()) {
+            return back()->with('warning', __('tasks.bulk_none_selected'));
+        }
+
+        $parent = null;
+
+        if (filled($data['parent_id'] ?? null)) {
+            // `assertBelongs` responde 404 y es lo correcto: un numero de otro
+            // proyecto no es un dato invalido que se le explique al usuario,
+            // es una direccion que no existe para el.
+            $parent = Task::query()->findOrFail((int) $data['parent_id']);
+            $this->outliner->assertBelongs($project, $parent);
+        }
+
+        try {
+            $moved = $this->outliner->reparent($project, $selected, $parent);
+        } catch (InvalidArgumentException $error) {
+            // `reparent` valida el ciclo antes de escribir, asi que aqui el
+            // plan sigue exactamente como estaba: no hay nada que deshacer.
+            return back()->with('error', $error->getMessage());
+        }
+
+        if ($moved === 0) {
+            return back()->with('warning', __('tasks.bulk_none_selected'));
+        }
+
+        return $this->afterChange($project, __('tasks.bulk_moved', ['count' => $moved]));
     }
 
     public function recalculate(Project $project): RedirectResponse
@@ -369,18 +441,44 @@ final class TaskController extends Controller
      * null y se avisa con el ciclo señalado, en vez de dejar fechas viejas
      * conviviendo con nuevas.
      */
-    private function afterChange(Project $project, string $status): RedirectResponse
+    private function afterChange(Project $project, string $status, ?int $keepParent = null): RedirectResponse
     {
         $result = $this->scheduler->reschedule($project->refresh());
+
+        // El paquete viaja en la direccion de regreso y el ancla deja el foco
+        // donde se sigue escribiendo. Sin el ancla, cada tarea capturada manda
+        // al usuario al principio de una lista que puede medir cien renglones.
+        $target = $keepParent === null
+            ? route('projects.tasks.index', $project)
+            : route('projects.tasks.index', [$project, 'parent' => $keepParent]).'#'.self::NEW_TASK_ANCHOR;
 
         if ($result === null && $project->tasks()->exists()) {
             $reason = $project->scheduleRuns()->first()?->failure_reason;
 
-            return redirect()
-                ->route('projects.tasks.index', $project)
-                ->with('error', $reason ?: __('tasks.could_not_calculate'));
+            return redirect()->to($target)->with('error', $reason ?: __('tasks.could_not_calculate'));
         }
 
-        return redirect()->route('projects.tasks.index', $project)->with('status', $status);
+        return redirect()->to($target)->with('status', $status);
+    }
+
+    /**
+     * El paquete dentro del que se captura, tomado de `?parent=`.
+     *
+     * Devuelve `null` tanto si no venia nada como si el numero no es de este
+     * proyecto. Un 404 seria peor: la lista si existe, y el unico efecto de un
+     * numero invalido es que el alta vuelva al primer nivel.
+     */
+    private function parentFromRequest(Request $request, Project $project): ?Task
+    {
+        $id = $request->integer('parent');
+
+        if ($id <= 0) {
+            return null;
+        }
+
+        return Task::query()
+            ->where('project_id', $project->id)
+            ->whereKey($id)
+            ->first();
     }
 }

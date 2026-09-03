@@ -72,7 +72,20 @@ final class StoreTaskRequest extends FormRequest
             'waiting_on' => ['nullable', Rule::in(WaitingReason::values())],
             'waiting_note' => ['nullable', 'string', 'max:255'],
             'predecessors' => ['nullable', 'string', 'max:255'],
-            'parent_id' => ['nullable', 'integer'],
+
+            // El paquete dentro del que nace la tarea, acotado al proyecto por
+            // la misma razon que el calendario. Hasta ahora ninguna pantalla lo
+            // enviaba y la regla suelta no hacia daño; desde que el renglon
+            // tiene su «+», un numero escrito a mano en la direccion colgaria
+            // la tarea del arbol de otro cliente — y ahi no volveria a
+            // aparecer, porque `outline()` solo recorre lo de este proyecto.
+            'parent_id' => [
+                'nullable', 'integer',
+                Rule::exists('tasks', 'id')->where(
+                    'project_id',
+                    $this->route('project') instanceof Project ? $this->route('project')->id : 0,
+                ),
+            ],
         ];
     }
 

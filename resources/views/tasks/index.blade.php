@@ -3,6 +3,15 @@
 @section('title', __('tasks.title'))
 @section('heading', $project->name)
 
+@php
+    // El identificador del formulario de grupo. Lo comparten la casilla de cada
+    // renglón y el formulario que vive fuera de la tabla; si se escribe a mano
+    // en los dos lados, el día que cambie uno las casillas dejan de enviarse
+    // sin que nada avise.
+    $bulkFormId = 'bulk-outline';
+    $anchor = \App\Http\Controllers\TaskController::NEW_TASK_ANCHOR;
+@endphp
+
 @section('content')
     @include('tasks._tabs', ['active' => 'list'])
 
@@ -34,6 +43,18 @@
                 <caption class="sr-only">{{ __('tasks.title') }}</caption>
                 <thead class="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-600">
                     <tr>
+                        @can('update', $project)
+                            <th scope="col" class="px-2 py-2">
+                                {{-- Marcar todas de una vez. Va oculta hasta que
+                                     JavaScript la enciende: sin él sería una
+                                     casilla que no hace nada, y eso es peor
+                                     que no tenerla. --}}
+                                <input type="checkbox" data-bulk-all hidden
+                                       aria-label="{{ __('tasks.bulk_select_all') }}"
+                                       class="h-3.5 w-3.5 rounded border-slate-300 text-brand-700 focus:ring-2 focus:ring-hud-500">
+                            </th>
+                        @endcan
+
                         <th scope="col" class="px-2 py-2 text-right">
                             {{ __('tasks.wbs') }}
                             <x-help-term term="wbs" />
@@ -76,6 +97,74 @@
 
         @stack('outside-table')
 
+        {{-- Mover varias al mismo paquete de un golpe.
+             Cada flechita es un recálculo del proyecto y una recarga de esta
+             pantalla —que trae un formulario por renglón—, así que acomodar las
+             diez tareas de una semana eran quince recargas. Marcar y escoger
+             destino es una.
+             Vive fuera de la tabla por la misma razón que los formularios de
+             cada renglón: el navegador no deja un `<form>` entre `<tr>`. Las
+             casillas lo alcanzan con el atributo `form`.
+             Funciona completo sin JavaScript: son casillas y un `<select>`. --}}
+        @can('update', $project)
+            <form method="POST" action="{{ route('projects.tasks.reparent', $project) }}"
+                  id="{{ $bulkFormId }}"
+                  class="mb-3 rounded-lg bg-surface p-4 ring-1 ring-slate-200">
+                @csrf
+
+                <div class="flex flex-wrap items-end gap-3">
+                    <div class="min-w-0">
+                        <h2 class="text-sm font-semibold text-slate-900">{{ __('tasks.bulk_title') }}</h2>
+                        <p class="mt-1 max-w-xl text-xs text-slate-500">{{ __('tasks.bulk_hint') }}</p>
+                    </div>
+
+                    <div class="ml-auto flex flex-wrap items-end gap-2">
+                        <div>
+                            <label for="bulk-parent-field" class="block text-xs font-medium text-slate-700">
+                                {{ __('tasks.bulk_parent') }}
+                            </label>
+                            {{-- Los destinos son los renglones que están a la
+                                 vista, no el plan entero. Si el filtro esconde
+                                 una tarea, ofrecerla aquí haría que la pantalla
+                                 dijera dos cosas distintas del mismo filtro —y
+                                 nombraría en un desplegable justo lo que se
+                                 pidió esconder.
+                                 A propósito no se descartan los renglones que
+                                 no son paquete: cualquier tarea se vuelve uno
+                                 en el momento en que algo se le mete adentro,
+                                 que es justo lo que hace este formulario.
+                                 La sangría va con espacios duros: el HTML
+                                 colapsa los normales y el árbol se veía plano,
+                                 sin manera de saber qué cuelga de qué. --}}
+                            <select id="bulk-parent-field" name="parent_id"
+                                    class="mt-1 block max-w-xs rounded-md border-slate-300 text-sm shadow-sm focus:border-hud-500 focus:ring-2 focus:ring-hud-500">
+                                <option value="">{{ __('tasks.bulk_top_level') }}</option>
+                                @foreach ($tasks as $candidate)
+                                    {{-- El relleno va sin escapar porque es texto
+                                         fijo del programa. El nombre de la tarea
+                                         nunca: eso lo escribe un usuario y sale
+                                         por `{{ }}`, como todo lo demás. --}}
+                                    <option value="{{ $candidate->id }}">{!! str_repeat('&nbsp;&nbsp;&nbsp;', (int) ($candidate->outline_depth ?? 0)) !!}{{ $candidate->wbs_code ? $candidate->wbs_code.' · ' : '' }}{{ $candidate->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-secondary btn-sm">
+                            {{ __('tasks.bulk_apply') }}
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Cuántas van marcadas. Lo llena JavaScript; vacío no estorba.
+                     El texto viaja en el atributo y no dentro del `.js`: ahí no
+                     habría cómo traducirlo, y esta pantalla existe en dos
+                     idiomas. --}}
+                <p data-bulk-count role="status"
+                   data-template="{{ __('tasks.bulk_selected_count') }}"
+                   class="mt-2 text-xs font-medium text-brand-700"></p>
+            </form>
+        @endcan
+
         <p class="mb-3 text-xs text-slate-500">{{ __('tasks.detail_hint_row') }}</p>
 
         {{-- Lo que la tabla dice en símbolos, dicho en palabras.
@@ -93,6 +182,8 @@
                     [__('tasks.critical'), __('tasks.legend_critical')],
                     ['⋯', __('tasks.legend_detail')],
                     ['✎', __('tasks.legend_notes')],
+                    ['+', __('tasks.legend_subtask')],
+                    ['☐', __('tasks.legend_bulk')],
                     ['◀ ▶', __('tasks.legend_indent')],
                     ['▲ ▼', __('tasks.legend_move')],
                     ['✕', __('tasks.legend_delete')],
@@ -114,14 +205,40 @@
              una pantalla aparte por cada tarea es lo que hace que capturar un
              plan de sesenta tareas se sienta interminable. --}}
         <form method="POST" action="{{ route('projects.tasks.store', $project) }}"
+              id="{{ $anchor }}"
               class="space-y-4 rounded-lg bg-surface p-5 ring-1 ring-slate-200 lg:col-span-2">
             @csrf
 
-            <h2 class="text-sm font-semibold text-slate-900">{{ __('tasks.new_task') }}</h2>
+            {{-- El paquete dentro del que nace la tarea.
+                 `store()` siempre aceptó `parent_id`; lo que faltaba era una
+                 forma de decirlo desde aquí. Sin esto, la única manera de armar
+                 un nivel era crear plano y después indentar renglón por
+                 renglón, y de ahí salía casi todo el trabajo a mano. --}}
+            @if ($parent)
+                <input type="hidden" name="parent_id" value="{{ $parent->id }}">
+
+                <div>
+                    <h2 class="text-sm font-semibold text-slate-900">
+                        {{ __('tasks.new_subtask_of', ['name' => $parent->name]) }}
+                    </h2>
+                    <p class="mt-1 text-xs text-slate-500">{{ __('tasks.new_subtask_hint') }}</p>
+                    <a href="{{ route('projects.tasks.index', $project) }}#{{ $anchor }}"
+                       class="mt-1 inline-block text-xs font-medium text-brand-700 underline hover:no-underline">
+                        {{ __('tasks.new_subtask_exit') }}
+                    </a>
+                </div>
+            @else
+                <h2 class="text-sm font-semibold text-slate-900">{{ __('tasks.new_task') }}</h2>
+            @endif
 
             <div class="grid gap-4 sm:grid-cols-6">
                 <div class="sm:col-span-3">
-                    <x-form-field name="name" :label="__('tasks.name')" required />
+                    {{-- El foco entra solo cuando se viene de un «+»: capturar
+                         cinco subtareas seguidas es escribir, Enter, escribir.
+                         Al abrir la lista sin paquete no se roba el foco, que
+                         ahí estorbaría a quien solo viene a leer el plan. --}}
+                    <x-form-field name="name" :label="__('tasks.name')" required
+                                  :autofocus="$parent !== null" />
                 </div>
 
                 <div class="sm:col-span-1">
