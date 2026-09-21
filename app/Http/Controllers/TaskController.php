@@ -14,6 +14,7 @@ use App\Models\TaskDependency;
 use App\Services\Scheduling\ProjectScheduler;
 use App\Services\Scheduling\TaskOutliner;
 use App\Support\Reporting\TaskTimeline;
+use App\Support\Scheduling\ConstraintType;
 use App\Support\Scheduling\DependencyExpression;
 use App\Support\Scheduling\DependencyType;
 use App\Support\Scheduling\DurationParser;
@@ -148,7 +149,11 @@ final class TaskController extends Controller
             'project_id' => $project->id,
             'name' => $request->string('name')->value(),
             'duration_minutes' => $request->durationMinutes(),
-            'constraint_type' => $request->input('constraint_type'),
+            // Explicito y no `null`: una tarea nueva de un proyecto Estandar
+            // --o de la Lista-- no manda restriccion, y «lo antes posible» es
+            // justo lo que significa no haber escogido ninguna.
+            'constraint_type' => $request->input('constraint_type')
+                ?: ConstraintType::AsSoonAsPossible->value,
             'constraint_date' => $request->input('constraint_date'),
             'requested_start' => $request->input('requested_start'),
             'deadline' => $request->input('deadline'),
@@ -175,8 +180,16 @@ final class TaskController extends Controller
         $task->update([
             'name' => $request->string('name')->value(),
             'duration_minutes' => $request->durationMinutes(),
-            'constraint_type' => $request->input('constraint_type'),
-            'constraint_date' => $request->input('constraint_date'),
+            // `has` y no a secas: la restriccion solo se captura en el detalle
+            // de un proyecto Especialista. Sin esto, guardar la misma tarea
+            // desde un proyecto Estandar --o desde la Lista-- le borraria la
+            // restriccion a quien si la puso, y nadie se enteraria.
+            'constraint_type' => $request->has('constraint_type')
+                ? $request->input('constraint_type')
+                : $task->constraint_type,
+            'constraint_date' => $request->has('constraint_date')
+                ? $request->input('constraint_date')
+                : $task->constraint_date,
             'requested_start' => $request->has('requested_start')
                 ? $request->input('requested_start')
                 : $task->requested_start,

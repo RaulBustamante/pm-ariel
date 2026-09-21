@@ -131,9 +131,24 @@ final class StoreTaskRequest extends FormRequest
         $normalized = [
             'owner_id' => $this->input('owner_id') ?: null,
             'parent_id' => $this->input('parent_id') ?: null,
-            'constraint_type' => $this->input('constraint_type') ?: ConstraintType::AsSoonAsPossible->value,
-            'constraint_date' => $this->input('constraint_date') ?: null,
         ];
+
+        // La restricción solo se normaliza si la pantalla la mandó, igual que
+        // las fechas y la espera de más abajo.
+        //
+        // Antes se metía siempre, y eso la reescribía a «lo antes posible» en
+        // cada guardado de una pantalla que no la captura: la vista Lista solo
+        // manda nombre, duración, responsable, avance y predecesoras, así que
+        // corregir un nombre desde ahí le borraba la restricción y su fecha a
+        // quien sí las había puesto. Con el detalle Estándar escondiéndolas
+        // también, el mismo descuido se habría multiplicado.
+        if ($this->exists('constraint_type')) {
+            $normalized['constraint_type'] = $this->input('constraint_type') ?: ConstraintType::AsSoonAsPossible->value;
+        }
+
+        if ($this->exists('constraint_date')) {
+            $normalized['constraint_date'] = $this->input('constraint_date') ?: null;
+        }
 
         if ($this->exists('requested_start')) {
             $normalized['requested_start'] = $this->input('requested_start') ?: null;
