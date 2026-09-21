@@ -13,11 +13,14 @@ return [
     'display' => 'Display',
     'detail_level' => 'Level of detail',
 
+    'detail_scope' => 'Each project carries its own level, changed from its settings. This only decides the level projects you create start at.',
+    'detail_default_specialist' => 'Create my projects in Specialist',
+
     'simple_mode_help' => 'Recommended if you are getting started. Shows dates, owners and progress.',
     'expert_mode_help' => 'Adds float, constraints and advanced dependency types on the screens that have them.',
 
-    'current_simple' => 'You are currently in Simple mode.',
-    'current_expert' => 'You are currently in Expert mode.',
+    'current_simple' => 'Your new projects start in Standard.',
+    'current_expert' => 'Your new projects start in Specialist.',
 
     'timezone_help' => 'Which time zone dates and times are shown in. For example: America/Mexico_City.',
 

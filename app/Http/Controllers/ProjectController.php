@@ -12,6 +12,7 @@ use App\Models\ProjectTemplate;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\Scheduling\ProjectScheduler;
+use App\Support\DetailLevel;
 use App\Support\Initiation\InitiationHealth;
 use App\Support\Initiation\InitiationStarter;
 use App\Support\Visibility\VisibilityScope;
@@ -66,9 +67,17 @@ final class ProjectController extends Controller
     {
         $this->authorize('create', Project::class);
 
+        /** @var User $creator */
+        $creator = auth()->user();
+
         return view('projects.create', [
             ...$this->formOptions(),
             'candidates' => User::query()->where('is_active', true)->orderBy('name')->get(),
+            // La preferencia de quien crea solo decide qué viene marcado; el
+            // nivel se guarda en el proyecto y desde ahí manda.
+            'defaultDetailLevel' => $creator->expert_mode
+                ? DetailLevel::Specialist
+                : DetailLevel::default(),
         ]);
     }
 
@@ -89,6 +98,7 @@ final class ProjectController extends Controller
                 'org_unit_id' => $request->input('org_unit_id'),
                 'planned_start' => $request->input('planned_start'),
                 'planned_finish' => $request->input('planned_finish'),
+                'detail_level' => $request->detailLevel()->value,
             ],
             $owner,
             $template,

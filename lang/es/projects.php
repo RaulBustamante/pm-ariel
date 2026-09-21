@@ -14,6 +14,14 @@ return [
     'settings' => 'Ajustes',
     'details' => 'Datos del proyecto',
 
+    // El nivel de detalle del proyecto. La ayuda de cada nivel dice qué se ve,
+    // no qué tan capaz es quien lo escoge.
+    'detail_standard_help' => 'Fechas, responsables y avance. Suficiente para la mayoría de los proyectos.',
+    'detail_specialist_help' => 'Agrega holguras, restricciones, tipos de dependencia y demoras. Para planes con ruta crítica.',
+    'detail_change' => 'Cambiar el nivel de detalle',
+    'detail_changed' => 'Nivel de detalle actualizado.',
+    'detail_nothing_lost' => 'Bajar el nivel no borra nada: lo que ya capturaste sigue guardado y reaparece si vuelves a subirlo.',
+
     'currency' => 'Moneda',
     'start_help' => 'Cambiar esta fecha recalcula el plan completo: todas las tareas se mueven con ella.',
 

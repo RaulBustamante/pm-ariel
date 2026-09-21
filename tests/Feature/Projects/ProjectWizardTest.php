@@ -9,6 +9,7 @@ use App\Models\Project;
 use App\Models\Role;
 use App\Models\Task;
 use App\Models\User;
+use App\Support\DetailLevel;
 use Database\Seeders\ProjectTemplatesSeeder;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -54,16 +55,32 @@ final class ProjectWizardTest extends TestCase
         ];
     }
 
+    /**
+     * El alta dejó de ser cuatro pasos en fila. Lo esencial queda a la vista y
+     * el resto vive plegado en «Más opciones»: es el reclamo que originó el
+     * cambio —demasiadas opciones de entrada— y lo que esta prueba cuida es
+     * que nadie vuelva a desplegarlo todo sin querer.
+     */
     #[Test]
-    public function the_wizard_screen_renders_its_four_steps(): void
+    public function the_screen_shows_the_essentials_and_keeps_the_rest_folded(): void
     {
-        $this->actingAs($this->manager)
+        $response = $this->actingAs($this->manager)
             ->get(route('projects.create'))
             ->assertOk()
+            ->assertSee(__('wizard.deliverables_become_tasks'))
+            ->assertSee(__('common.detail_level'))
+            // Siguen existiendo, pero adentro del plegado.
+            ->assertSee(__('wizard.more_options'))
             ->assertSee(__('wizard.step_who'))
             ->assertSee(__('wizard.step_when'))
-            ->assertSee(__('wizard.step_measure'))
-            ->assertSee(__('wizard.deliverables_become_tasks'));
+            ->assertSee(__('wizard.step_measure'));
+
+        // Cerrado de entrada: un `<details>` sin `open`. Si alguien le pone el
+        // atributo, el muro de campos vuelve y esta prueba lo dice.
+        $html = $response->getContent();
+        $this->assertIsString($html);
+        $this->assertStringContainsString('<details', $html);
+        $this->assertStringNotContainsString('<details class="border-t border-slate-100 pt-5" open', $html);
     }
 
     /**
@@ -127,16 +144,27 @@ final class ProjectWizardTest extends TestCase
         $this->assertSame('2026-04-06', $project->planned_start?->format('Y-m-d'));
     }
 
+    /**
+     * La fecha de inicio salió de la parte visible del alta, así que dejarla
+     * vacía ya no es un error: el proyecto arranca hoy. Rechazarla sería
+     * mandar a la gente de vuelta al formulario por un campo que ni le
+     * preguntamos.
+     */
     #[Test]
-    public function the_start_is_chosen_and_the_committed_date_cannot_precede_it(): void
+    public function an_empty_start_means_the_project_begins_today(): void
     {
         $this->actingAs($this->manager)
-            ->post(route('projects.store'), $this->payload([
-                'planned_start' => '',
-                'planned_finish' => '2026-04-01',
-            ]))
-            ->assertSessionHasErrors('planned_start');
+            ->post(route('projects.store'), $this->payload(['planned_start' => '']))
+            ->assertSessionHasNoErrors();
 
+        $project = Project::query()->where('code', 'INV-9')->firstOrFail();
+
+        $this->assertSame(now()->toDateString(), $project->planned_start?->format('Y-m-d'));
+    }
+
+    #[Test]
+    public function the_committed_date_cannot_precede_the_start(): void
+    {
         $this->actingAs($this->manager)
             ->post(route('projects.store'), $this->payload([
                 'planned_finish' => '2026-04-05',
@@ -152,6 +180,73 @@ final class ProjectWizardTest extends TestCase
         $project = Project::query()->where('code', 'INV-9')->firstOrFail();
 
         $this->assertSame('2026-04-30', $project->planned_finish?->format('Y-m-d'));
+    }
+
+    // ------------------------------------------- Nivel de detalle
+
+    /**
+     * Sin escoger nada, el proyecto nace en Estándar. Es la mitad del arreglo
+     * que pidieron: quien no sabe que existe un nivel no tiene que enterarse.
+     */
+    #[Test]
+    public function a_project_is_born_in_standard(): void
+    {
+        $this->actingAs($this->manager)->post(route('projects.store'), $this->payload());
+
+        $project = Project::query()->where('code', 'INV-9')->firstOrFail();
+
+        $this->assertSame(DetailLevel::Standard, $project->detailLevel());
+        $this->assertFalse($project->isSpecialist());
+    }
+
+    #[Test]
+    public function the_level_can_be_chosen_while_creating(): void
+    {
+        $this->actingAs($this->manager)->post(route('projects.store'), $this->payload([
+            'detail_level' => DetailLevel::Specialist->value,
+        ]));
+
+        $project = Project::query()->where('code', 'INV-9')->firstOrFail();
+
+        $this->assertTrue($project->isSpecialist());
+    }
+
+    /**
+     * Un nivel inventado no tumba el alta: cae en Estándar. Un proyecto a
+     * medio crear es peor que un proyecto que enseña de menos.
+     */
+    #[Test]
+    public function an_unknown_level_is_rejected_without_losing_the_form(): void
+    {
+        $this->actingAs($this->manager)
+            ->post(route('projects.store'), $this->payload(['detail_level' => 'gerente']))
+            ->assertSessionHasErrors('detail_level');
+
+        $this->assertDatabaseMissing('projects', ['code' => 'INV-9']);
+    }
+
+    /**
+     * La preferencia de quien crea solo decide qué viene marcado. El nivel
+     * vive en el proyecto, así que la preferencia no puede mandar después.
+     */
+    #[Test]
+    public function the_creators_preference_seeds_the_marked_level(): void
+    {
+        $this->manager->update(['expert_mode' => true]);
+
+        $this->actingAs($this->manager)
+            ->get(route('projects.create'))
+            ->assertOk()
+            ->assertSee('value="'.DetailLevel::Specialist->value.'"', false);
+
+        // Y aun así el proyecto guarda lo que se mandó, no la preferencia.
+        $this->actingAs($this->manager)->post(route('projects.store'), $this->payload([
+            'detail_level' => DetailLevel::Standard->value,
+        ]));
+
+        $this->assertFalse(
+            Project::query()->where('code', 'INV-9')->firstOrFail()->isSpecialist(),
+        );
     }
 
     #[Test]

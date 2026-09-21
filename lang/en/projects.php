@@ -14,6 +14,14 @@ return [
     'settings' => 'Settings',
     'details' => 'Project details',
 
+    // A project's level of detail. Each level's help says what you see, not
+    // how capable whoever picks it is.
+    'detail_standard_help' => 'Dates, owners and progress. Enough for most projects.',
+    'detail_specialist_help' => 'Adds float, constraints, dependency types and lag. For plans with a critical path.',
+    'detail_change' => 'Change the level of detail',
+    'detail_changed' => 'Level of detail updated.',
+    'detail_nothing_lost' => 'Lowering the level deletes nothing: what you captured stays saved and comes back if you raise it again.',
+
     'currency' => 'Currency',
     'start_help' => 'Changing this date recalculates the whole plan: every task moves with it.',
 

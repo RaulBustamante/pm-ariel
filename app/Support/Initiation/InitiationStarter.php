@@ -31,7 +31,7 @@ final class InitiationStarter
     ) {}
 
     /**
-     * @param  array{code: string, name: string, description?: ?string, org_unit_id?: ?int, currency?: ?string, planned_start?: ?string, planned_finish?: ?string}  $attributes
+     * @param  array{code: string, name: string, description?: ?string, org_unit_id?: ?int, currency?: ?string, planned_start?: ?string, planned_finish?: ?string, detail_level?: ?string}  $attributes
      */
     public function start(array $attributes, User $owner, ?ProjectTemplate $template = null): Project
     {

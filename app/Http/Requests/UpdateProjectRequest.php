@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Requests;
 
 use App\Models\Project;
+use App\Support\DetailLevel;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -38,6 +39,11 @@ final class UpdateProjectRequest extends FormRequest
             'planned_finish' => ['nullable', 'date', 'after_or_equal:planned_start'],
             'status' => ['required', Rule::in(['draft', 'active', 'on_hold', 'closed', 'cancelled'])],
             'currency' => ['required', 'string', 'size:3'],
+
+            // Cuánto enseña el proyecto. `sometimes` para que un formulario que
+            // no traiga el campo —una pantalla vieja en caché— conserve el
+            // nivel que ya tenía en vez de bajarlo sin que nadie lo pidiera.
+            'detail_level' => ['sometimes', 'required', Rule::enum(DetailLevel::class)],
         ];
     }
 

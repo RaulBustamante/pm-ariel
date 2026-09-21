@@ -88,6 +88,35 @@
                     <textarea id="description-field" name="description" rows="2" class="field">{{ old('description', $project->description) }}</textarea>
                 </div>
 
+                {{-- El nivel de detalle de este proyecto. Va aquí y no en las
+                     preferencias de la persona porque es del proyecto: la misma
+                     gerente lleva uno de tres entregables y otro con ruta
+                     crítica, y no tiene por qué escoger un solo nivel para los
+                     dos. --}}
+                <fieldset class="space-y-2 border-t border-slate-100 pt-3">
+                    <legend class="field-label">{{ __('common.detail_level') }}</legend>
+
+                    <div class="grid gap-2 sm:grid-cols-2">
+                        @foreach (\App\Support\DetailLevel::cases() as $level)
+                            <label class="flex cursor-pointer items-start gap-3 rounded-md border border-slate-200 p-3 text-sm hover:border-brand-400 has-[:checked]:border-hud-500 has-[:checked]:bg-brand-50">
+                                <input type="radio" name="detail_level" value="{{ $level->value }}"
+                                       @checked(old('detail_level', $project->detailLevel()->value) === $level->value)
+                                       class="mt-0.5 border-slate-300 text-brand-700 focus:ring-2 focus:ring-hud-500">
+                                <span>
+                                    <span class="block font-medium text-slate-900">{{ $level->label() }}</span>
+                                    <span class="block text-xs text-slate-600">{{ $level->help() }}</span>
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+
+                    {{-- Se dice antes de bajarlo, no después: el miedo a perder
+                         lo capturado es lo que hace que nadie se atreva a
+                         simplificar un proyecto que ya se complicó. --}}
+                    <p class="field-help">{{ __('projects.detail_nothing_lost') }}</p>
+                    @error('detail_level') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
+                </fieldset>
+
                 <div class="flex flex-wrap items-center gap-3 border-t border-slate-100 pt-3">
                     <button type="submit" class="btn btn-primary">{{ __('common.save') }}</button>
 

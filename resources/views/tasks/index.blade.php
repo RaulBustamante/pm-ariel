@@ -69,12 +69,12 @@
                         </th>
                         <th scope="col" class="px-3 py-2">{{ __('tasks.start') }}</th>
                         <th scope="col" class="px-3 py-2">{{ __('tasks.finish') }}</th>
-                        @expert
+                        @specialist($project)
                             <th scope="col" class="px-2 py-2">
                                 {{ __('tasks.float') }}
                                 <x-help-term term="float" />
                             </th>
-                        @endexpert
+                        @endspecialist
                         <th scope="col" class="px-3 py-2">{{ __('tasks.owner') }}</th>
                         {{-- El avance va en la lista, no solo en el detalle.
                              «¿Ya terminamos?» es la pregunta que más se le hace a

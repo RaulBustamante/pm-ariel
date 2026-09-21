@@ -11,7 +11,12 @@
     // El proyecto abierto, si la pantalla es de un proyecto. Sale de la
     // dirección y no de la vista: las treinta pantallas de proyecto ya ponen el
     // nombre en `heading` y ninguna tiene que enterarse de esto.
-    $currentProject = request()->route('project');
+    //
+    // Se normaliza aquí: una ruta sin enlace de modelo entrega la clave como
+    // cadena, y más abajo se le piden métodos al proyecto. Un `null` limpio
+    // evita que cada uso vuelva a preguntar de qué tipo es.
+    $routeProject = request()->route('project');
+    $currentProject = $routeProject instanceof \App\Models\Project ? $routeProject : null;
 @endphp
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}"
       @if ($theme !== \App\Models\User::THEME_SYSTEM) data-theme="{{ $theme }}" @endif
@@ -126,7 +131,7 @@
                          para cambiarse a otro: el nombre ya estaba ahí, y
                          cambiarse costaba salir al listado y volver a entrar.
                          Fuera de un proyecto no hay nada que elegir. --}}
-                    @if ($currentProject instanceof \App\Models\Project)
+                    @if ($currentProject !== null)
                         <x-project-switcher :project="$currentProject" />
                     @else
                         <h1 class="truncate text-base font-semibold tracking-tight text-slate-900">@yield('heading')</h1>
@@ -134,11 +139,26 @@
                 </div>
 
                 <div class="flex shrink-0 items-center gap-2">
-                    <a href="{{ route('preferences.edit') }}"
+                    @php
+                        // Dentro de un proyecto la insignia habla del proyecto y
+                        // lleva a sus ajustes; fuera, de la preferencia propia.
+                        // Anunciar el nivel de la persona mientras miras un
+                        // proyecto que se rige por otro es peor que no decir nada.
+                        $badgeLevel = $currentProject?->detailLevel()
+                            ?? (auth()->user()->expert_mode
+                                ? \App\Support\DetailLevel::Specialist
+                                : \App\Support\DetailLevel::Standard);
+
+                        $badgeUrl = $currentProject !== null && auth()->user()->can('update', $currentProject)
+                            ? route('projects.edit', $currentProject)
+                            : route('preferences.edit');
+                    @endphp
+
+                    <a href="{{ $badgeUrl }}"
                        class="hidden items-center gap-2 rounded-md px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-100 hover:text-slate-900 sm:flex">
                         <span class="max-w-[10rem] truncate">{{ auth()->user()->name }}</span>
-                        <span class="badge {{ auth()->user()->expert_mode ? 'badge-brand' : 'badge-neutral' }}">
-                            {{ auth()->user()->expert_mode ? __('common.expert_mode') : __('common.simple_mode') }}
+                        <span class="badge {{ $badgeLevel->isSpecialist() ? 'badge-brand' : 'badge-neutral' }}">
+                            {{ $badgeLevel->label() }}
                         </span>
                     </a>
 

@@ -42,9 +42,18 @@ return [
     'locale_es' => 'Español',
     'locale_en' => 'English',
 
-    'simple_mode' => 'Modo Simple',
-    'expert_mode' => 'Modo Experto',
-    'mode_help' => 'El Modo Simple oculta holguras, restricciones y tipos de dependencia avanzados. Puedes cambiarlo cuando quieras.',
+    // El nivel de detalle de un proyecto. «Estándar» nombra el caso normal, no
+    // el disminuido, y «Especialista» nombra un oficio, no un rango: quien usa
+    // el sistema sin ruta crítica no está en la versión para principiantes.
+    'detail_level' => 'Nivel de detalle',
+    'detail_standard' => 'Estándar',
+    'detail_specialist' => 'Especialista',
+    'detail_help' => 'En Estándar se ven fechas, responsables y avance. En Especialista se agregan holguras, restricciones y tipos de dependencia. Se cambia cuando quieras y no se pierde nada al bajarlo.',
+
+    // Preferencia personal, que solo decide con qué nivel nacen los proyectos
+    // que tú creas. El nivel de cada proyecto se manda solo.
+    'simple_mode' => 'Estándar',
+    'expert_mode' => 'Especialista',
 
     // Estados vacíos: qué es, por qué está vacío, qué hacer. Nunca una pantalla en blanco.
     'empty_title' => 'Todavía no hay nada aquí',

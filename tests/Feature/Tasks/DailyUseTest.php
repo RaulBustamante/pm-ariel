@@ -13,6 +13,7 @@ use App\Models\TaskDependency;
 use App\Models\User;
 use App\Services\Scheduling\ProjectScheduler;
 use App\Services\Scheduling\TaskOutliner;
+use App\Support\DetailLevel;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -309,19 +310,19 @@ final class DailyUseTest extends TestCase
     }
 
     /**
-     * En Modo Simple no se ofrece escoger la relación: casi todas las
+     * En Estándar no se ofrece escoger la relación: casi todas las
      * dependencias reales son «esta empieza cuando aquella termina», y las
      * cuatro son justo la complejidad que hace que la gente odie estas
      * herramientas.
      */
     #[Test]
-    public function simple_mode_does_not_offer_the_four_relationship_types(): void
+    public function a_standard_project_does_not_offer_the_four_relationship_types(): void
     {
         $this->task('Primera');
         $second = $this->task('Segunda');
         $this->reschedule();
 
-        $this->manager->update(['expert_mode' => false]);
+        $this->project->update(['detail_level' => DetailLevel::Standard->value]);
 
         $this->actingAs($this->manager)
             ->get(route('projects.tasks.show', [$this->project, $second]))
@@ -329,12 +330,191 @@ final class DailyUseTest extends TestCase
             ->assertSee(__('tasks.depends_on'))
             ->assertDontSee(__('tasks.relationship'));
 
-        $this->manager->update(['expert_mode' => true]);
+        $this->project->update(['detail_level' => DetailLevel::Specialist->value]);
 
         $this->actingAs($this->manager)
             ->get(route('projects.tasks.show', [$this->project, $second]))
             ->assertOk()
             ->assertSee(__('tasks.relationship'));
+    }
+
+    /**
+     * El detalle en Estándar se queda en lo básico: qué es, cuánto dura, cómo
+     * va, quién la trae, para cuándo y qué falta. Nada de dinero, restricción
+     * ni calendario propio.
+     */
+    #[Test]
+    public function a_standard_task_screen_only_asks_the_basics(): void
+    {
+        $task = $this->task('Sencilla');
+        $this->reschedule();
+
+        $this->project->update(['detail_level' => DetailLevel::Standard->value]);
+
+        $response = $this->actingAs($this->manager)
+            ->get(route('projects.tasks.show', [$this->project, $task]))
+            ->assertOk();
+
+        // Lo esencial sigue ahí.
+        foreach (['tasks.name', 'tasks.duration', 'tasks.owner', 'tasks.deadline', 'tasks.notes', 'tasks.waiting'] as $key) {
+            $response->assertSee(__($key));
+        }
+
+        // Y lo que estorba, no.
+        foreach (['tasks.cost', 'evm.actual_cost', 'tasks.constraint', 'tasks.requested_start'] as $key) {
+            $response->assertDontSee(__($key));
+        }
+    }
+
+    #[Test]
+    public function a_specialist_task_screen_asks_for_all_of_it(): void
+    {
+        $task = $this->task('Completa');
+        $this->reschedule();
+
+        $this->project->update(['detail_level' => DetailLevel::Specialist->value]);
+
+        $response = $this->actingAs($this->manager)
+            ->get(route('projects.tasks.show', [$this->project, $task]))
+            ->assertOk();
+
+        foreach (['tasks.cost', 'evm.actual_cost', 'tasks.constraint', 'tasks.requested_start'] as $key) {
+            $response->assertSee(__($key));
+        }
+    }
+
+    /**
+     * El renglón de la vista Lista solo manda nombre, duración, responsable,
+     * avance y predecesoras. Corregir un nombre desde ahí no debe tocar la
+     * restricción, y hasta este cambio la reescribía a «lo antes posible».
+     */
+    #[Test]
+    public function editing_from_the_list_keeps_the_constraint(): void
+    {
+        $task = $this->task('Con restriccion');
+        $this->reschedule();
+
+        $task->update(['constraint_type' => 'FNLT', 'constraint_date' => '2026-05-20']);
+
+        $this->actingAs($this->manager)
+            ->put(route('projects.tasks.update', [$this->project, $task]), [
+                'name' => 'Con restriccion, renombrada',
+                'duration' => '2d',
+                'owner_id' => $this->manager->id,
+                'percent_complete' => 10,
+            ])
+            ->assertSessionHasNoErrors();
+
+        $task->refresh();
+
+        $this->assertSame('Con restriccion, renombrada', $task->name);
+        $this->assertSame('FNLT', $task->constraint_type);
+        $this->assertSame('2026-05-20', $task->constraint_date?->format('Y-m-d'));
+    }
+
+    /**
+     * La trampa de esconder campos: el formulario de Estándar no manda costo
+     * ni restricción, y si el controlador los tomara a secas los borraría al
+     * guardar. Perder datos de alguien más por simplificar una pantalla es
+     * peor que la pantalla complicada.
+     */
+    #[Test]
+    public function saving_from_the_standard_screen_does_not_erase_what_it_cannot_see(): void
+    {
+        $task = $this->task('Con datos de especialista');
+        $this->reschedule();
+
+        $task->update([
+            'cost' => 1500,
+            'actual_cost' => 900,
+            'constraint_type' => 'FNLT',
+            'constraint_date' => '2026-05-20',
+            'requested_start' => '2026-03-10',
+        ]);
+
+        $this->project->update(['detail_level' => DetailLevel::Standard->value]);
+
+        // Un guardado normal desde Estándar: solo lo que esa pantalla manda.
+        $this->actingAs($this->manager)
+            ->put(route('projects.tasks.update', [$this->project, $task]), [
+                'name' => 'Con datos de especialista',
+                'duration' => '2d',
+                'percent_complete' => 40,
+                'owner_id' => $this->manager->id,
+                'description' => 'Avanzando',
+                'deadline' => '2026-06-01',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $task->refresh();
+
+        $this->assertSame(40, (int) $task->percent_complete);
+        $this->assertSame('1500.00', (string) $task->cost);
+        $this->assertSame('900.00', (string) $task->actual_cost);
+        $this->assertSame('FNLT', $task->constraint_type);
+        $this->assertSame('2026-05-20', $task->constraint_date?->format('Y-m-d'));
+        $this->assertSame('2026-03-10', $task->requested_start?->format('Y-m-d'));
+    }
+
+    /**
+     * Lo que de verdad pidieron: la misma persona lleva un proyecto sencillo y
+     * otro robusto sin tener que reconfigurarse entre uno y otro. Si el nivel
+     * siguiera colgado del usuario, esta prueba no podría existir.
+     */
+    #[Test]
+    public function the_level_belongs_to_the_project_and_not_to_whoever_looks(): void
+    {
+        $this->task('Primera');
+        $second = $this->task('Segunda');
+        $this->reschedule();
+
+        // Alguien que pidió ver todo en sus propios proyectos nuevos.
+        $this->manager->update(['expert_mode' => true]);
+        $this->project->update(['detail_level' => DetailLevel::Standard->value]);
+
+        // Y aun así este proyecto, que es Estándar, se sigue viendo Estándar.
+        $this->actingAs($this->manager)
+            ->get(route('projects.tasks.show', [$this->project, $second]))
+            ->assertOk()
+            ->assertDontSee(__('tasks.relationship'));
+
+        $this->actingAs($this->manager)
+            ->get(route('projects.tasks.index', $this->project))
+            ->assertOk()
+            ->assertDontSee(__('tasks.float'));
+    }
+
+    /**
+     * Bajar el nivel esconde, no borra. Es la promesa que hace la pantalla de
+     * ajustes, y si no se cumple nadie se atreve a simplificar un proyecto.
+     */
+    #[Test]
+    public function lowering_the_level_hides_the_lag_without_losing_it(): void
+    {
+        $first = $this->task('Primera');
+        $second = $this->task('Segunda');
+        $this->reschedule();
+
+        $this->project->update(['detail_level' => DetailLevel::Specialist->value]);
+
+        $this->actingAs($this->manager)->post(
+            route('projects.tasks.dependencies.store', [$this->project, $second]),
+            ['predecessor_id' => $first->id, 'type' => 'FS', 'lag_days' => 2],
+        );
+
+        $this->project->update(['detail_level' => DetailLevel::Standard->value]);
+
+        $this->actingAs($this->manager)
+            ->get(route('projects.tasks.show', [$this->project, $second]))
+            ->assertOk()
+            ->assertDontSee(__('tasks.relationship'));
+
+        // La demora sigue guardada, aunque la pantalla ya no la ofrezca.
+        $this->assertDatabaseHas('task_dependencies', [
+            'successor_id' => $second->id,
+            'predecessor_id' => $first->id,
+            'lag_minutes' => 2 * self::DAY,
+        ]);
     }
 
     // ---------------------------------------------- Comentarios (9.3)

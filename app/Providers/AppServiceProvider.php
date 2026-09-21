@@ -68,24 +68,32 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * `@expert` y `@simple` en las vistas. Existen desde ya para que las
-     * pantallas de las etapas siguientes no inventen cada una su forma de
-     * preguntar lo mismo, ni consulten al usuario a mano en cada Blade.
+     * `@specialist` y `@standard` en las vistas, para que ninguna pantalla
+     * invente su forma de preguntar lo mismo ni lea la columna a mano.
      *
-     * Un invitado no tiene preferencia, y lo prudente ahí es lo simple.
+     * Se usan con el proyecto: `@specialist($project)`. El nivel es del
+     * proyecto, no de quien mira, porque la misma persona lleva proyectos de
+     * complejidad distinta.
+     *
+     * Sin proyecto —el tablero, las pantallas de administración— se cae a la
+     * preferencia de la persona, que es lo único que hay ahí. Y un invitado no
+     * tiene ninguna de las dos: lo prudente entonces es enseñar poco.
      */
     private function registerDisplayModeDirectives(): void
     {
-        Blade::if('expert', function (): bool {
-            $user = Auth::user();
+        Blade::if('specialist', fn (?Project $project = null): bool => $this->showsFullDetail($project));
 
-            return $user instanceof User && $user->expert_mode;
-        });
+        Blade::if('standard', fn (?Project $project = null): bool => ! $this->showsFullDetail($project));
+    }
 
-        Blade::if('simple', function (): bool {
-            $user = Auth::user();
+    private function showsFullDetail(?Project $project): bool
+    {
+        if ($project instanceof Project) {
+            return $project->isSpecialist();
+        }
 
-            return ! ($user instanceof User && $user->expert_mode);
-        });
+        $user = Auth::user();
+
+        return $user instanceof User && $user->expert_mode;
     }
 }

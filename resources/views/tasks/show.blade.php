@@ -40,18 +40,12 @@
                         <input id="name-field" type="text" name="name" value="{{ old('name', $task->name) }}" class="field" required>
                     </div>
 
-                    <div class="grid gap-3 sm:grid-cols-3">
+                    <div class="grid gap-3 sm:grid-cols-2">
                         <div>
                             <label for="duration-field" class="field-label">{{ __('tasks.duration') }}</label>
                             <input id="duration-field" type="text" name="duration"
                                    value="{{ old('duration', $durations->toHuman((int) $task->duration_minutes)) }}" class="field">
                             @error('duration') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
-                        </div>
-
-                        <div>
-                            <label for="cost-field" class="field-label">{{ __('tasks.cost') }}</label>
-                            <input id="cost-field" type="number" step="0.01" min="0" name="cost"
-                                   value="{{ old('cost', $task->cost) }}" class="field">
                         </div>
 
                         <div>
@@ -61,18 +55,35 @@
                         </div>
                     </div>
 
-                    {{-- El costo real va junto al avance porque es el mismo acto:
-                         quien reporta que una tarea va al 60 % es quien sabe qué
-                         se lleva gastado. Vacío significa «todavía no lo sé» y no
-                         «salió gratis» — de esa diferencia depende que el valor
-                         ganado pueda calcular el índice de costo o tenga que
+                    {{-- El dinero, junto y solo en Especialista.
+                         Un proyecto que se lleva para saber qué falta y quién lo
+                         trae no necesita presupuesto por tarea, y dos campos de
+                         dinero vacíos en cada tarea es justo lo que hace que la
+                         pantalla se sienta un trámite.
+
+                         El costo real iba junto al avance porque es el mismo
+                         acto —quien reporta el 60 % es quien sabe qué se lleva
+                         gastado— y esa cercanía se conserva aquí, ahora al lado
+                         del presupuesto. Vacío sigue significando «todavía no lo
+                         sé» y no «salió gratis»: de esa diferencia depende que
+                         el valor ganado calcule el índice de costo o tenga que
                          decir que le faltan datos. --}}
-                    <div class="sm:max-w-[16rem]">
-                        <label for="actual-cost-field" class="field-label">{{ __('evm.actual_cost') }}</label>
-                        <input id="actual-cost-field" type="number" step="0.01" min="0" name="actual_cost"
-                               value="{{ old('actual_cost', $task->actual_cost) }}" class="field">
-                        <p class="field-help">{{ __('evm.actual_cost_help') }}</p>
-                    </div>
+                    @specialist($project)
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label for="cost-field" class="field-label">{{ __('tasks.cost') }}</label>
+                                <input id="cost-field" type="number" step="0.01" min="0" name="cost"
+                                       value="{{ old('cost', $task->cost) }}" class="field">
+                            </div>
+
+                            <div>
+                                <label for="actual-cost-field" class="field-label">{{ __('evm.actual_cost') }}</label>
+                                <input id="actual-cost-field" type="number" step="0.01" min="0" name="actual_cost"
+                                       value="{{ old('actual_cost', $task->actual_cost) }}" class="field">
+                                <p class="field-help">{{ __('evm.actual_cost_help') }}</p>
+                            </div>
+                        </div>
+                    @endspecialist
 
                     {{-- La espera: por qué no avanza, cuando la razón está
                          afuera.
@@ -126,30 +137,49 @@
                         <p class="field-help mt-2">{{ __('tasks.waiting_clock_help') }}</p>
                     </fieldset>
 
-                    <div class="grid gap-3 sm:grid-cols-2">
-                        <div>
-                            <label for="owner-field" class="field-label">{{ __('tasks.owner') }}</label>
-                            <select id="owner-field" name="owner_id" class="field">
-                                <option value="">—</option>
-                                @foreach ($members as $member)
-                                    <option value="{{ $member->id }}" @selected((int) old('owner_id', $task->owner_id) === $member->id)>
-                                        {{ $member->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div>
-                            <label for="constraint-field" class="field-label">{{ __('tasks.constraint') }}</label>
-                            <select id="constraint-field" name="constraint_type" class="field">
-                                @foreach (\App\Support\Scheduling\ConstraintType::cases() as $type)
-                                    <option value="{{ $type->value }}" @selected(old('constraint_type', $task->constraint_type) === $type->value)>
-                                        {{ __("constraints.{$type->value}") }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                    {{-- Quién la trae. Esto nunca se esconde: junto con «¿qué
+                         falta?» es la pregunta que hace que alguien abra esta
+                         pantalla. --}}
+                    <div class="sm:max-w-[20rem]">
+                        <label for="owner-field" class="field-label">{{ __('tasks.owner') }}</label>
+                        <select id="owner-field" name="owner_id" class="field">
+                            <option value="">—</option>
+                            @foreach ($members as $member)
+                                <option value="{{ $member->id }}" @selected((int) old('owner_id', $task->owner_id) === $member->id)>
+                                    {{ $member->name }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
+
+                    {{-- La restricción y su fecha, juntas y solo en
+                         Especialista. Ocho opciones de las que seis piden una
+                         fecha para significar algo, y elegir mal produce
+                         holgura negativa sin explicar por qué: es la definición
+                         de una opción que estorba a quien no la necesita.
+                         Sin escoger nada la tarea va «lo antes posible», que es
+                         lo que la gente espera. --}}
+                    @specialist($project)
+                        <div class="grid gap-3 sm:grid-cols-2">
+                            <div>
+                                <label for="constraint-field" class="field-label">{{ __('tasks.constraint') }}</label>
+                                <select id="constraint-field" name="constraint_type" class="field">
+                                    @foreach (\App\Support\Scheduling\ConstraintType::cases() as $type)
+                                        <option value="{{ $type->value }}" @selected(old('constraint_type', $task->constraint_type) === $type->value)>
+                                            {{ __("constraints.{$type->value}") }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="constraint-date-field" class="field-label">{{ __('tasks.constraint_date') }}</label>
+                                <input id="constraint-date-field" type="date" name="constraint_date"
+                                       value="{{ old('constraint_date', $task->constraint_date?->format('Y-m-d')) }}" class="field">
+                                @error('constraint_date') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
+                            </div>
+                        </div>
+                    @endspecialist
 
                     {{-- Las notas de la tarea.
                          La columna existía desde la Etapa 3 y ninguna pantalla la
@@ -166,28 +196,40 @@
                          El motor lo soporta desde la Etapa 3 y no había forma de
                          escogerlo, así que un turno de noche o un contratista con
                          jornada distinta no se podían modelar. --}}
-                    @if ($calendars->count() > 1)
-                        <div class="sm:max-w-[20rem]">
-                            <label for="calendar-field" class="field-label">{{ __('tasks.calendar') }}</label>
-                            <select id="calendar-field" name="calendar_id" class="field">
-                                <option value="">{{ __('tasks.calendar_default') }}</option>
-                                @foreach ($calendars as $calendar)
-                                    <option value="{{ $calendar->id }}" @selected((int) old('calendar_id', $task->calendar_id) === $calendar->id)>
-                                        {{ $calendar->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            <p class="field-help">{{ __('tasks.calendar_help') }}</p>
-                        </div>
-                    @endif
+                    {{-- Escoger jornada por tarea sirve para modelar un turno
+                         de noche o un contratista, y no significa nada para
+                         quien lleva una lista de pendientes. --}}
+                    @specialist($project)
+                        @if ($calendars->count() > 1)
+                            <div class="sm:max-w-[20rem]">
+                                <label for="calendar-field" class="field-label">{{ __('tasks.calendar') }}</label>
+                                <select id="calendar-field" name="calendar_id" class="field">
+                                    <option value="">{{ __('tasks.calendar_default') }}</option>
+                                    @foreach ($calendars as $calendar)
+                                        <option value="{{ $calendar->id }}" @selected((int) old('calendar_id', $task->calendar_id) === $calendar->id)>
+                                            {{ $calendar->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <p class="field-help">{{ __('tasks.calendar_help') }}</p>
+                            </div>
+                        @endif
+                    @endspecialist
 
+                    {{-- La fecha límite se queda: «¿para cuándo?» es básico.
+                         La de inicio pedido no: es una restricción disfrazada
+                         —«no empezar antes de»— y en Estándar el motor ya
+                         decide el inicio con las dependencias. --}}
                     <div class="grid gap-3 sm:grid-cols-2">
-                        <div>
-                            <label for="task-start-field" class="field-label">{{ __('tasks.requested_start') }}</label>
-                            <input id="task-start-field" type="date" name="requested_start"
-                                   value="{{ old('requested_start', $task->requested_start?->format('Y-m-d')) }}" class="field">
-                            <p class="field-help">{{ __('tasks.requested_start_help') }}</p>
-                        </div>
+                        @specialist($project)
+                            <div>
+                                <label for="task-start-field" class="field-label">{{ __('tasks.requested_start') }}</label>
+                                <input id="task-start-field" type="date" name="requested_start"
+                                       value="{{ old('requested_start', $task->requested_start?->format('Y-m-d')) }}" class="field">
+                                <p class="field-help">{{ __('tasks.requested_start_help') }}</p>
+                            </div>
+                        @endspecialist
+
                         <div>
                             <label for="task-deadline-field" class="field-label">{{ __('tasks.deadline') }}</label>
                             <input id="task-deadline-field" type="date" name="deadline"
@@ -198,13 +240,6 @@
                         </div>
                     </div>
 
-                    <div>
-                        <label for="constraint-date-field" class="field-label">{{ __('tasks.constraint_date') }}</label>
-                        <input id="constraint-date-field" type="date" name="constraint_date"
-                               value="{{ old('constraint_date', $task->constraint_date?->format('Y-m-d')) }}" class="field sm:max-w-[12rem]">
-                        @error('constraint_date') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
-                    </div>
-
                     @can('update', $project)
                         <div class="border-t border-slate-100 pt-3">
                             <button type="submit" class="btn btn-primary">{{ __('common.save') }}</button>
@@ -213,7 +248,13 @@
                 </div>
             </form>
 
-            {{-- Asignaciones --}}
+            {{-- Asignaciones.
+                 Los recursos son la mitad de arriba del costo: reparten carga
+                 y alimentan el presupuesto. Si el dinero no se lleva, esto
+                 tampoco, y en Estándar «Responsable» ya contesta quién la
+                 trae. Se sigue mostrando si la tarea ya tiene recursos
+                 asignados, para que bajar el nivel no esconda trabajo hecho. --}}
+            @if ($project->isSpecialist() || $assignments->isNotEmpty())
             <section class="card">
                 <div class="card-header">
                     <h2 class="card-title">{{ __('resources.title') }}</h2>
@@ -298,6 +339,7 @@
                     @endcan
                 </div>
             </section>
+            @endif
 
             {{-- Archivos --}}
             <section class="card">
@@ -483,7 +525,7 @@
                         </div>
                     @endforeach
 
-                    @expert
+                    @specialist($project)
                         <div class="flex justify-between gap-3 border-t border-slate-100 pt-2">
                             <dt class="text-slate-600">{{ __('tasks.total_float') }}</dt>
                             <dd class="font-medium {{ ($task->total_float_minutes ?? 0) < 0 ? 'text-[var(--color-badge-danger-fg)]' : '' }}">
@@ -496,7 +538,7 @@
                                 {{ $task->free_float_minutes === null ? '—' : $durations->toHuman((int) $task->free_float_minutes) }}
                             </dd>
                         </div>
-                    @endexpert
+                    @endspecialist
                 </dl>
             </section>
 
@@ -572,7 +614,7 @@
                                  cuando aquella termina», y ofrecer las cuatro es
                                  justo la clase de complejidad que hace que la
                                  gente odie estas herramientas. --}}
-                            @expert
+                            @specialist($project)
                                 <div>
                                     <label for="type-field" class="field-label">{{ __('tasks.relationship') }}</label>
                                     <select id="type-field" name="type" class="field">
@@ -589,11 +631,11 @@
                                     <input id="lag-field" type="number" step="0.5" name="lag_days" value="0" class="field">
                                     <p class="field-help">{{ __('tasks.lag_days_help') }}</p>
                                 </div>
-                            @endexpert
+                            @endspecialist
 
-                            @simple
+                            @standard($project)
                                 <input type="hidden" name="type" value="FS">
-                            @endsimple
+                            @endstandard
 
                             <button type="submit" class="btn btn-secondary btn-sm">{{ __('tasks.add_dependency') }}</button>
                             <p class="field-help">{{ __('tasks.depends_on_help') }}</p>
@@ -602,22 +644,31 @@
                 </div>
             </section>
 
-            <section class="card">
-                <div class="card-header"><h2 class="card-title">{{ __('tasks.blocks') }}</h2></div>
-                <div class="p-4 text-sm">
-                    @forelse ($successors as $link)
-                        <p class="truncate py-0.5">
-                            <span class="text-xs text-slate-500">{{ __("tasks.rel_{$link->type}_short") }}</span>
-                            @if ($link->successor)
-                                <a href="{{ route('projects.tasks.show', [$project, $link->successor]) }}"
-                                   class="text-slate-800 underline decoration-slate-300 hover:text-brand-700">{{ $link->successor->name }}</a>
-                            @endif
-                        </p>
-                    @empty
-                        <p class="text-xs text-slate-500">{{ __('tasks.blocks_none') }}</p>
-                    @endforelse
-                </div>
-            </section>
+            {{-- «Esto detiene a» es la misma información que «Depende de»,
+                 leída al revés. Útil para revisar una red; ruido para quien
+                 solo quiere saber de qué depende lo suyo. En Estándar se
+                 muestra nada más cuando de verdad detiene algo, porque ahí ya
+                 no es una lista vacía sino un aviso. --}}
+            @if ($project->isSpecialist() || $successors->isNotEmpty())
+                <section class="card">
+                    <div class="card-header"><h2 class="card-title">{{ __('tasks.blocks') }}</h2></div>
+                    <div class="p-4 text-sm">
+                        @forelse ($successors as $link)
+                            <p class="truncate py-0.5">
+                                @specialist($project)
+                                    <span class="text-xs text-slate-500">{{ __("tasks.rel_{$link->type}_short") }}</span>
+                                @endspecialist
+                                @if ($link->successor)
+                                    <a href="{{ route('projects.tasks.show', [$project, $link->successor]) }}"
+                                       class="text-slate-800 underline decoration-slate-300 hover:text-brand-700">{{ $link->successor->name }}</a>
+                                @endif
+                            </p>
+                        @empty
+                            <p class="text-xs text-slate-500">{{ __('tasks.blocks_none') }}</p>
+                        @endforelse
+                    </div>
+                </section>
+            @endif
         </aside>
     </div>
 @endsection

@@ -132,18 +132,36 @@ final class PreferencesTest extends TestCase
     }
 
     /**
-     * Las etapas siguientes van a esconder columnas con estas directivas. Si
-     * dejan de responder a la preferencia, lo avanzado se muestra a todos.
+     * Las pantallas esconden columnas con estas directivas. Sin proyecto
+     * —el tablero, la administración— se caen a la preferencia de la persona,
+     * que es lo único que hay ahí. Si dejaran de responderle, lo avanzado se
+     * mostraría a todos.
+     *
+     * Con proyecto manda el proyecto, y eso se prueba donde se usa de verdad:
+     * en `DailyUseTest`.
      */
     #[Test]
-    public function the_blade_directives_follow_the_preference(): void
+    public function the_blade_directives_follow_the_preference_when_there_is_no_project(): void
     {
-        $template = "@expert\nA\n@endexpert\n@simple\nB\n@endsimple";
+        $template = "@specialist\nA\n@endspecialist\n@standard\nB\n@endstandard";
 
         $this->actingAs($this->user(['expert_mode' => true]));
         $this->assertSame('A', trim(Blade::render($template)));
 
         $this->actingAs($this->user(['expert_mode' => false]));
+        $this->assertSame('B', trim(Blade::render($template)));
+    }
+
+    /**
+     * Un invitado no tiene preferencia ni proyecto. Lo prudente ahí es enseñar
+     * poco: un error de más esconde una columna, uno de menos la muestra a
+     * quien ni siquiera entró.
+     */
+    #[Test]
+    public function a_guest_gets_the_standard_screens(): void
+    {
+        $template = "@specialist\nA\n@endspecialist\n@standard\nB\n@endstandard";
+
         $this->assertSame('B', trim(Blade::render($template)));
     }
 

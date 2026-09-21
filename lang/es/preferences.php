@@ -13,11 +13,14 @@ return [
     'display' => 'Presentación',
     'detail_level' => 'Nivel de detalle',
 
+    'detail_scope' => 'Cada proyecto tiene su propio nivel y se cambia desde sus ajustes. Lo de aquí solo decide con cuál nacen los proyectos que tú creas.',
+    'detail_default_specialist' => 'Crear mis proyectos en Especialista',
+
     'simple_mode_help' => 'Recomendado si estás empezando. Se muestran las fechas, los responsables y el avance.',
     'expert_mode_help' => 'Agrega holguras, restricciones y tipos de dependencia avanzados a las pantallas que los tengan.',
 
-    'current_simple' => 'Ahora mismo estás en Modo Simple.',
-    'current_expert' => 'Ahora mismo estás en Modo Experto.',
+    'current_simple' => 'Tus proyectos nuevos nacen en Estándar.',
+    'current_expert' => 'Tus proyectos nuevos nacen en Especialista.',
 
     'timezone_help' => 'Con qué huso se muestran las fechas y horas. Ejemplo: America/Mexico_City.',
 

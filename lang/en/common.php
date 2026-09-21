@@ -42,9 +42,18 @@ return [
     'locale_es' => 'Español',
     'locale_en' => 'English',
 
-    'simple_mode' => 'Simple mode',
-    'expert_mode' => 'Expert mode',
-    'mode_help' => 'Simple mode hides float, constraints and advanced dependency types. You can switch at any time.',
+    // A project's level of detail. "Standard" names the normal case, not the
+    // diminished one, and "Specialist" names a craft, not a rank: running a
+    // project without critical path is not the beginner edition.
+    'detail_level' => 'Level of detail',
+    'detail_standard' => 'Standard',
+    'detail_specialist' => 'Specialist',
+    'detail_help' => 'Standard shows dates, owners and progress. Specialist adds float, constraints and dependency types. Switch whenever you like — nothing is lost on the way down.',
+
+    // Personal preference, which only decides the level new projects you create
+    // start at. Each project's own level rules its screens.
+    'simple_mode' => 'Standard',
+    'expert_mode' => 'Specialist',
 
     // Empty states: what this is, why it is empty, what to do. Never a blank screen.
     'empty_title' => 'Nothing here yet',

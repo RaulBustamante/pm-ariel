@@ -127,26 +127,27 @@
         <fieldset class="space-y-3">
             <legend class="text-sm font-semibold text-slate-900">{{ __('preferences.detail_level') }}</legend>
 
-            <p class="text-xs text-slate-500">{{ __('common.mode_help') }}</p>
+            {{-- Se dice antes de la casilla, no después: aquí ya no se decide
+                 lo que ves, sino con qué nace lo que creas. Quien venga
+                 buscando por qué un proyecto se ve distinto tiene que salir de
+                 esta pantalla sabiendo que el ajuste está en el proyecto. --}}
+            <p class="text-xs text-slate-500">{{ __('preferences.detail_scope') }}</p>
 
-            {{-- Una casilla y no dos botones de opción: el Modo Simple es el
-                 estado normal, y el Experto es lo que se activa a propósito. --}}
+            {{-- Una casilla y no dos botones de opción: Estándar es el estado
+                 normal, y Especialista es lo que se activa a propósito. --}}
             <div class="rounded-md border border-slate-200 bg-surface p-4">
                 <label class="flex items-start gap-3 text-sm">
                     <input type="checkbox" name="expert_mode" value="1"
                            @checked(old('expert_mode', $me->expert_mode))
                            class="mt-0.5 rounded border-slate-300 text-brand-600 focus:ring-2 focus:ring-hud-500">
                     <span>
-                        <span class="font-medium text-slate-900">{{ __('common.expert_mode') }}</span>
+                        <span class="font-medium text-slate-900">{{ __('preferences.detail_default_specialist') }}</span>
                         <span class="mt-1 block text-slate-600">{{ __('preferences.expert_mode_help') }}</span>
                     </span>
                 </label>
 
                 <p class="mt-3 border-t border-slate-100 pt-3 text-xs text-slate-500">
                     {{ $me->expert_mode ? __('preferences.current_expert') : __('preferences.current_simple') }}
-                    @unless ($me->expert_mode)
-                        {{ __('preferences.simple_mode_help') }}
-                    @endunless
                 </p>
             </div>
         </fieldset>

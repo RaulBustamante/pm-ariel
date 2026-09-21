@@ -11,6 +11,7 @@ use App\Models\Role;
 use App\Models\Task;
 use App\Models\User;
 use App\Services\Scheduling\ProjectScheduler;
+use App\Support\DetailLevel;
 use Database\Seeders\RolesAndPermissionsSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -116,6 +117,44 @@ final class ProjectSettingsTest extends TestCase
             ->assertRedirect();
 
         $this->assertSame('2026-04-06', $task->refresh()->early_start?->format('Y-m-d'));
+    }
+
+    #[Test]
+    public function the_level_of_detail_can_be_raised_and_lowered_from_the_settings(): void
+    {
+        $this->assertSame(DetailLevel::Standard, $this->project->detailLevel());
+
+        $this->actingAs($this->manager)
+            ->put(route('projects.update', $this->project), $this->payload([
+                'detail_level' => DetailLevel::Specialist->value,
+            ]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertTrue($this->project->refresh()->isSpecialist());
+
+        $this->actingAs($this->manager)
+            ->put(route('projects.update', $this->project), $this->payload([
+                'detail_level' => DetailLevel::Standard->value,
+            ]))
+            ->assertSessionHasNoErrors();
+
+        $this->assertFalse($this->project->refresh()->isSpecialist());
+    }
+
+    /**
+     * Un formulario que no trae el campo —una pantalla vieja en caché, una
+     * integración— no debe bajarle el nivel al proyecto sin que nadie lo pida.
+     */
+    #[Test]
+    public function a_form_without_the_level_keeps_the_one_the_project_had(): void
+    {
+        $this->project->update(['detail_level' => DetailLevel::Specialist->value]);
+
+        $this->actingAs($this->manager)
+            ->put(route('projects.update', $this->project), $this->payload())
+            ->assertSessionHasNoErrors();
+
+        $this->assertTrue($this->project->refresh()->isSpecialist());
     }
 
     #[Test]

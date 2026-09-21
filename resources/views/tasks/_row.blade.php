@@ -95,7 +95,7 @@
     <td class="whitespace-nowrap px-3 py-1.5 text-slate-600">{{ $task->early_start?->format('d/m/y') ?? '—' }}</td>
     <td class="whitespace-nowrap px-3 py-1.5 text-slate-600">{{ $task->early_finish?->format('d/m/y') ?? '—' }}</td>
 
-    @expert
+    @specialist($project)
         <td class="whitespace-nowrap px-2 py-1.5 text-xs">
             @php $float = $task->total_float_minutes; @endphp
             @if ($float === null)
@@ -108,7 +108,7 @@
                 <span class="text-slate-600">{{ $durations->toHuman($float) }}</span>
             @endif
         </td>
-    @endexpert
+    @endspecialist
 
     <td class="px-3 py-1.5">
         @unless ($task->is_summary)

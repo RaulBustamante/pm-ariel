@@ -65,64 +65,107 @@
             </div>
         </fieldset>
 
-        {{-- Paso 2 — quién --}}
-        <fieldset class="space-y-2 border-t border-slate-100 pt-5">
-            <legend class="text-sm font-semibold text-slate-900">{{ __('wizard.step_who') }}</legend>
-            <p class="field-help">{{ __('wizard.step_who_help') }}</p>
+        {{-- Los entregables son lo único de los pasos 2 a 4 que se queda
+             afuera: son lo que siembra la WBS, y sin ellos el proyecto termina
+             en una pantalla vacía. Lo demás tiene un valor por omisión
+             razonable y se puede cambiar después sin costo. --}}
+        <div>
+            <label for="deliverables-field" class="field-label">{{ __('initiation.field_deliverables') }}</label>
+            <textarea id="deliverables-field" name="deliverables" rows="4" class="field"
+                      placeholder="{{ __('wizard.deliverables_placeholder') }}">{{ old('deliverables') }}</textarea>
+            {{-- Se dice antes de escribir, no después: cada renglón se
+                 convierte en una tarea del plan. --}}
+            <p class="field-help mt-1 font-medium text-brand-800">{{ __('wizard.deliverables_become_tasks') }}</p>
+        </div>
 
-            <div class="max-h-40 space-y-1 overflow-y-auto rounded-md border border-slate-200 p-2">
-                @foreach ($candidates as $candidate)
-                    <label class="flex items-center gap-2 text-sm">
-                        <input type="checkbox" name="members[]" value="{{ $candidate->id }}"
-                               class="rounded border-slate-300 text-brand-700">
-                        {{ $candidate->name }}
+        {{-- El nivel con el que nace. Dos tarjetas y no una casilla: son dos
+             caminos con nombre, no una opción avanzada que se activa. --}}
+        <fieldset class="space-y-2 border-t border-slate-100 pt-5">
+            <legend class="text-sm font-semibold text-slate-900">{{ __('common.detail_level') }}</legend>
+            <p class="field-help">{{ __('common.detail_help') }}</p>
+
+            <div class="grid gap-2 sm:grid-cols-2">
+                @foreach (\App\Support\DetailLevel::cases() as $level)
+                    <label class="flex cursor-pointer items-start gap-3 rounded-md border border-slate-200 p-3 text-sm hover:border-brand-400 has-[:checked]:border-hud-500 has-[:checked]:bg-brand-50">
+                        <input type="radio" name="detail_level" value="{{ $level->value }}"
+                               @checked(old('detail_level', $defaultDetailLevel->value) === $level->value)
+                               class="mt-0.5 border-slate-300 text-brand-700 focus:ring-2 focus:ring-hud-500">
+                        <span>
+                            <span class="block font-medium text-slate-900">{{ $level->label() }}</span>
+                            <span class="block text-xs text-slate-600">{{ $level->help() }}</span>
+                        </span>
                     </label>
                 @endforeach
             </div>
+            @error('detail_level') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
         </fieldset>
 
-        {{-- Paso 3 — cuándo --}}
-        <fieldset class="space-y-2 border-t border-slate-100 pt-5">
-            <legend class="text-sm font-semibold text-slate-900">{{ __('wizard.step_when') }}</legend>
+        {{-- Lo que antes eran los pasos 2 y 3, ahora plegado. Se abre solo si
+             hubo un error adentro: quien mandó el formulario con una fecha mal
+             no tiene que adivinar dónde quedó el campo que lo rechazó. --}}
+        <details class="border-t border-slate-100 pt-5"
+                 @if ($errors->hasAny(['planned_start', 'planned_finish', 'members', 'members.*', 'success_criteria'])) open @endif>
+            <summary class="cursor-pointer text-sm font-semibold text-slate-900">
+                {{ __('wizard.more_options') }}
+            </summary>
 
-            <div class="grid max-w-2xl gap-4 sm:grid-cols-2">
-                <div>
-                    <label for="start-field" class="field-label">{{ __('tasks.project_start') }}</label>
-                    <input id="start-field" type="date" name="planned_start" class="field"
-                           value="{{ old('planned_start') }}" required>
-                    @error('planned_start') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
-                    <p class="field-help mt-1">{{ __('wizard.step_when_help') }}</p>
-                </div>
+            <p class="field-help mt-1">{{ __('wizard.more_options_help') }}</p>
 
-                <div>
-                    <label for="finish-field" class="field-label">{{ __('projects.planned_finish') }}</label>
-                    <input id="finish-field" type="date" name="planned_finish" class="field"
-                           value="{{ old('planned_finish') }}" min="{{ old('planned_start') }}">
-                    @error('planned_finish') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
-                    <p class="field-help mt-1">{{ __('projects.planned_finish_help') }}</p>
-                </div>
+            <div class="mt-4 space-y-5">
+                {{-- Quién --}}
+                <fieldset class="space-y-2">
+                    <legend class="text-sm font-medium text-slate-700">{{ __('wizard.step_who') }}</legend>
+                    <p class="field-help">{{ __('wizard.step_who_help') }}</p>
+
+                    <div class="max-h-40 space-y-1 overflow-y-auto rounded-md border border-slate-200 p-2">
+                        @foreach ($candidates as $candidate)
+                            <label class="flex items-center gap-2 text-sm">
+                                <input type="checkbox" name="members[]" value="{{ $candidate->id }}"
+                                       @checked(in_array((string) $candidate->id, (array) old('members', []), true))
+                                       class="rounded border-slate-300 text-brand-700">
+                                {{ $candidate->name }}
+                            </label>
+                        @endforeach
+                    </div>
+                </fieldset>
+
+                {{-- Cuándo. El inicio ya no es obligatorio en la pantalla: sin
+                     él el proyecto arranca hoy, que es lo que la gente quiere
+                     decir cuando no escribe una fecha. --}}
+                <fieldset class="space-y-2">
+                    <legend class="text-sm font-medium text-slate-700">{{ __('wizard.step_when') }}</legend>
+
+                    <div class="grid max-w-2xl gap-4 sm:grid-cols-2">
+                        <div>
+                            <label for="start-field" class="field-label">{{ __('tasks.project_start') }}</label>
+                            <input id="start-field" type="date" name="planned_start" class="field"
+                                   value="{{ old('planned_start') }}">
+                            @error('planned_start') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
+                            <p class="field-help mt-1">{{ __('wizard.start_defaults_today') }}</p>
+                        </div>
+
+                        <div>
+                            <label for="finish-field" class="field-label">{{ __('projects.planned_finish') }}</label>
+                            <input id="finish-field" type="date" name="planned_finish" class="field"
+                                   value="{{ old('planned_finish') }}" min="{{ old('planned_start') }}">
+                            @error('planned_finish') <p role="alert" class="mt-1 text-xs text-[var(--color-badge-danger-fg)]">{{ $message }}</p> @enderror
+                            <p class="field-help mt-1">{{ __('projects.planned_finish_help') }}</p>
+                        </div>
+                    </div>
+                </fieldset>
+
+                {{-- Cómo se mide --}}
+                <fieldset class="space-y-2">
+                    <legend class="text-sm font-medium text-slate-700">{{ __('wizard.step_measure') }}</legend>
+
+                    <div>
+                        <label for="criteria-field" class="field-label">{{ __('initiation.field_success_criteria') }}</label>
+                        <textarea id="criteria-field" name="success_criteria" rows="2" class="field">{{ old('success_criteria') }}</textarea>
+                        <p class="field-help mt-1">{{ __('initiation.help_success_criteria') }}</p>
+                    </div>
+                </fieldset>
             </div>
-        </fieldset>
-
-        {{-- Paso 4 — cómo se mide --}}
-        <fieldset class="space-y-3 border-t border-slate-100 pt-5">
-            <legend class="text-sm font-semibold text-slate-900">{{ __('wizard.step_measure') }}</legend>
-
-            <div>
-                <label for="criteria-field" class="field-label">{{ __('initiation.field_success_criteria') }}</label>
-                <textarea id="criteria-field" name="success_criteria" rows="2" class="field">{{ old('success_criteria') }}</textarea>
-                <p class="field-help mt-1">{{ __('initiation.help_success_criteria') }}</p>
-            </div>
-
-            <div>
-                <label for="deliverables-field" class="field-label">{{ __('initiation.field_deliverables') }}</label>
-                <textarea id="deliverables-field" name="deliverables" rows="4" class="field"
-                          placeholder="{{ __('wizard.deliverables_placeholder') }}">{{ old('deliverables') }}</textarea>
-                {{-- Se dice antes de escribir, no después: cada renglón se
-                     convierte en una tarea del plan. --}}
-                <p class="field-help mt-1 font-medium text-brand-800">{{ __('wizard.deliverables_become_tasks') }}</p>
-            </div>
-        </fieldset>
+        </details>
 
         <div class="flex gap-3 border-t border-slate-100 pt-5">
             <button type="submit" class="btn btn-primary">{{ __('initiation.start') }}</button>

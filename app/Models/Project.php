@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Models\Concerns\RecordsAudit;
+use App\Support\DetailLevel;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,10 +21,11 @@ use Illuminate\Support\Carbon;
  *
  * @property Carbon|null $planned_start
  * @property Carbon|null $planned_finish
+ * @property DetailLevel|null $detail_level
  */
 #[Fillable([
     'code', 'name', 'description', 'status', 'owner_id', 'org_unit_id', 'currency',
-    'planned_start', 'planned_finish',
+    'planned_start', 'planned_finish', 'detail_level',
 ])]
 class Project extends Model
 {
@@ -37,7 +39,32 @@ class Project extends Model
         return [
             'planned_start' => 'datetime',
             'planned_finish' => 'datetime',
+            'detail_level' => DetailLevel::class,
         ];
+    }
+
+    /**
+     * ¿Este proyecto enseña las pantallas completas?
+     *
+     * Se pregunta aquí y no leyendo la columna en cada vista para que un
+     * proyecto sin el dato —uno de antes de la migración, uno recién hecho en
+     * una prueba— caiga en Estándar en vez de tronar.
+     */
+    public function isSpecialist(): bool
+    {
+        return $this->detailLevel()->isSpecialist();
+    }
+
+    /**
+     * El nivel de detalle, siempre un caso del enum.
+     *
+     * El `?? ` no es adorno: un modelo recién hecho en memoria todavía no tiene
+     * el valor por omisión de la columna, y las vistas preguntan por el nivel
+     * sin saber si el proyecto ya se guardó.
+     */
+    public function detailLevel(): DetailLevel
+    {
+        return $this->detail_level ?? DetailLevel::default();
     }
 
     public const ROLE_MANAGER = 'manager';
